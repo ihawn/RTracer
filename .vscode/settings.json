@@ -1,0 +1,10 @@
+{
+    "rust-analyzer.linkedProjects": [
+        ".\\r_tracer\\Cargo.toml",
+        ".\\r_tracer\\Cargo.toml",
+        ".\\r_tracer\\Cargo.toml",
+        ".\\r_tracer\\Cargo.toml",
+        ".\\r_tracer\\Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
+}
