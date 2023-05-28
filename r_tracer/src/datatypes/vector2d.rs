@@ -1,6 +1,6 @@
 pub struct Vector2D<T> {
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
     pub data: Vec<T>,
 }
 
@@ -18,16 +18,16 @@ impl<T> Vector2D<T> {
         }
     }
 
-    fn get_index(&self, row: usize, col: usize) -> usize {
+    pub fn get_index(&self, row: usize, col: usize) -> usize {
         row * self.width + col
     }
 
-    fn get(&self, row: usize, col: usize) -> Option<&T> {
+    pub fn get(&self, row: usize, col: usize) -> Option<&T> {
         let index = self.get_index(row, col);
         self.data.get(index)
     }
 
-    fn set(&mut self, row: usize, col: usize, value: T) -> Option<()> {
+    pub fn set(&mut self, row: usize, col: usize, value: T) -> Option<()> {
         let index = self.get_index(row, col);
         self.data.get_mut(index).map(|element| *element = value)
     }
