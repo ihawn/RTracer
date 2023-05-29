@@ -28,10 +28,10 @@ use spacial::scene::Scene;
 use spacial::camera::Camera;
 
 fn main() {
-    let size_x: usize = 480;
+    let size_x: usize = 720;
     let size_y: usize = 480;
 
-    let sphere: Sphere = Sphere::new(700.0, 250.0, 100.0, 120.0);
+    let sphere: Sphere = Sphere::new(700.0, -200.0, 100.0, 120.0);
     let scene: Scene = Scene::new(sphere);
     let mut camera: Camera = Camera::new(size_x, size_y, scene);
 
@@ -40,7 +40,7 @@ fn main() {
     //frame_handler.update_window(&colors);
 
     for i in (0..200){
-        camera.scene.sphere.center.x -= 2.0;
+        camera.scene.sphere.center.x -= 6.0;
         let p = camera.scene.sphere.center;
         println!("({}, {}, {})", p.x, p.y, p.z);
 

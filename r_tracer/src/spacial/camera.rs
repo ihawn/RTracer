@@ -10,17 +10,21 @@ pub struct Camera {
     pub scene: Scene,
     pub projection_distance: f64,
     pub width: usize,
-    pub height: usize
+    pub height: usize,
+    pub yaw: f64,
+    pub pitch: f64
 }
 
 impl Camera {
     pub fn new(width: usize, height: usize, scene: Scene) -> Camera {
         Camera {
-             position: Vector3::new(0.0, 0.0, 0.0),
+             position: Vector3::new(-100.0, 0.0, 0.0),
              scene: scene,
              projection_distance: 400.0,
              width: width,
-             height: height
+             height: height,
+             yaw: 0.0,
+             pitch: 0.0
         }
     }
 
@@ -32,8 +36,8 @@ impl Camera {
             black
         );
 
-        for x in 0..frame.width {
-            for y in 0..frame.height {
+        for x in 0..frame.height {
+            for y in 0..frame.width {
                 frame.set(x, y, self.cast_ray(x, y));
             }
         }
@@ -45,8 +49,8 @@ impl Camera {
 
         let projection_point: Vector3 = Vector3::new(
             self.projection_distance,
-            (self.width as f64)/2.0 - x as f64,
-            (self.height as f64)/2.0 - y as f64
+            y as f64 - (self.width as f64)/2.0, 
+            (self.height as f64)/2.0 - x as f64
         );
 
         let r: f64 = self.scene.sphere.radius;
