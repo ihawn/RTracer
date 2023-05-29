@@ -22,6 +22,10 @@ impl Vector3 {
     pub fn square(self) -> Vector3 {
         Vector3::new(self.x * self.x, self.y * self.y, self.z * self.z)
     }
+
+    pub fn distance(self, other: Vector3) -> f64 {
+        (self - other).square().component_add().sqrt()
+    }
 }
 
 impl std::ops::Add<Vector3> for Vector3 {

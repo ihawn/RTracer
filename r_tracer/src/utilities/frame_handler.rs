@@ -30,16 +30,15 @@ impl FrameHandler {
         }
     }
 
-    pub fn update_window(mut self, pixel_values: &Vector2D<Color>) -> FrameHandler {
+    pub fn update_window(mut self, pixel_values: &Vector2D<Color>) {
         let converted_values: Vec<u32> = Self::buffer_from_color_vec(&pixel_values);
         let _update: Result<(), Error> = self.window.update_with_buffer(
             &converted_values,
             self.size_x, self.size_y
         );
-        self
     }
 
-    fn buffer_from_color_vec(pixel_values: &Vector2D<Color>) -> Vec<u32> {
+    pub fn buffer_from_color_vec(pixel_values: &Vector2D<Color>) -> Vec<u32> {
         pixel_values.data.iter().map(|color| color.as_buffer_color()).collect()
     }
 }

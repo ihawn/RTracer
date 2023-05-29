@@ -1,4 +1,7 @@
 use std::io::{stdin, stdout, Read, Write};
+use std::thread;
+use std::time::Duration;
+use crate::datatypes::vector3::Vector3;
 
 mod utilities {
     pub mod frame_handler;
@@ -28,12 +31,31 @@ fn main() {
     let size_x: usize = 480;
     let size_y: usize = 480;
 
-    let sphere: Sphere = Sphere::new(-5.0, 0.0, 0.0, 20.0);
+    let sphere: Sphere = Sphere::new(700.0, 250.0, 100.0, 120.0);
     let scene: Scene = Scene::new(sphere);
-    let camera: Camera = Camera::new(size_x, size_y, scene);
-    let frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
+    let mut camera: Camera = Camera::new(size_x, size_y, scene);
 
-    let renderer = camera.render_scene(frame_handler);
+    let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
+    let mut colors = camera.render_scene();
+    //frame_handler.update_window(&colors);
+
+    for i in (0..200){
+        camera.scene.sphere.center.x -= 2.0;
+        let p = camera.scene.sphere.center;
+        println!("({}, {}, {})", p.x, p.y, p.z);
+
+        colors = camera.render_scene();
+        //frame_handler.update_window(&colors);
+
+        let converted_values: Vec<u32> = FrameHandler::buffer_from_color_vec(&colors);
+        let _update = frame_handler.window.update_with_buffer(
+            &converted_values,
+            frame_handler.size_x, frame_handler.size_y
+        );
+
+
+        thread::sleep(Duration::from_millis(25));
+    }
     pause();
 }
 
