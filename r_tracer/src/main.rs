@@ -1,4 +1,5 @@
 use std::io::{stdin, stdout, Read, Write};
+use std::os::windows::prelude::MetadataExt;
 use std::thread;
 use std::time::Duration;
 use crate::datatypes::vector3::Vector3;
@@ -20,6 +21,7 @@ mod spacial {
     pub mod camera;
     pub mod scene;
     pub mod sphere;
+    pub mod ray;
 }
 
 use datatypes::material::Material;
@@ -46,14 +48,32 @@ fn main() {
         0.0
     );
 
-    let red_sphere = Sphere::new(
-        700.0, 0.0, 0.0, 100.0, red_mat
-    );
-    let green_sphere = Sphere::new(
-        400.0, 50.0, 100.0, 100.0, green_mat
+    let blue_mat = Material::new(
+        Color::new(0, 0, 255),
+        Color::new(0, 0, 0),
+        0.0
     );
 
-    let spheres: Vec<Sphere> = vec![red_sphere, green_sphere];
+    let emiss_mat = Material::new(
+        Color::black(),
+        Color::white(),
+        0.0
+    );
+
+    let red_sphere = Sphere::new(
+        700.0, 0.0, 0.0, 100.0, red_mat, 0
+    );
+    let green_sphere = Sphere::new(
+        600.0, 200.0, 0.0, 100.0, green_mat, 1
+    );
+    let blue_sphere = Sphere::new(
+        650.0, 150.0, -1083.0, 1000.0, blue_mat, 2
+    );
+    let emiss_sphere = Sphere::new(
+        1200.0, 500.0, 200.0, 600.0, emiss_mat, 3
+    );
+
+    let spheres: Vec<Sphere> = vec![red_sphere, green_sphere, blue_sphere, emiss_sphere];
 
     let scene: Scene = Scene::new(spheres);
     let mut camera: Camera = Camera::new(size_x, size_y, scene);

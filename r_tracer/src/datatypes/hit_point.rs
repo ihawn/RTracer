@@ -1,21 +1,34 @@
 use crate::datatypes::vector3::Vector3;
 use crate::spacial::sphere::Sphere;
+use crate::spacial::ray::Ray;
 
 #[derive(Copy, Clone)]
 pub struct HitPoint {
     pub point: Vector3,
-    pub camera_origion: Vector3,
-    pub projection_point: Vector3,
-    pub object: Sphere
+    pub hitting_ray: Ray,
+    pub normal: Vector3,
+    pub object: Sphere,
+    pub is_empty: bool
 }
 
 impl HitPoint {
-    pub fn new(point: Vector3, cam_origin: Vector3, proj_point: Vector3, object: Sphere) -> HitPoint {
+    pub fn new(point: Vector3, ray: Ray, object: Sphere) -> HitPoint {
         HitPoint {
             point: point,
-            camera_origion: cam_origin,
-            projection_point: proj_point,
-            object: object
+            hitting_ray: ray,
+            normal: (object.center - point),
+            object: object,
+            is_empty: false
+        }
+    }
+
+    pub fn empty() -> HitPoint {
+        HitPoint {
+            point: Vector3::zero(),
+            hitting_ray: Ray::empty(),
+            normal: Vector3::zero(),
+            object: Sphere::empty(),
+            is_empty: true
         }
     }
 }

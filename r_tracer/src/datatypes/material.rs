@@ -16,4 +16,12 @@ impl Material {
             emission_strength: emiss_strength
         }
     }
+
+    pub fn empty() -> Material {
+        Material {
+            color: Color::black(),
+            emission_color: Color::black(),
+            emission_strength: 0.0
+        }
+    }
 }

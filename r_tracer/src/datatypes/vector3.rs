@@ -1,4 +1,7 @@
 use std::f64::consts::PI;
+use rand::{Rng, SeedableRng};
+use rand::distributions::{Distribution, Standard};
+use rand::rngs::StdRng;
 
 
 #[derive(Copy, Clone)]
@@ -11,6 +14,14 @@ pub struct Vector3 {
 impl Vector3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vector3 {
         Vector3 { x: x, y: y, z: z}
+    }
+
+    pub fn zero() -> Vector3 {
+        Vector3::new(0.0, 0.0, 0.0)
+    }
+
+    pub fn one() -> Vector3 {
+        Vector3::new(1.0, 1.0, 1.0)
     }
 
     pub fn self_dot(self) -> f64 {
@@ -58,6 +69,38 @@ impl Vector3 {
 
     pub fn rot(self, degrees: Vector3) -> Vector3 {
         self.rot_x(degrees.x).rot_y(degrees.y).rot_z(degrees.z)
+    }
+
+    pub fn random_normal() -> Vector3 {
+        0.01*Vector3::new(
+            StdRng::from_entropy().sample(Standard),
+            StdRng::from_entropy().sample(Standard),
+            StdRng::from_entropy().sample(Standard)
+        ) //+ Vector3::one()
+    }
+
+    pub fn random_hemisphere_normal(normal: Vector3) -> Vector3 {
+        let direction = Self::random_normal();
+        let sign = f64::signum(normal * direction);
+        sign * direction
+    }
+
+    pub fn normalize(self) -> Vector3 {
+        let magnitude: f64 = self.magnitude();
+        
+        if magnitude != 0.0 {
+            Vector3::new(
+                self.x / magnitude,
+                self.y / magnitude,
+                self.z / magnitude
+            )
+        } else {
+            self
+        }
+    }
+
+    pub fn magnitude(self) -> f64 {
+        self.square().component_add().sqrt()
     }
 }
 

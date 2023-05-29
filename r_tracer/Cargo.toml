@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 minifb = "0.24"
+rand = "0.8.5"
+rand_distr = "0.3.0"
