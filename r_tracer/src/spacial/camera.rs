@@ -1,4 +1,4 @@
-use crate::datatypes::vector3::Vector3;
+use crate::datatypes::vector3::{Vector3, self};
 use crate::datatypes::color::Color;
 use crate::datatypes::vector2d::Vector2D;
 use crate::utilities::frame_handler::FrameHandler;
@@ -11,8 +11,7 @@ pub struct Camera {
     pub projection_distance: f64,
     pub width: usize,
     pub height: usize,
-    pub yaw: f64,
-    pub pitch: f64
+    pub rotation: Vector3
 }
 
 impl Camera {
@@ -23,8 +22,7 @@ impl Camera {
              projection_distance: 400.0,
              width: width,
              height: height,
-             yaw: 0.0,
-             pitch: 0.0
+             rotation: Vector3::new(0.0, 0.0, 0.0)
         }
     }
 
@@ -51,7 +49,7 @@ impl Camera {
             self.projection_distance,
             y as f64 - (self.width as f64)/2.0, 
             (self.height as f64)/2.0 - x as f64
-        );
+        ).rot(self.rotation);
 
         let r: f64 = self.scene.sphere.radius;
         let object_direction: Vector3 = self.position - self.scene.sphere.center;

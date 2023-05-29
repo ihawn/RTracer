@@ -28,16 +28,15 @@ use spacial::scene::Scene;
 use spacial::camera::Camera;
 
 fn main() {
-    let size_x: usize = 720;
-    let size_y: usize = 480;
+    let size_x: usize = 480;
+    let size_y: usize = 320;
 
-    let sphere: Sphere = Sphere::new(700.0, -200.0, 100.0, 120.0);
+    let sphere: Sphere = Sphere::new(700.0, 0.0, 150.0, 120.0);
     let scene: Scene = Scene::new(sphere);
     let mut camera: Camera = Camera::new(size_x, size_y, scene);
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
     let mut colors = camera.render_scene();
-    //frame_handler.update_window(&colors);
 
     for i in (0..200){
         camera.scene.sphere.center.x -= 6.0;
@@ -45,7 +44,6 @@ fn main() {
         println!("({}, {}, {})", p.x, p.y, p.z);
 
         colors = camera.render_scene();
-        //frame_handler.update_window(&colors);
 
         let converted_values: Vec<u32> = FrameHandler::buffer_from_color_vec(&colors);
         let _update = frame_handler.window.update_with_buffer(
@@ -54,7 +52,7 @@ fn main() {
         );
 
 
-        thread::sleep(Duration::from_millis(25));
+        //thread::sleep(Duration::from_millis(25));
     }
     pause();
 }

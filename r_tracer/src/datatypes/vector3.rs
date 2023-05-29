@@ -34,7 +34,7 @@ impl Vector3 {
         Vector3::new(
             self.x,
             self.y*theta_x.cos() - self.z*theta_x.sin(),
-            self.y*theta_x.sin() - self.z*theta_x.cos()
+            self.y*theta_x.sin() + self.z*theta_x.cos()
         )
     }
 
@@ -47,8 +47,17 @@ impl Vector3 {
         )
     }
 
-    pub fn rot(self, x_degrees: f64, y_degrees: f64) -> Vector3 {
-        self.rot_y(y_degrees).rot_x(x_degrees)
+    pub fn rot_z(self, z_degrees: f64) -> Vector3 {
+        let theta_z: f64 = z_degrees*2.0*PI/360.0;
+        Vector3::new(
+            self.x*theta_z.cos() - self.y*theta_z.sin(),
+            self.x*theta_z.sin() + self.y*theta_z.cos(),
+            self.z
+        )
+    }
+
+    pub fn rot(self, degrees: Vector3) -> Vector3 {
+        self.rot_x(degrees.x).rot_y(degrees.y).rot_z(degrees.z)
     }
 }
 
