@@ -1,12 +1,14 @@
 use crate::spacial::sphere::Sphere;
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Scene {
-    pub sphere: Sphere
+    pub spheres: Vec<Sphere>
 }
 
 impl Scene {
-    pub fn new(sphere: Sphere) -> Scene {
-        Scene { sphere: sphere }
+    pub fn new(spheres: Vec<Sphere>) -> Scene {
+        Scene { 
+            spheres: spheres
+        }
     }
 }

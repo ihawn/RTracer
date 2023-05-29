@@ -3,8 +3,9 @@ use crate::datatypes::color::Color;
 use crate::datatypes::vector2d::Vector2D;
 use crate::utilities::frame_handler::FrameHandler;
 use crate::spacial::scene::Scene;
+use crate::datatypes::hit_point::HitPoint;
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Camera {
     pub position: Vector3,
     pub scene: Scene,
@@ -36,56 +37,77 @@ impl Camera {
 
         for x in 0..frame.height {
             for y in 0..frame.width {
-                frame.set(x, y, self.cast_ray(x, y));
+                frame.set(x, y, Self::cast_ray(self.clone(), x, y));
             }
         }
 
         frame
     }
 
-    fn cast_ray(self, x: usize, y: usize) -> Color {
+    fn cast_ray(camera: Camera, x: usize, y: usize) -> Color {
 
-        let projection_point: Vector3 = Vector3::new(
-            self.projection_distance,
-            y as f64 - (self.width as f64)/2.0, 
-            (self.height as f64)/2.0 - x as f64
-        ).rot(self.rotation);
+        let mut hit_points: Vec<HitPoint> = Vec::new();
+        for sphere in camera.scene.spheres {
+            let projection_point: Vector3 = Vector3::new(
+                camera.projection_distance + camera.position.x,
+                y as f64 - (camera.width as f64)/2.0 + camera.position.y, 
+                (camera.height as f64)/2.0 - x as f64 + camera.position.z
+            ).rot(camera.rotation);
 
-        let r: f64 = self.scene.sphere.radius;
-        let object_direction: Vector3 = self.position - self.scene.sphere.center;
+            let r: f64 = sphere.radius;
+            let object_direction: Vector3 = camera.position - sphere.center;
 
-        let a: f64 = projection_point.self_dot();
-        let b: f64 = 2.0*object_direction*projection_point;
-        let c: f64 = object_direction.square().component_add() - r*r ;
-        
-        let desc: f64 = b*b - 4.0*a*c;
+            let a: f64 = projection_point.self_dot();
+            let b: f64 = 2.0*object_direction*projection_point;
+            let c: f64 = object_direction.square().component_add() - r*r ;
+            
+            let desc: f64 = b*b - 4.0*a*c;
 
-        if desc >= 0.0 {
-            let t1: f64 = (-b + desc.sqrt()) / (2.0 * a);
-            let t2: f64 = (-b - desc.sqrt()) / (2.0 * a);
-            let pt1: Vector3 = Vector3::new(
-                projection_point.x * t1,
-                projection_point.y * t1,
-                projection_point.z * t1
-            );
-            let pt2: Vector3 = Vector3::new(
-                projection_point.x * t2,
-                projection_point.y * t2,
-                projection_point.z * t2
-            );
-
-            let d1 = self.position.distance(pt1);
-            let d2 = self.position.distance(pt2);
-            let mut shade: u8 = 0;
-
-            if pt1.x > self.position.x + self.projection_distance &&
-                pt2.x > self.position.x + self.projection_distance {
-                    shade = 255;
-                }
-
-            Color::new(shade, 0, 0)
-        } else {
-            Color::new(0, 0, 0)
+            if desc >= 0.0 {
+                let t1: f64 = (-b + desc.sqrt()) / (2.0 * a);
+                let t2: f64 = (-b - desc.sqrt()) / (2.0 * a);
+                let pt1: Vector3 = Vector3::new(
+                    projection_point.x * t1,
+                    projection_point.y * t1,
+                    projection_point.z * t1
+                ) + camera.position;
+                let pt2: Vector3 = Vector3::new(
+                    projection_point.x * t2,
+                    projection_point.y * t2,
+                    projection_point.z * t2
+                ) + camera.position;
+    
+                hit_points.push(
+                    HitPoint::new(pt1, camera.position, projection_point, sphere)
+                );
+                hit_points.push(
+                    HitPoint::new(pt2, camera.position, projection_point, sphere)
+                );
+            }
         }
+
+        if hit_points.len() > 0 {
+            let closest_hit: HitPoint = Self::closest_front_hit_point(hit_points);
+            return closest_hit.object.material.color
+        }
+
+        Color::new(0, 0, 0)
     }
+
+    fn closest_front_hit_point(hit_points: Vec<HitPoint>) -> HitPoint {
+        let mut min_dist: f64 = hit_points[0].point.distance(hit_points[0].camera_origion);
+        let mut min_i: usize = 0;
+        for i in (1..hit_points.len()) {
+            //still need to make sure hit point is in front of camera
+            //for now we assume that it is
+            let dist = hit_points[i].point.distance(hit_points[1].camera_origion);
+            if dist < min_dist {
+                min_i = i;
+                min_dist = dist;
+            }
+        }
+
+        hit_points[min_i]
+    }
+
 }
