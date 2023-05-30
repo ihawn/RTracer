@@ -37,20 +37,20 @@ fn main() {
     let size_y: usize = 320;
 
     let red_mat = Material::new(
-        Color::new(255, 0, 0),
-        Color::new(0, 0, 0),
+        Color::new(1.0, 0.0, 0.0),
+        Color::new(0.0, 0.0, 0.0),
         0.0
     );
 
     let green_mat = Material::new(
-        Color::new(0, 255, 0),
-        Color::new(0, 0, 0),
+        Color::new(0.0, 1.0, 0.0),
+        Color::new(0.0, 0.0, 0.0),
         0.0
     );
 
     let blue_mat = Material::new(
-        Color::new(0, 0, 255),
-        Color::new(0, 0, 0),
+        Color::new(0.0, 0.0, 1.0),
+        Color::new(0.0, 0.0, 0.0),
         0.0
     );
 
@@ -67,7 +67,7 @@ fn main() {
         600.0, 200.0, 0.0, 100.0, green_mat, 1
     );
     let blue_sphere = Sphere::new(
-        650.0, 150.0, -1083.0, 1000.0, blue_mat, 2
+        650.0, 150.0, -1083.0, 1000.0, red_mat, 2
     );
     let emiss_sphere = Sphere::new(
         1200.0, 500.0, 200.0, 600.0, emiss_mat, 3
@@ -86,12 +86,10 @@ fn main() {
         &converted_values,
         frame_handler.size_x, frame_handler.size_y
     );
+    let mut samples = 1;
 
 
-    /*for i in (0..200){
-        camera.scene.sphere.center.x -= 6.0;
-        let p = camera.scene.sphere.center;
-        println!("({}, {}, {})", p.x, p.y, p.z);
+    /*for i in (0..10){
 
         colors = camera.render_scene();
 
@@ -100,9 +98,6 @@ fn main() {
             &converted_values,
             frame_handler.size_x, frame_handler.size_y
         );
-
-
-        //thread::sleep(Duration::from_millis(25));
     }*/
     pause();
 }

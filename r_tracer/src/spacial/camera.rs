@@ -33,7 +33,7 @@ impl Camera {
     }
 
     pub fn render_scene(self) -> Vector2D<Color> {
-        let black: Color = Color::new(0, 0, 0);
+        let black: Color = Color::new(0.0, 0.0, 0.0);
         let mut frame: Vector2D<Color> = Vector2D::new(
             self.width, 
             self.height, 
@@ -57,31 +57,34 @@ impl Camera {
             (camera.height as f64)/2.0 - x as f64
         ).rot(camera.rotation);
 
-
+        let mut incoming_light: Color = Color::black();
+        let mut ray_color: Color = Color::white();
         let mut ray: Ray = Ray::new(camera.position, start_ray_direction);
         
         let hit_point: HitPoint = Self::ray_sphere_collision(
             ray, &camera.scene.spheres, -1
         );
+        let mut hit_skip_id = hit_point.object.id;
         if hit_point.is_empty {
             return hit_point.object.material.color;
         }
 
-        let original_hit_obj = hit_point.object.clone();
-
         ray.origin = hit_point.point;
         ray.direction = Vector3::random_hemisphere_normal(hit_point.normal);
-        
-        let max_bounces = 3;
 
-        let mut incoming_light: Color = hit_point.object.material.emission_color;
-        let mut ray_color: Color = hit_point.object.material.color;
+        let max_bounces = 2;
+
+        let material: Material = hit_point.object.material;
+        let emitted_light: Color = material.emission_color;
+        incoming_light = emitted_light * ray_color + incoming_light;
+        ray_color = material.color * ray_color;
 
         for i in 0..max_bounces {
 
             let hit_point: HitPoint = Self::ray_sphere_collision(
-                ray, &camera.scene.spheres, hit_point.object.id
+                ray, &camera.scene.spheres, hit_skip_id
             );
+            hit_skip_id = hit_point.object.id;
 
             if !hit_point.is_empty {
 
@@ -91,7 +94,11 @@ impl Camera {
                 let material: Material = hit_point.object.material;
                 let emitted_light: Color = material.emission_color;
                 incoming_light = emitted_light * ray_color + incoming_light;
-                ray_color = hit_point.object.material.color * ray_color;
+                ray_color = material.color * ray_color;
+
+                /*if hit_point.object.material.emission_color.red != 0 {
+                    return Color::white()
+                }*/
 
             } else {
                 break;
@@ -152,7 +159,13 @@ impl Camera {
             }
         }
 
-        hit_points[min_i]
+        if min_i > 0 {
+            return hit_points[min_i];
+        } else if (hit_points[0].point - hit_points[0].hitting_ray.origin) * hit_points[0].hitting_ray.direction > 0.0 {
+            return hit_points[min_i];
+        } else {
+            return HitPoint::empty();
+        }  
     }
 
 }

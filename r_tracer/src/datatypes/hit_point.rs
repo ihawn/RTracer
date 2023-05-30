@@ -16,7 +16,7 @@ impl HitPoint {
         HitPoint {
             point: point,
             hitting_ray: ray,
-            normal: (object.center - point),
+            normal: (point - object.center),
             object: object,
             is_empty: false
         }

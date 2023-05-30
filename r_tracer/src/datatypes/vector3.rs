@@ -72,7 +72,7 @@ impl Vector3 {
     }
 
     pub fn random_normal() -> Vector3 {
-        0.01*Vector3::new(
+        Vector3::new(
             StdRng::from_entropy().sample(Standard),
             StdRng::from_entropy().sample(Standard),
             StdRng::from_entropy().sample(Standard)
