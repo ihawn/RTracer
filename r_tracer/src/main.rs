@@ -36,21 +36,21 @@ fn main() {
     let size_x: usize = 480;
     let size_y: usize = 320;
 
-    let red_mat = Material::new(
-        Color::new(1.0, 0.0, 0.0),
-        Color::new(0.0, 0.0, 0.0),
+    let col1_mat = Material::new(
+        Color::new(1.0, 0.8, 0.2),
+        Color::black(),
         0.0
     );
 
-    let green_mat = Material::new(
-        Color::new(0.0, 1.0, 0.0),
-        Color::new(0.0, 0.0, 0.0),
+    let col2_mat = Material::new(
+        Color::new(0.1, 1.0, 0.6),
+        Color::black(),
         0.0
     );
 
-    let blue_mat = Material::new(
-        Color::new(0.0, 0.0, 1.0),
-        Color::new(0.0, 0.0, 0.0),
+    let col3_mat = Material::new(
+        Color::new(0.9, 0.5, 0.5),
+        Color::black(),
         0.0
     );
 
@@ -61,13 +61,13 @@ fn main() {
     );
 
     let red_sphere = Sphere::new(
-        700.0, 0.0, 0.0, 100.0, red_mat, 0
+        700.0, 0.0, 0.0, 100.0, col1_mat, 0
     );
     let green_sphere = Sphere::new(
-        600.0, 200.0, 0.0, 100.0, green_mat, 1
+        600.0, 200.0, 0.0, 100.0, col2_mat, 1
     );
     let blue_sphere = Sphere::new(
-        650.0, 150.0, -1083.0, 1000.0, red_mat, 2
+        650.0, 150.0, -1083.0, 1000.0, col3_mat, 2
     );
     let emiss_sphere = Sphere::new(
         1200.0, 500.0, 200.0, 600.0, emiss_mat, 3

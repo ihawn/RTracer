@@ -96,10 +96,6 @@ impl Camera {
                 incoming_light = emitted_light * ray_color + incoming_light;
                 ray_color = material.color * ray_color;
 
-                /*if hit_point.object.material.emission_color.red != 0 {
-                    return Color::white()
-                }*/
-
             } else {
                 break;
             }

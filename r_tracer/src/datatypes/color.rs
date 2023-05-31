@@ -1,3 +1,5 @@
+use crate::datatypes::vector3::Vector3;
+
 #[derive(Copy, Clone)]
 pub struct Color {
     pub red: f64,
@@ -20,6 +22,10 @@ impl Color {
 
     pub fn white() -> Color {
         Color::new(1.0, 1.0, 1.0)
+    }
+
+    pub fn to_vector3(self) -> Vector3 {
+        Vector3::new(self.red, self.green, self.blue)
     }
 
     pub fn as_buffer_color(self: &Color) -> u32 {

@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 use rand::{Rng, SeedableRng};
 use rand::distributions::{Distribution, Standard};
 use rand::rngs::StdRng;
-
+use crate::datatypes::color::Color;
 
 #[derive(Copy, Clone)]
 pub struct Vector3 {
@@ -14,6 +14,10 @@ pub struct Vector3 {
 impl Vector3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vector3 {
         Vector3 { x: x, y: y, z: z}
+    }
+
+    pub fn to_color(self) -> Color {
+        Color::new(self.x, self.y, self.z)
     }
 
     pub fn zero() -> Vector3 {
