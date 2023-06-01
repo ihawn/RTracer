@@ -28,12 +28,12 @@ pub struct Camera {
 impl Camera {
     pub fn new(width: usize, height: usize, scene: Scene, max_bounces: u32, rays_per_pixel: u32) -> Camera {
         Camera {
-             position: Vector3::new(-100.0, 0.0, 0.0),
+             position: Vector3::new(350.0, 100.0, 500.0),
              scene: scene,
              projection_distance: 500.0,
              width: width,
              height: height,
-             rotation: Vector3::new(0.0, 0.0, 0.0),
+             rotation: Vector3::new(0.0, 60.0, 0.0),
              max_bounces: max_bounces,
              rays_per_pixel: rays_per_pixel
         }
@@ -134,7 +134,8 @@ impl Camera {
                 ray_color = material.color * ray_color * light_strength * 2.0;
 
             } else {
-                break;
+                incoming_light = camera.scene.env_color * ray_color + incoming_light;
+                return incoming_light;
             }
         }
 

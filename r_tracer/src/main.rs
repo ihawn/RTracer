@@ -33,8 +33,8 @@ use spacial::scene::Scene;
 use spacial::camera::Camera;
 
 fn main() {
-    let size_x: usize = 480;
-    let size_y: usize = 320;
+    let size_x: usize = 600;
+    let size_y: usize = 400;
 
     let col1_mat = Material::new(
         Color::new(1.0, 0.8, 0.2),
@@ -49,7 +49,19 @@ fn main() {
     );
 
     let col3_mat = Material::new(
-        Color::new(0.9, 0.5, 0.5),
+        Color::new(0.5, 0.5, 0.5),
+        Color::black(),
+        0.0
+    );
+
+    let col4_mat = Material::new(
+        Color::new(1.0, 0.15, 0.15),
+        Color::black(),
+        0.0
+    );
+
+    let col5_mat = Material::new(
+        Color::new(0.3, 1.0, 1.0),
         Color::black(),
         0.0
     );
@@ -63,41 +75,49 @@ fn main() {
     let emiss_mat_2 = Material::new(
         Color::black(),
         Color::white(),
-        50.0
+        30.0
     );
 
     let red_sphere = Sphere::new(
         700.0, 0.0, 0.0, 100.0, col1_mat, 0
     );
     let green_sphere = Sphere::new(
-        600.0, 200.0, 5.0, 100.0, col2_mat, 1
+        750.0, 200.0, -12.0, 75.0, col2_mat, 1
     );
     let blue_sphere = Sphere::new(
         650.0, 150.0, -1083.0, 1000.0, col3_mat, 2
     );
-    let emiss_sphere_1 = Sphere::new(
-        1200.0, 500.0, 200.0, 600.0, emiss_mat_1, 3
+    let another_sphere = Sphere::new(
+        525.0, 50.0, -45.0, 40.0, col4_mat, 3
     );
-    let emiss_sphere_2 = Sphere::new(
-        525.0, -100.0, -120.0, 50.0, emiss_mat_2, 4
+    let another_sphere2 = Sphere::new(
+        700.0, 350.0, -50.0, 50.0, col5_mat, 7
     );
     let emiss_sphere_3 = Sphere::new(
-        525.0, -100.0, 750.0, 500.0, emiss_mat_2, 4
+        600.0, 150.0, -60.0, 65.0, emiss_mat_2, 4
+    );
+    let emiss_sphere_1 = Sphere::new(
+        2000.0, 500.0, 200.0, 600.0, emiss_mat_1, 5
+    );
+    let emiss_sphere_2 = Sphere::new(
+        525.0, -100.0, -50.0, 50.0, emiss_mat_2, 6
     );
 
     let spheres: Vec<Sphere> = vec![
         red_sphere, green_sphere, blue_sphere, 
-        emiss_sphere_1, emiss_sphere_2, emiss_sphere_3
+        emiss_sphere_1, emiss_sphere_2,
+        emiss_sphere_3, another_sphere,
+        another_sphere2
     ];
 
-    let scene: Scene = Scene::new(spheres);
+    let scene: Scene = Scene::new(spheres, Color::white() * 0.3);
     let mut camera: Camera = Camera::new(
         size_x, size_y, scene, 
-        3, 10
+        15, 10
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 50);
+    frame_handler = camera.render_scene(frame_handler, 100);
     
     pause();
 }

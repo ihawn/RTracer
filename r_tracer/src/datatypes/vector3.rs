@@ -80,7 +80,7 @@ impl Vector3 {
             StdRng::from_entropy().sample(Standard),
             StdRng::from_entropy().sample(Standard),
             StdRng::from_entropy().sample(Standard)
-        ) //+ Vector3::one()
+        )
     }
 
     pub fn random_hemisphere_normal(normal: Vector3) -> Vector3 {
