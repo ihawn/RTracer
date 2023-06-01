@@ -1,4 +1,6 @@
 use crate::datatypes::vector3::Vector3;
+use std::ops::AddAssign;
+use std::ops::DivAssign;
 
 #[derive(Copy, Clone)]
 pub struct Color {
@@ -62,9 +64,25 @@ impl std::ops::Add<Color> for Color {
     type Output = Color;
 
     fn add(self, other: Color) -> Color {
-        let r = (self.red + other.red).clamp(0.0, 1.0);
-        let g = (self.green + other.green).clamp(0.0, 1.0);
-        let b = (self.blue + other.blue).clamp(0.0, 1.0);
+        let r = (self.red + other.red);
+        let g = (self.green + other.green);
+        let b = (self.blue + other.blue);
         Color::new(r, g, b)
+    }
+}
+
+impl AddAssign<Color> for Color {
+    fn add_assign(&mut self, other: Color) {
+        self.red = (self.red + other.red);
+        self.green = (self.green + other.green);
+        self.blue = (self.blue + other.blue);
+    }
+}
+
+impl DivAssign<u32> for Color {
+    fn div_assign(&mut self, scalar: u32) {
+        self.red /= scalar as f64;
+        self.green /= scalar as f64;
+        self.blue /= scalar as f64;
     }
 }

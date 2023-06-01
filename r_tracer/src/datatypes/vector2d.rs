@@ -8,6 +8,7 @@ impl<T> Vector2D<T> {
     pub fn new(width: usize, height: usize, default: T) -> Self
     where
         T: Clone,
+        T: Copy
     {
         let size = width * height;
         let data = vec![default; size];

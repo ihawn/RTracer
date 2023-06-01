@@ -7,6 +7,8 @@ use crate::utilities::frame_handler::FrameHandler;
 use crate::spacial::scene::Scene;
 use crate::spacial::ray::Ray;
 use crate::datatypes::hit_point::HitPoint;
+use rayon::prelude::*;
+use std::sync::Mutex;
 
 use super::sphere::Sphere;
 
@@ -17,18 +19,22 @@ pub struct Camera {
     pub projection_distance: f64,
     pub width: usize,
     pub height: usize,
-    pub rotation: Vector3
+    pub rotation: Vector3,
+    pub max_bounces: u32,
+    pub rays_per_pixel: u32
 }
 
 impl Camera {
-    pub fn new(width: usize, height: usize, scene: Scene) -> Camera {
+    pub fn new(width: usize, height: usize, scene: Scene, max_bounces: u32, rays_per_pixel: u32) -> Camera {
         Camera {
              position: Vector3::new(-100.0, 0.0, 0.0),
              scene: scene,
              projection_distance: 500.0,
              width: width,
              height: height,
-             rotation: Vector3::new(0.0, 0.0, 0.0)
+             rotation: Vector3::new(0.0, 0.0, 0.0),
+             max_bounces: max_bounces,
+             rays_per_pixel: rays_per_pixel
         }
     }
 
@@ -40,13 +46,25 @@ impl Camera {
             black
         );
 
-        for x in 0..frame.height {
-            for y in 0..frame.width {
-                frame.set(x, y, Self::cast_ray(self.clone(), x, y));
-            }
-        }
+        let vert: Vec<usize> = (0..frame.height).collect();
+        let horz: Vec<usize> = (0..frame.width).collect();
+        let vert_slice: &[usize] = &vert;
+        let horz_slice: &[usize] = &horz;
 
-        frame
+        let frame = Mutex::new(frame);
+        vert_slice.par_iter().for_each(|&x| {
+            horz_slice.par_iter().for_each(|&y| {
+                let mut pixel_color: Color = Color::black();
+                for _s in 0..self.rays_per_pixel {
+                    pixel_color += Self::cast_ray(self.clone(), x, y);
+                }
+                pixel_color /= self.rays_per_pixel as u32;             
+                let mut frame = frame.lock().unwrap();             
+                frame.set(x, y, pixel_color);
+            });
+        });
+
+        frame.into_inner().unwrap()
     }
 
     fn cast_ray(camera: Camera, x: usize, y: usize) -> Color {
@@ -61,25 +79,9 @@ impl Camera {
         let mut ray_color: Color = Color::white();
         let mut ray: Ray = Ray::new(camera.position, start_ray_direction);
         
-        let hit_point: HitPoint = Self::ray_sphere_collision(
-            ray, &camera.scene.spheres, -1
-        );
-        let mut hit_skip_id = hit_point.object.id;
-        if hit_point.is_empty {
-            return hit_point.object.material.color;
-        }
+        let mut hit_skip_id = -1;
 
-        ray.origin = hit_point.point;
-        ray.direction = Vector3::random_hemisphere_normal(hit_point.normal);
-
-        let max_bounces = 2;
-
-        let material: Material = hit_point.object.material;
-        let emitted_light: Color = material.emission_color;
-        incoming_light = emitted_light * ray_color + incoming_light;
-        ray_color = material.color * ray_color;
-
-        for i in 0..max_bounces {
+        for i in 0..camera.max_bounces + 1 {
 
             let hit_point: HitPoint = Self::ray_sphere_collision(
                 ray, &camera.scene.spheres, hit_skip_id
@@ -93,8 +95,9 @@ impl Camera {
 
                 let material: Material = hit_point.object.material;
                 let emitted_light: Color = material.emission_color;
+                let light_strength: f64 = hit_point.normal * ray.direction;
                 incoming_light = emitted_light * ray_color + incoming_light;
-                ray_color = material.color * ray_color;
+                ray_color = material.color * ray_color * light_strength * 2.0;
 
             } else {
                 break;
@@ -122,8 +125,10 @@ impl Camera {
             let desc: f64 = b*b - 4.0*a*c;
 
             if desc >= 0.0 {
-                let t1: f64 = (-b + desc.sqrt()) / (2.0 * a);
-                let t2: f64 = (-b - desc.sqrt()) / (2.0 * a);
+                let desc_sqrt: f64 = desc.sqrt();
+                let ax2: f64 = 2.0 * a;
+                let t1: f64 = (-b + desc_sqrt) / ax2;
+                let t2: f64 = (-b - desc_sqrt) / ax2;
                 let pt1: Vector3 = ray.origin + t1*ray.direction;
                 let pt2: Vector3 = ray.origin + t2*ray.direction;
     
