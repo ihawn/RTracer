@@ -1,4 +1,5 @@
 use crate::datatypes::material;
+use minifb::{Window, WindowOptions, Error};
 use crate::datatypes::vector3::{Vector3, self};
 use crate::datatypes::color::Color;
 use crate::datatypes::material::Material;
@@ -38,7 +39,40 @@ impl Camera {
         }
     }
 
-    pub fn render_scene(self) -> Vector2D<Color> {
+    pub fn render_scene(self, mut handler: FrameHandler, sample_count: u32) -> FrameHandler {
+        let mut camera: Camera = self.clone();
+
+        let mut new_render: Vector2D<Color> = camera.render_sample();
+        let mut old_render: Vector2D<Color> = new_render;
+        let mut pixel_accumulation: Vector2D<Color> = old_render;
+
+        let height = self.height;
+        let width = self.width;
+        let mut weight: f64 = 1.0;
+        
+        for i in 0..sample_count {
+
+            println!("Sample {}/{}", i + 1, sample_count);
+
+            camera = self.clone();
+            old_render = pixel_accumulation;
+            new_render = camera.render_sample();
+            weight = 1.0 / (i as f64 + 1.0);
+
+            pixel_accumulation = old_render * (1.0 - weight) + new_render * weight;                
+            
+            let converted_values: Vec<u32> = pixel_accumulation.data.iter()
+                .map(|color| color.as_buffer_color()).collect();
+
+            let _update: Result<(), Error> = handler.window.update_with_buffer(
+                &converted_values, width, height
+            );
+        }
+
+        handler
+    }
+
+    pub fn render_sample(self) -> Vector2D<Color> {
         let black: Color = Color::new(0.0, 0.0, 0.0);
         let mut frame: Vector2D<Color> = Vector2D::new(
             self.width, 

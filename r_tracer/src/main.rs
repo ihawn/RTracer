@@ -76,13 +76,13 @@ fn main() {
         650.0, 150.0, -1083.0, 1000.0, col3_mat, 2
     );
     let emiss_sphere_1 = Sphere::new(
-        1200.0, 500.0, 200.0, 400.0, emiss_mat_1, 3
+        1200.0, 500.0, 200.0, 600.0, emiss_mat_1, 3
     );
     let emiss_sphere_2 = Sphere::new(
-        625.0, 100.0, -65.0, 30.0, emiss_mat_2, 4
+        525.0, -100.0, -120.0, 50.0, emiss_mat_2, 4
     );
     let emiss_sphere_3 = Sphere::new(
-        525.0, -100.0, -120.0, 50.0, emiss_mat_2, 4
+        525.0, -100.0, 750.0, 500.0, emiss_mat_2, 4
     );
 
     let spheres: Vec<Sphere> = vec![
@@ -93,30 +93,12 @@ fn main() {
     let scene: Scene = Scene::new(spheres);
     let mut camera: Camera = Camera::new(
         size_x, size_y, scene, 
-        2, 3
+        3, 10
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    let mut colors = camera.render_scene();
-
-    let converted_values: Vec<u32> = FrameHandler::buffer_from_color_vec(&colors);
-    let _update = frame_handler.window.update_with_buffer(
-        &converted_values,
-        frame_handler.size_x, frame_handler.size_y
-    );
-    let mut samples = 1;
-
-
-    /*for i in (0..10){
-
-        colors = camera.render_scene();
-
-        let converted_values: Vec<u32> = FrameHandler::buffer_from_color_vec(&colors);
-        let _update = frame_handler.window.update_with_buffer(
-            &converted_values,
-            frame_handler.size_x, frame_handler.size_y
-        );
-    }*/
+    frame_handler = camera.render_scene(frame_handler, 50);
+    
     pause();
 }
 
