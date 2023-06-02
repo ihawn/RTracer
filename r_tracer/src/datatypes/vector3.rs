@@ -80,7 +80,7 @@ impl Vector3 {
             StdRng::from_entropy().sample(Standard),
             StdRng::from_entropy().sample(Standard),
             StdRng::from_entropy().sample(Standard)
-        )
+        ).normalize()
     }
 
     pub fn random_hemisphere_normal(normal: Vector3) -> Vector3 {
@@ -101,6 +101,10 @@ impl Vector3 {
         } else {
             self
         }
+    }
+
+    pub fn lerp(v1: Vector3, v2: Vector3, t: f64) -> Vector3 {
+        (1.0 - t)*v1 + t*v2
     }
 
     pub fn magnitude(self) -> f64 {

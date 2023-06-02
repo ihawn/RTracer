@@ -20,4 +20,8 @@ impl Ray {
             direction: Vector3::zero()
         }
     }
+
+    pub fn reflect(self, normal: Vector3) -> Vector3 {
+        (self.direction - 2.0*normal*self.direction*normal).normalize()
+    }
 }

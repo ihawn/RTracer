@@ -1,6 +1,7 @@
 use crate::datatypes::vector3::Vector3;
 use std::ops::AddAssign;
 use std::ops::DivAssign;
+use std::ops::Sub;
 
 #[derive(Copy, Clone)]
 pub struct Color {
@@ -35,6 +36,10 @@ impl Color {
         let g = (self.green.clamp(0.0, 1.0) * 255.0) as u32;
         let b = (self.blue.clamp(0.0, 1.0) * 255.0) as u32;
         (r << 16) | (g << 8) | b
+    }
+
+    pub fn lerp(v1: Color, v2: Color, t: f64) -> Color {
+        v1*(1.0 - t) + v2*t
     }
 }
 
@@ -84,5 +89,16 @@ impl DivAssign<u32> for Color {
         self.red /= scalar as f64;
         self.green /= scalar as f64;
         self.blue /= scalar as f64;
+    }
+}
+
+impl std::ops::Sub<Color> for Color {
+    type Output = Color;
+
+    fn sub(self, other: Color) -> Color {
+        let r = self.red - other.red;
+        let g = self.green - other.green;
+        let b = self.blue - other.blue;
+        Color::new(r, g, b)
     }
 }

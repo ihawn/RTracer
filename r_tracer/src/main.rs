@@ -33,49 +33,63 @@ use spacial::scene::Scene;
 use spacial::camera::Camera;
 
 fn main() {
-    let size_x: usize = 600;
-    let size_y: usize = 400;
+    let size_x: usize = 1800;
+    let size_y: usize = 1200;
 
     let col1_mat = Material::new(
-        Color::new(1.0, 0.8, 0.2),
+        Color::new(1.0, 0.1, 0.1),
         Color::black(),
-        0.0
+        Color::white(),
+        0.0, 1.0, 
+        0.06
     );
 
     let col2_mat = Material::new(
         Color::new(0.1, 1.0, 0.6),
         Color::black(),
-        0.0
+        Color::new(0.1, 1.0, 0.6),
+        0.0, 0.7,
+        1.0
     );
 
     let col3_mat = Material::new(
         Color::new(0.5, 0.5, 0.5),
         Color::black(),
-        0.0
+        Color::white(),
+        0.0, 0.0,
+        1.0
     );
 
     let col4_mat = Material::new(
-        Color::new(1.0, 0.15, 0.15),
+        Color::new(1.0, 1.0, 1.0),
         Color::black(),
-        0.0
+        Color::new(1.0, 1.0, 1.0),
+        0.0, 1.0,
+        1.0
     );
 
     let col5_mat = Material::new(
         Color::new(0.3, 1.0, 1.0),
         Color::black(),
+        Color::white(),
+        0.0, 1.0,
         0.0
     );
 
     let emiss_mat_1 = Material::new(
         Color::black(),
         Color::white(),
-        15.0
+        Color::white(),
+        15.0, 0.0,
+        0.0
     );
 
     let emiss_mat_2 = Material::new(
         Color::black(),
         Color::white(),
-        30.0
+        Color::white(),
+        30.0, 0.0,
+        0.0
     );
 
     let red_sphere = Sphere::new(
@@ -113,11 +127,11 @@ fn main() {
     let scene: Scene = Scene::new(spheres, Color::white() * 0.3);
     let mut camera: Camera = Camera::new(
         size_x, size_y, scene, 
-        15, 10
+        10, 2
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 100);
+    frame_handler = camera.render_scene(frame_handler, 50);
     
     pause();
 }
