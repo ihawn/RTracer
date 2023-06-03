@@ -1,8 +1,12 @@
 use std::io::{stdin, stdout, Read, Write};
-use std::os::windows::prelude::MetadataExt;
-use std::thread;
-use std::time::Duration;
 use crate::datatypes::vector3::Vector3;
+use datatypes::material::Material;
+use utilities::frame_handler::FrameHandler;
+use datatypes::color::Color;
+use spacial::mesh::Mesh;
+use spacial::scene::Scene;
+use spacial::camera::Camera;
+
 
 mod utilities {
     pub mod frame_handler;
@@ -20,17 +24,10 @@ mod datatypes {
 mod spacial {
     pub mod camera;
     pub mod scene;
-    pub mod sphere;
+    pub mod mesh;
     pub mod ray;
 }
 
-use datatypes::material::Material;
-use utilities::frame_handler::FrameHandler;
-use datatypes::color::Color;
-use datatypes::vector2d::Vector2D;
-use spacial::sphere::Sphere;
-use spacial::scene::Scene;
-use spacial::camera::Camera;
 
 fn main() {
     let size_x: usize = 1800;
@@ -92,43 +89,47 @@ fn main() {
         0.0
     );
 
-    let red_sphere = Sphere::new(
-        700.0, 0.0, 0.0, 100.0, col1_mat, 0
+    let red_sphere = Mesh::new_sphere(
+        700.0, 0.0, 0.0, 100.0, col1_mat
     );
-    let green_sphere = Sphere::new(
-        750.0, 200.0, -12.0, 75.0, col2_mat, 1
+    let green_sphere = Mesh::new_sphere(
+        750.0, 200.0, -12.0, 75.0, col2_mat
     );
-    let blue_sphere = Sphere::new(
-        650.0, 150.0, -1083.0, 1000.0, col3_mat, 2
+    let blue_sphere = Mesh::new_sphere(
+        650.0, 150.0, -1083.0, 1000.0, col3_mat
     );
-    let another_sphere = Sphere::new(
-        525.0, 50.0, -45.0, 40.0, col4_mat, 3
+    let another_sphere = Mesh::new_sphere(
+        525.0, 50.0, -45.0, 40.0, col4_mat
     );
-    let another_sphere2 = Sphere::new(
-        700.0, 350.0, -50.0, 50.0, col5_mat, 7
+    let another_sphere2 = Mesh::new_sphere(
+        700.0, 350.0, -50.0, 50.0, col5_mat
     );
-    let emiss_sphere_3 = Sphere::new(
-        600.0, 150.0, -60.0, 65.0, emiss_mat_2, 4
+    let emiss_sphere_3 = Mesh::new_sphere(
+        600.0, 150.0, -60.0, 65.0, emiss_mat_2
     );
-    let emiss_sphere_1 = Sphere::new(
-        2000.0, 500.0, 200.0, 600.0, emiss_mat_1, 5
+    let emiss_sphere_1 = Mesh::new_sphere(
+        2000.0, 500.0, 200.0, 600.0, emiss_mat_1
     );
-    let emiss_sphere_2 = Sphere::new(
-        525.0, -100.0, -50.0, 50.0, emiss_mat_2, 6
+    let emiss_sphere_2 = Mesh::new_sphere(
+        525.0, -100.0, -50.0, 50.0, emiss_mat_2
     );
+    let tri_1 = Mesh::new_triangle(
+        Vector3::new(700.0, 0.0, 0.0),
+        Vector3::new(700.0, 350.0, -50.0),
+        Vector3::new(525.0, -100.0, -50.0), col2_mat);
 
-    let spheres: Vec<Sphere> = vec![
+    let meshes: Vec<Mesh> = vec![
         red_sphere, green_sphere, blue_sphere, 
         emiss_sphere_1, emiss_sphere_2,
         emiss_sphere_3, another_sphere,
-        another_sphere2
+        another_sphere2, tri_1
     ];
 
-    let scene: Scene = Scene::new(spheres, Color::white() * 0.3);
-    let mut camera: Camera = Camera::new(
+    let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
+    let camera: Camera = Camera::new(
         Vector3::new(400.0, 100.0, 425.0),
         Vector3::new(0.0, 60.0, 0.0),
-        scene,1500.0, 1.3, 
+        scene, 1500.0, 1.4, 
         size_x, size_y,
         7, 4
     );

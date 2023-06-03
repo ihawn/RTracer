@@ -28,6 +28,18 @@ impl Vector3 {
         Vector3::new(1.0, 1.0, 1.0)
     }
 
+    pub fn cross(&self, other: &Vector3) -> Vector3 {
+        let cross_x = self.y * other.z - self.z * other.y;
+        let cross_y = self.z * other.x - self.x * other.z;
+        let cross_z = self.x * other.y - self.y * other.x;
+
+        Vector3 {
+            x: cross_x,
+            y: cross_y,
+            z: cross_z,
+        }
+    }
+
     pub fn self_dot(self) -> f64 {
         self * self
     }

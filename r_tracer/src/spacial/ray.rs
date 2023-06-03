@@ -2,9 +2,11 @@ use crate::datatypes::vector3::Vector3;
 use crate::spacial::camera::Camera;
 use crate::datatypes::color::Color;
 use crate::datatypes::hit_point::HitPoint;
-use crate::spacial::sphere::Sphere;
+use crate::spacial::mesh::Mesh;
 use crate::datatypes::material::Material;
 use rand::Rng;
+use uuid::Uuid;
+
 
 #[derive(Copy, Clone)]
 pub struct Ray {
@@ -37,12 +39,12 @@ impl Ray {
         let mut ray_color: Color = Color::white();
         let mut ray: Ray = Ray::new(camera.position, *pixel_projection);
         
-        let mut hit_skip_id = -1;
+        let mut hit_skip_id = Uuid::new_v4();
 
         for _i in 0..camera.max_bounces + 1 {
 
-            let hit_point: HitPoint = Sphere::ray_collision(
-                ray, &camera.scene.spheres, hit_skip_id
+            let hit_point: HitPoint = Mesh::ray_collision(
+                ray, &camera.scene.meshes, hit_skip_id
             );
             hit_skip_id = hit_point.object.id;
 
@@ -64,8 +66,8 @@ impl Ray {
 
                 
                 ray_color = ray_color * Color::lerp(
-                    material.color * light_strength * 1.0, 
-                    material.specular_color * light_strength * 1.0, 
+                    material.color * light_strength * camera.exposure, 
+                    material.specular_color * light_strength * camera.exposure, 
                     is_specular_bounce
                 );
 
