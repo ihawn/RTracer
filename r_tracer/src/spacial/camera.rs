@@ -1,40 +1,41 @@
-use crate::datatypes::material;
-use minifb::{Window, WindowOptions, Error};
-use crate::datatypes::vector3::{Vector3, self};
+use minifb::Error;
+use crate::datatypes::vector3::Vector3;
 use crate::datatypes::color::Color;
-use crate::datatypes::material::Material;
 use crate::datatypes::vector2d::Vector2D;
 use crate::utilities::frame_handler::FrameHandler;
 use crate::spacial::scene::Scene;
 use crate::spacial::ray::Ray;
-use crate::datatypes::hit_point::HitPoint;
 use rayon::prelude::*;
 use std::sync::{Mutex, MutexGuard};
-use rand::Rng;
 
-use super::sphere::Sphere;
 
 #[derive(Clone)]
 pub struct Camera {
     pub position: Vector3,
+    pub rotation: Vector3,
     pub scene: Scene,
     pub projection_distance: f64,
+    pub exposure: f64,
     pub width: usize,
     pub height: usize,
-    pub rotation: Vector3,
     pub max_bounces: u32,
     pub rays_per_pixel: u32
 }
 
 impl Camera {
-    pub fn new(width: usize, height: usize, scene: Scene, max_bounces: u32, rays_per_pixel: u32) -> Camera {
+    pub fn new(
+        position: Vector3, rotation: Vector3, scene: Scene,
+        projection_dist: f64, exposure: f64, width: usize, 
+        height: usize, max_bounces: u32, rays_per_pixel: u32
+    ) -> Camera {
         Camera {
-             position: Vector3::new(400.0, 100.0, 425.0),
+             position: position,
+             rotation: rotation,
              scene: scene,
-             projection_distance: 1500.0,
+             projection_distance: projection_dist,
+             exposure: exposure,
              width: width,
              height: height,
-             rotation: Vector3::new(0.0, 60.0, 0.0),
              max_bounces: max_bounces,
              rays_per_pixel: rays_per_pixel
         }
@@ -93,7 +94,7 @@ impl Camera {
             horz_slice.par_iter().for_each(|&y| {
                 let mut pixel_color: Color = Color::black();
                 for _s in 0..self.rays_per_pixel {
-                    pixel_color += Self::cast_ray(
+                    pixel_color += Ray::cast_ray(
                         self.clone(), 
                         pixel_projections.get(x, y).unwrap()
                     );
@@ -105,111 +106,6 @@ impl Camera {
         });
 
         (frame.into_inner().unwrap(), pixel_projections)
-    }
-
-    fn cast_ray(camera: Camera, pixel_projection: &Vector3) -> Color {
-
-        let mut incoming_light: Color = Color::black();
-        let mut ray_color: Color = Color::white();
-        let mut ray: Ray = Ray::new(camera.position, *pixel_projection);
-        
-        let mut hit_skip_id = -1;
-
-        for i in 0..camera.max_bounces + 1 {
-
-            let hit_point: HitPoint = Self::ray_sphere_collision(
-                ray, &camera.scene.spheres, hit_skip_id
-            );
-            hit_skip_id = hit_point.object.id;
-
-            if !hit_point.is_empty {
-
-                let material: Material = hit_point.object.material;
-
-                ray.origin = hit_point.point;
-                let diffuse_direction = Vector3::random_hemisphere_normal(hit_point.normal);
-                let specular_direction = ray.reflect(hit_point.normal);
-                let is_specular_bounce = ((material.specular >= rand::thread_rng().gen()) as u8) as f64;
-                ray.direction = Vector3::lerp(diffuse_direction, specular_direction, material.smoothness * is_specular_bounce);
-
-                let emitted_light: Color = material.emission_color;
-                let light_strength: f64 = hit_point.normal * ray.direction;
-                incoming_light = emitted_light * ray_color + incoming_light;
-
-                
-                ray_color = ray_color * Color::lerp(
-                    material.color * light_strength * 2.0, material.specular_color * light_strength * 2.0, is_specular_bounce
-                );
-
-            } else {
-                incoming_light = camera.scene.env_color * ray_color + incoming_light;
-                return incoming_light;
-            }
-        }
-
-        incoming_light
-    }
-
-    fn ray_sphere_collision(ray: Ray, objects: &Vec<Sphere>, skip_id: i32) -> HitPoint {
-        let mut hit_points: Vec<HitPoint> = Vec::new();
-        for sphere in objects {
-            if sphere.id == skip_id {
-                continue; //skip the object that was just reflected off
-                          //will have to re-think this when we have concave objects
-            }
-
-            let r: f64 = sphere.radius;
-            let object_direction: Vector3 = ray.origin - sphere.center;
-
-            let a: f64 = ray.direction.self_dot();
-            let b: f64 = 2.0*object_direction*ray.direction;
-            let c: f64 = object_direction.square().component_add() - r*r ;
-            
-            let desc: f64 = b*b - 4.0*a*c;
-
-            if desc >= 0.0 {
-                let desc_sqrt: f64 = desc.sqrt();
-                let ax2: f64 = 2.0 * a;
-                let t1: f64 = (-b + desc_sqrt) / ax2;
-                let t2: f64 = (-b - desc_sqrt) / ax2;
-                let pt1: Vector3 = ray.origin + t1*ray.direction;
-                let pt2: Vector3 = ray.origin + t2*ray.direction;
-    
-                hit_points.push(
-                    HitPoint::new(pt1, ray, sphere.clone())
-                );
-                hit_points.push(
-                    HitPoint::new(pt2, ray, sphere.clone())
-                );
-            }
-        }
-
-        if hit_points.len() > 0 {
-            Self::closest_front_hit_point(hit_points)
-        } else {
-            HitPoint::empty()
-        }
-    }
-
-    fn closest_front_hit_point(hit_points: Vec<HitPoint>) -> HitPoint {
-        let mut min_dist: f64 = hit_points[0].point.distance(hit_points[0].hitting_ray.origin);
-        let mut min_i: usize = 0;
-        for i in (1..hit_points.len()) {
-            let dist = hit_points[i].point.distance(hit_points[1].hitting_ray.origin);
-            if dist < min_dist
-            && (hit_points[i].point - hit_points[i].hitting_ray.origin) * hit_points[i].hitting_ray.direction > 0.0 {
-                min_i = i;
-                min_dist = dist;
-            }
-        }
-
-        if min_i > 0 {
-            return hit_points[min_i];
-        } else if (hit_points[0].point - hit_points[0].hitting_ray.origin) * hit_points[0].hitting_ray.direction > 0.0 {
-            return hit_points[min_i];
-        } else {
-            return HitPoint::empty();
-        }  
     }
 
     fn get_pixel_projections(camera: Camera) -> Vector2D<Vector3> {

@@ -1,7 +1,6 @@
 use crate::datatypes::vector3::Vector3;
 use std::ops::AddAssign;
 use std::ops::DivAssign;
-use std::ops::Sub;
 
 #[derive(Copy, Clone)]
 pub struct Color {
@@ -69,18 +68,18 @@ impl std::ops::Add<Color> for Color {
     type Output = Color;
 
     fn add(self, other: Color) -> Color {
-        let r = (self.red + other.red);
-        let g = (self.green + other.green);
-        let b = (self.blue + other.blue);
+        let r = self.red + other.red;
+        let g = self.green + other.green;
+        let b = self.blue + other.blue;
         Color::new(r, g, b)
     }
 }
 
 impl AddAssign<Color> for Color {
     fn add_assign(&mut self, other: Color) {
-        self.red = (self.red + other.red);
-        self.green = (self.green + other.green);
-        self.blue = (self.blue + other.blue);
+        self.red = self.red + other.red;
+        self.green = self.green + other.green;
+        self.blue = self.blue + other.blue;
     }
 }
 

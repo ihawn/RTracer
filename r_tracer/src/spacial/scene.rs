@@ -1,5 +1,3 @@
-use std::env;
-
 use crate::spacial::sphere::Sphere;
 use crate::datatypes::color::Color;
 

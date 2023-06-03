@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 use rand::{Rng, SeedableRng};
-use rand::distributions::{Distribution, Standard};
+use rand::distributions::Standard;
 use rand::rngs::StdRng;
 use crate::datatypes::color::Color;
 

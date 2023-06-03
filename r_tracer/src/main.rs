@@ -80,7 +80,7 @@ fn main() {
         Color::black(),
         Color::white(),
         Color::white(),
-        15.0, 0.0,
+        1.0, 0.0,
         0.0
     );
 
@@ -88,7 +88,7 @@ fn main() {
         Color::black(),
         Color::white(),
         Color::white(),
-        30.0, 0.0,
+        1.0, 0.0,
         0.0
     );
 
@@ -126,12 +126,15 @@ fn main() {
 
     let scene: Scene = Scene::new(spheres, Color::white() * 0.3);
     let mut camera: Camera = Camera::new(
-        size_x, size_y, scene, 
-        10, 2
+        Vector3::new(400.0, 100.0, 425.0),
+        Vector3::new(0.0, 60.0, 0.0),
+        scene,1500.0, 1.3, 
+        size_x, size_y,
+        7, 4
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 50);
+    frame_handler = camera.render_scene(frame_handler, 250);
     
     pause();
 }

@@ -1,4 +1,3 @@
-use crate::datatypes::vector3::Vector3;
 use crate::datatypes::color::Color;
 
 #[derive(Copy, Clone)]
