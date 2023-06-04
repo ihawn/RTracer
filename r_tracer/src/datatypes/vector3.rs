@@ -72,6 +72,10 @@ impl Vector3 {
         )
     }
 
+    pub fn component_ave(self) -> f64 {
+        (self.x + self.y + self.z) / 3.0
+    }
+
     pub fn rot_x(self, x_degrees: f64) -> Vector3 {
         let theta_x: f64 = x_degrees*2.0*PI/360.0;
         Vector3::new(

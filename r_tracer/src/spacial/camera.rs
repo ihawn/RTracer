@@ -1,10 +1,13 @@
 use minifb::Error;
 use crate::datatypes::vector3::Vector3;
 use crate::datatypes::color::Color;
+use crate::datatypes::hit_point::HitPoint;
 use crate::datatypes::vector2d::Vector2D;
 use crate::utilities::frame_handler::FrameHandler;
 use crate::spacial::scene::Scene;
+use crate::spacial::mesh::{Mesh, PrimitiveMeshType};
 use crate::spacial::ray::Ray;
+use crate::spacial::bvh::BVH;
 use rayon::prelude::*;
 use std::sync::{Mutex, MutexGuard};
 
@@ -42,11 +45,22 @@ impl Camera {
     }
 
     pub fn render_scene(self, mut handler: FrameHandler, sample_count: u32) -> FrameHandler {
+
+        let bvh: BVH = BVH::new(&self.scene.meshes);
+
         let mut camera: Camera = self.clone();
         let mut new_render: Vector2D<Color> = Vector2D::new(self.width, self.height, Color::black());
 
         let mut pixel_projections: Vector2D<Vector3> = Self::get_pixel_projections(self.clone());
-        (new_render, pixel_projections) = camera.render_sample(pixel_projections);
+        let mut cached_first_hits: Vector2D<HitPoint> = Self::get_first_hits(self.clone(), pixel_projections.clone(), &bvh);
+        let mut spheres: Vec<Mesh> = vec![];
+        for m in camera.clone().scene.meshes {
+            if m.mesh_type == PrimitiveMeshType::Triangle { spheres.push(m) }
+        }
+
+        (new_render, pixel_projections, cached_first_hits) = camera.render_sample(
+            pixel_projections, cached_first_hits, &bvh, &spheres
+        );
         let mut old_render: Vector2D<Color> = new_render;
         let mut pixel_accumulation: Vector2D<Color> = old_render;
 
@@ -60,7 +74,9 @@ impl Camera {
 
             camera = self.clone();
             old_render = pixel_accumulation;
-            (new_render, pixel_projections) = camera.render_sample(pixel_projections);
+            (new_render, pixel_projections, cached_first_hits) = camera.render_sample(
+                pixel_projections, cached_first_hits, &bvh, &spheres
+            );
             weight = 1.0 / (i as f64 + 1.0);
 
             pixel_accumulation = old_render * (1.0 - weight) + new_render * weight;                
@@ -76,7 +92,9 @@ impl Camera {
         handler
     }
 
-    pub fn render_sample(self, pixel_projections: Vector2D<Vector3>) -> (Vector2D<Color>, Vector2D<Vector3>) {
+    pub fn render_sample(self, pixel_projections: Vector2D<Vector3>,
+        cached_first_hits: Vector2D<HitPoint>, bvh: &BVH, sphere_objects: &Vec<Mesh>) 
+        -> (Vector2D<Color>, Vector2D<Vector3>, Vector2D<HitPoint>) {
         let black: Color = Color::new(0.0, 0.0, 0.0);
         let mut frame: Vector2D<Color> = Vector2D::new(
             self.width, 
@@ -96,7 +114,9 @@ impl Camera {
                 for _s in 0..self.rays_per_pixel {
                     pixel_color += Ray::cast_ray(
                         self.clone(), 
-                        pixel_projections.get(x, y).unwrap()
+                        *pixel_projections.get(x, y).unwrap(),
+                        *cached_first_hits.get(x, y).unwrap(),
+                        &bvh, &sphere_objects
                     );
                 }
                 pixel_color /= self.rays_per_pixel as u32;             
@@ -105,7 +125,7 @@ impl Camera {
             });
         });
 
-        (frame.into_inner().unwrap(), pixel_projections)
+        (frame.into_inner().unwrap(), pixel_projections, cached_first_hits)
     }
 
     fn get_pixel_projections(camera: Camera) -> Vector2D<Vector3> {
@@ -122,6 +142,20 @@ impl Camera {
             }
         }
         projections
+    }
+
+    fn get_first_hits(camera: Camera, pixel_projections: Vector2D<Vector3>, bvh: &BVH) -> Vector2D<HitPoint> {
+        let mut hit_points: Vector2D<HitPoint> = Vector2D::new(camera.width, camera.height, HitPoint::empty());
+        for x in 0..camera.height {
+            for y in 0..camera.width {
+                let projection_dir: &Vector3 = pixel_projections.get(x, y).unwrap();
+                let ray: Ray = Ray::new(camera.position, *projection_dir);
+                hit_points.set(x, y, 
+                    Mesh::ray_collision(ray, bvh, &camera.scene.meshes)
+                );
+            }
+        }
+        hit_points
     }
 
 }

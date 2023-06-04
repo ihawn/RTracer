@@ -33,8 +33,8 @@ mod spacial {
 
 
 fn main() {
-    let size_x: usize = 1800;
-    let size_y: usize = 1200;
+    let size_x: usize = 1200;
+    let size_y: usize = 900;
 
     /*let red_sphere = Mesh::new_sphere(
         700.0, 0.0, 0.0, 100.0, col1_mat
@@ -83,12 +83,69 @@ fn main() {
         Color::white(), 0.0, 1.0, 1.0
     );
     let mirror_rough = Material::new(Color::white(), Color::black(), 
-        Color::white() * 0.9, 0.0, 0.9, 1.0
+        Color::white() * 0.9, 0.0, 0.93, 1.0
+    );
+    let mirror_rough2 = Material::new(Color::white(), Color::black(), 
+    Color::white() * 0.9, 0.0, 0.8, 1.0
+);
+
+    let glossy_white1 = Material::new(Color::white(), Color::black(),
+        Color::white(), 0.0, 1.0, 1.0
+    );
+    let glossy_white2 = Material::new(Color::white(), Color::black(),
+        Color::white(), 0.0, 1.0, 0.5
+    );
+    let glossy_white3 = Material::new(Color::white(), Color::black(),
+        Color::white(), 0.0, 1.0, 0.1
+    );
+    let glossy_white4 = Material::new(Color::white(), Color::black(),
+        Color::white(), 0.0, 1.0, 0.025
     );
 
-    let glossy_white = Material::new(Color::white(), Color::black(),
-        Color::white(), 0.0, 1.0, 0.06
+
+    let red1 = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.035
     );
+    let yellow1 = Material::new(Color::new(1.0, 1.0, 0.3), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.035
+    );
+    let green1 = Material::new(Color::new(0.3, 1.0, 0.3), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.035
+    );
+    let blue1 = Material::new(Color::new(0.3, 0.3, 1.0), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.035
+    );
+
+
+    let red2 = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
+        Color::new(1.0, 0.3, 0.3), 0.0, 1.0, 1.0
+    );
+    let yellow2 = Material::new(Color::new(1.0, 1.0, 0.3), Color::black(), 
+        Color::new(1.0, 1.0, 0.3), 0.0, 1.0, 1.0
+    );
+    let green2 = Material::new(Color::new(0.3, 1.0, 0.3), Color::black(), 
+        Color::new(0.3, 1.0, 0.3), 0.0, 1.0, 1.0
+    );
+    let blue2 = Material::new(Color::new(0.3, 0.3, 1.0), Color::black(), 
+        Color::new(0.3, 0.3, 1.0), 0.0, 1.0, 1.0
+    );
+
+
+    let mirror1 = Material::new(Color::white(), Color::black(), 
+        Color::white(), 0.0, 1.0, 1.0
+    );
+    let mirror2 = Material::new(Color::white(), Color::black(), 
+        Color::white(), 0.0, 0.75, 1.0
+    );
+    let mirror3 = Material::new(Color::white(), Color::black(), 
+        Color::white(), 0.0, 0.5, 1.0
+    );
+    let mirror4 = Material::new(Color::white(), Color::black(), 
+        Color::white(), 0.0, 0.3, 1.0
+    );
+
+
+
 
     let emiss_mat_1 = Material::new(Color::black(), Color::white(),
         Color::white(), 5.0, 0.0, 0.0
@@ -103,8 +160,30 @@ fn main() {
     let side3 = load_model("C:/Users/Isaac/Desktop/models/side3.stl", white);
     let side4 = load_model("C:/Users/Isaac/Desktop/models/side4.stl", red);
     let top_light = load_model("C:/Users/Isaac/Desktop/models/top_light.stl", emiss_mat_1);
-    let suzanne = load_model("C:/Users/Isaac/Desktop/models/suzanne.stl", glossy_white);
+    let suzanne = load_model("C:/Users/Isaac/Desktop/models/suzanne.stl", glossy_white1);
+    let ico_sphere = load_model("C:/Users/Isaac/Desktop/models/ico.stl", mirror);
 
+    let sphere1 = Mesh::new_sphere(10.0, -75.0, -75.0, 20.0, blue2);
+    let sphere2 = Mesh::new_sphere(10.0, -25.0, -75.0, 20.0, green2);
+    let sphere3 = Mesh::new_sphere(10.0, 25.0, -75.0, 20.0, yellow2);
+    let sphere4 = Mesh::new_sphere(10.0, 75.0, -75.0, 20.0, red2);
+
+    let sphere5 = Mesh::new_sphere(10.0, -75.0, -25.0, 20.0, glossy_white1);
+    let sphere6 = Mesh::new_sphere(10.0, -25.0, -25.0, 20.0, glossy_white2);
+    let sphere7 = Mesh::new_sphere(10.0, 25.0, -25.0, 20.0, glossy_white3);
+    let sphere8 = Mesh::new_sphere(10.0, 75.0, -25.0, 20.0, glossy_white4);
+
+    let sphere9 = Mesh::new_sphere(10.0, -75.0, 25.0, 20.0, mirror4);
+    let sphere10 = Mesh::new_sphere(10.0, -25.0, 25.0, 20.0, mirror3);
+    let sphere11 = Mesh::new_sphere(10.0, 25.0, 25.0, 20.0, mirror2);
+    let sphere12 = Mesh::new_sphere(10.0, 75.0, 25.0, 20.0, mirror1);
+
+    let sphere13 = Mesh::new_sphere(10.0, -75.0, 75.0, 20.0, blue1);
+    let sphere14 = Mesh::new_sphere(10.0, -25.0, 75.0, 20.0, green1);
+    let sphere15 = Mesh::new_sphere(10.0, 25.0, 75.0, 20.0, yellow1);
+    let sphere16 = Mesh::new_sphere(10.0, 75.0, 75.0, 20.0, red1);
+
+    let sphere = Mesh::new_sphere(0.0, 0.0, 0.0, 60.0, mirror);
 
     let mut meshes: Vec<Mesh> = vec![];
     meshes.extend(ceiling);
@@ -114,19 +193,39 @@ fn main() {
     meshes.extend(side3);
     meshes.extend(side4);
     meshes.extend(top_light);
-    meshes.extend(suzanne);
+    //meshes.extend(suzanne);
+    //meshes.extend(ico_sphere);
+    meshes.push(sphere1);
+    meshes.push(sphere2);
+    meshes.push(sphere3);
+    meshes.push(sphere4);
+    meshes.push(sphere5);
+    meshes.push(sphere6);
+    meshes.push(sphere7);
+    meshes.push(sphere8);
+    meshes.push(sphere9);
+    meshes.push(sphere10);
+    meshes.push(sphere11);
+    meshes.push(sphere12);
+    meshes.push(sphere13);
+    meshes.push(sphere14);
+    meshes.push(sphere15);
+    meshes.push(sphere16);
+    
+
+    //meshes.push(sphere);
 
     let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
     let camera: Camera = Camera::new(
-        Vector3::new(-175.0, 0.0, 30.0),
-        Vector3::new(0.0, 20.0, 0.0),
-        scene, 1200.0, 2.3, 
+        Vector3::new(-200.0, 0.0, 55.0),
+        Vector3::new(0.0, 15.0, 0.0),
+        scene, 900.0, 2.0, 
         size_x, size_y,
-        10, 7
+        3, 2
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 1000);
+    frame_handler = camera.render_scene(frame_handler, 5000);
     
     pause();
 }

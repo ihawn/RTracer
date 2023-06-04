@@ -1,8 +1,9 @@
 use crate::datatypes::vector3::Vector3;
 use crate::datatypes::hit_point::HitPoint;
 use crate::spacial::ray::Ray;
+use crate::spacial::bvh::BVH;
 use crate::datatypes::material::Material;
-use uuid::Uuid;
+use rand::Rng;
 
 #[derive(Copy, Clone)]
 pub struct Mesh {
@@ -17,21 +18,24 @@ pub struct Mesh {
     pub normal: Vector3,
 
     pub bounding_box: (Vector3, Vector3),
+    pub bounding_box_center: Vector3,
 
     pub material: Material,
-    pub id: Uuid,
     pub is_empty: bool
 }
 
 impl Mesh {
     pub fn new_sphere(x: f64, y: f64, z: f64, r: f64, material: Material) -> Mesh {
         let c = Vector3::new(x, y, z);
+        let bb = Self::get_bounding_box(
+            PrimitiveMeshType::Sphere, Vector3::zero(), 
+            Vector3::zero(), Vector3::zero(), c, r
+        );
         Mesh {
             mesh_type: PrimitiveMeshType::Sphere,
             center: c,
             radius: r,
-            material: material,
-            id: Uuid::new_v4(),        
+            material: material,      
             is_empty: false,
 
             p1: Vector3::zero(),
@@ -39,14 +43,16 @@ impl Mesh {
             p3: Vector3::zero(),
             normal: Vector3::zero(),
 
-            bounding_box: Self::get_bounding_box(
-                PrimitiveMeshType::Sphere, Vector3::zero(), 
-                Vector3::zero(), Vector3::zero(), c, r
-            )
+            bounding_box: bb,
+            bounding_box_center: Self::get_bounding_box_center(bb)
         }
     }
 
     pub fn new_triangle(p1: Vector3, p2: Vector3, p3: Vector3, normal: Vector3, material: Material) -> Mesh {
+        let bb = Self::get_bounding_box(
+            PrimitiveMeshType::Triangle, p1, 
+            p2, p3, Vector3::zero(), 0.0
+        );
         Mesh {
             mesh_type: PrimitiveMeshType::Triangle,
             p1: p1,
@@ -54,16 +60,13 @@ impl Mesh {
             p3: p3,
             normal: normal,
             material: material,
-            id: Uuid::new_v4(),
             is_empty: false,
 
             center: Vector3::zero(),
             radius: 0.0,
 
-            bounding_box: Self::get_bounding_box(
-                PrimitiveMeshType::Triangle, p1, 
-                p2, p3, Vector3::zero(), 0.0
-            )
+            bounding_box: bb,
+            bounding_box_center: Self::get_bounding_box_center(bb)
         }
     }
 
@@ -73,13 +76,13 @@ impl Mesh {
             center: Vector3::zero(),
             radius: 0.0,
             material: Material::empty(),
-            id: Uuid::new_v4(),
             p1: Vector3::zero(),
             p2: Vector3::zero(),
             p3: Vector3::zero(),
             normal: Vector3::zero(),
             is_empty: true,
-            bounding_box: (Vector3::zero(), Vector3::zero())
+            bounding_box: (Vector3::zero(), Vector3::zero()),
+            bounding_box_center: Vector3::zero()
         }
     }
 
@@ -100,18 +103,19 @@ impl Mesh {
         }
     }
 
-    pub fn ray_collision(ray: Ray, objects: &Vec<Mesh>, skip_id: Uuid) -> HitPoint {
-        let mut hit_points: Vec<HitPoint> = Vec::new();
-        for mesh in objects {
-            if mesh.id == skip_id {
-                continue;
-            }
+    pub fn get_bounding_box_center(bb: (Vector3, Vector3)) -> Vector3 {
+        0.5*(bb.0 + bb.1)
+    }
 
-            if mesh.mesh_type == PrimitiveMeshType::Triangle {
-                hit_points = Self::intersect_triangle(&ray, mesh, hit_points);
-            } else if mesh.mesh_type == PrimitiveMeshType::Sphere {
-                hit_points = Self::intersect_sphere(&ray, mesh, hit_points);
-            }
+    pub fn ray_collision(ray: Ray, bvh: &BVH, sphere_objects: &Vec<Mesh>) -> HitPoint {
+        let meshes_to_check = Self::traverse_bvh_for_meshes(ray, bvh, Vec::new());
+        let mut hit_points: Vec<HitPoint> = Vec::new();
+
+        for mesh in meshes_to_check {
+            hit_points = Self::intersect_triangle(&ray, &mesh, hit_points);
+        }
+        for mesh in sphere_objects {
+            hit_points = Self::intersect_sphere(&ray, &mesh, hit_points);
         }
 
         if hit_points.len() > 0 {
@@ -119,6 +123,25 @@ impl Mesh {
         } else {
             HitPoint::empty()
         }
+    }
+    
+    fn traverse_bvh_for_meshes(ray: Ray, node: &BVH, mut meshes_to_check: Vec<Mesh>) -> Vec<Mesh> {
+        if !node.is_leaf {
+            if let Some(left_child) = &node.bvh_obj_1 {
+                if ray.bb_intersects(left_child.bb_corner_1, left_child.bb_corner_2) {
+                    meshes_to_check = Self::traverse_bvh_for_meshes(ray, left_child, meshes_to_check);
+                }
+            }
+            if let Some(right_child) = &node.bvh_obj_2 {
+                if ray.bb_intersects(right_child.bb_corner_1, right_child.bb_corner_2) {
+                    meshes_to_check = Self::traverse_bvh_for_meshes(ray, right_child, meshes_to_check);
+                }
+            }
+        } else {
+            meshes_to_check.push(node.mesh.clone());
+        }
+
+        meshes_to_check
     }
 
     fn intersect_sphere(ray: &Ray, sphere: &Mesh, mut existing_hitpoints: Vec<HitPoint>) -> Vec<HitPoint> {
@@ -140,12 +163,14 @@ impl Mesh {
             let pt1: Vector3 = ray.origin + t1*ray.direction;
             let pt2: Vector3 = ray.origin + t2*ray.direction;
 
-            existing_hitpoints.push(
-                HitPoint::new_from_sphere(pt1, *ray, *sphere)
-            );
-            existing_hitpoints.push(
-                HitPoint::new_from_sphere(pt2, *ray, *sphere)
-            );
+            let hp1 = HitPoint::new_from_sphere(pt1, *ray, *sphere);
+            let hp2 = HitPoint::new_from_sphere(pt2, *ray, *sphere);
+
+            if hp1.normal*ray.direction < 0.0 {
+                existing_hitpoints.push(hp1);
+            } else {
+                existing_hitpoints.push(hp2);
+            }
         }
 
         existing_hitpoints

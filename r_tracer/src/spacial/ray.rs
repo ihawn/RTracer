@@ -1,11 +1,11 @@
 use crate::datatypes::vector3::Vector3;
 use crate::spacial::camera::Camera;
 use crate::datatypes::color::Color;
-use crate::datatypes::hit_point::HitPoint;
+use crate::datatypes::hit_point::{HitPoint, self};
 use crate::spacial::mesh::Mesh;
+use crate::spacial::bvh::BVH;
 use crate::datatypes::material::Material;
 use rand::Rng;
-use uuid::Uuid;
 
 
 #[derive(Copy, Clone)]
@@ -33,20 +33,36 @@ impl Ray {
         (self.direction - 2.0*normal*self.direction*normal).normalize()
     }
 
-    pub fn cast_ray(camera: Camera, pixel_projection: &Vector3) -> Color {
+    pub fn bb_intersects(&self, bb_corner_1: Vector3, bb_corner_2: Vector3) -> bool {
+        let inv_direction = Vector3::new(1.0 / self.direction.x, 1.0 / self.direction.y, 1.0 / self.direction.z);
+        let t1 = (bb_corner_1.x - self.origin.x) * inv_direction.x;
+        let t2 = (bb_corner_2.x - self.origin.x) * inv_direction.x;
+        let t3 = (bb_corner_1.y - self.origin.y) * inv_direction.y;
+        let t4 = (bb_corner_2.y - self.origin.y) * inv_direction.y;
+        let t5 = (bb_corner_1.z - self.origin.z) * inv_direction.z;
+        let t6 = (bb_corner_2.z - self.origin.z) * inv_direction.z;
+
+        let tmin = t1.min(t2).max(t3.min(t4)).max(t5.min(t6));
+        let tmax = t1.max(t2).min(t3.max(t4)).min(t5.max(t6));
+
+        return tmax >= tmin;
+    }
+
+    pub fn cast_ray(camera: Camera, pixel_projection: Vector3, 
+        cached_first_hit: HitPoint, bvh: &BVH, sphere_objects: &Vec<Mesh>) -> Color {
 
         let mut incoming_light: Color = Color::black();
         let mut ray_color: Color = Color::white();
-        let mut ray: Ray = Ray::new(camera.position, *pixel_projection);
-        
-        let mut hit_skip_id = Uuid::new_v4();
+        let mut ray: Ray = Ray::new(camera.position, pixel_projection);
+        let mut hit_point: HitPoint = HitPoint::empty();
 
         for i in 0..camera.max_bounces + 1 {
 
-            let hit_point: HitPoint = Mesh::ray_collision(
-                ray, &camera.scene.meshes, hit_skip_id
-            );
-            hit_skip_id = hit_point.object.id;
+            if i == 0 {
+                hit_point = cached_first_hit;
+            } else {
+                hit_point = Mesh::ray_collision(ray, bvh, sphere_objects);
+            }
 
             if !hit_point.is_empty {
 
