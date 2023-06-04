@@ -41,7 +41,7 @@ impl Ray {
         
         let mut hit_skip_id = Uuid::new_v4();
 
-        for _i in 0..camera.max_bounces + 1 {
+        for i in 0..camera.max_bounces + 1 {
 
             let hit_point: HitPoint = Mesh::ray_collision(
                 ray, &camera.scene.meshes, hit_skip_id
@@ -64,6 +64,9 @@ impl Ray {
                 let light_strength: f64 = hit_point.normal * ray.direction;
                 incoming_light = emitted_light * ray_color + incoming_light;
 
+                if i > 3 && incoming_light.to_vector3().magnitude() < 0.015 {
+                    break;
+                }
                 
                 ray_color = ray_color * Color::lerp(
                     material.color * light_strength * camera.exposure, 

@@ -14,37 +14,56 @@ pub struct Mesh {
     pub p1: Vector3,
     pub p2: Vector3,
     pub p3: Vector3,
+    pub normal: Vector3,
+
+    pub bounding_box: (Vector3, Vector3),
 
     pub material: Material,
-    pub id: Uuid
+    pub id: Uuid,
+    pub is_empty: bool
 }
 
 impl Mesh {
     pub fn new_sphere(x: f64, y: f64, z: f64, r: f64, material: Material) -> Mesh {
+        let c = Vector3::new(x, y, z);
         Mesh {
             mesh_type: PrimitiveMeshType::Sphere,
-            center: Vector3::new(x, y, z),
+            center: c,
             radius: r,
             material: material,
-            id: Uuid::new_v4(),
+            id: Uuid::new_v4(),        
+            is_empty: false,
 
             p1: Vector3::zero(),
             p2: Vector3::zero(),
             p3: Vector3::zero(),
+            normal: Vector3::zero(),
+
+            bounding_box: Self::get_bounding_box(
+                PrimitiveMeshType::Sphere, Vector3::zero(), 
+                Vector3::zero(), Vector3::zero(), c, r
+            )
         }
     }
 
-    pub fn new_triangle(p1: Vector3, p2: Vector3, p3: Vector3, material: Material) -> Mesh {
+    pub fn new_triangle(p1: Vector3, p2: Vector3, p3: Vector3, normal: Vector3, material: Material) -> Mesh {
         Mesh {
             mesh_type: PrimitiveMeshType::Triangle,
             p1: p1,
             p2: p2,
             p3: p3,
+            normal: normal,
             material: material,
             id: Uuid::new_v4(),
+            is_empty: false,
 
             center: Vector3::zero(),
-            radius: 0.0
+            radius: 0.0,
+
+            bounding_box: Self::get_bounding_box(
+                PrimitiveMeshType::Triangle, p1, 
+                p2, p3, Vector3::zero(), 0.0
+            )
         }
     }
 
@@ -58,6 +77,26 @@ impl Mesh {
             p1: Vector3::zero(),
             p2: Vector3::zero(),
             p3: Vector3::zero(),
+            normal: Vector3::zero(),
+            is_empty: true,
+            bounding_box: (Vector3::zero(), Vector3::zero())
+        }
+    }
+
+    pub fn get_bounding_box(mesh_type: PrimitiveMeshType, p1: Vector3, 
+        p2: Vector3, p3: Vector3, center: Vector3, r: f64) -> (Vector3, Vector3) {
+        if mesh_type == PrimitiveMeshType::Triangle {
+            return (
+                p1.min(p2.min(p3)),
+                p1.max(p2.max(p3))
+            )
+        } else if mesh_type == PrimitiveMeshType::Sphere {
+            return (
+                center - Vector3::new(r, r, r),
+                center + Vector3::new(r, r, r)
+            )
+        } else {
+            return (Vector3::zero(), Vector3::zero())
         }
     }
 
@@ -113,6 +152,11 @@ impl Mesh {
     }
 
     fn intersect_triangle(ray: &Ray, triangle: &Mesh, mut existing_hitpoints: Vec<HitPoint>) -> Vec<HitPoint> {
+
+        if triangle.normal*ray.direction > 0.0 {
+            return existing_hitpoints
+        }
+
         let epsilon = 1e-6;
     
         let edge1 = triangle.p2 - triangle.p1;
@@ -144,11 +188,10 @@ impl Mesh {
     
         if t > epsilon {
             let point = ray.origin + t*ray.direction;
-            let normal = edge1.cross(&edge2).normalize();
             let hitpoint = HitPoint {
                 point,
                 hitting_ray: ray.clone(),
-                normal,
+                normal: triangle.normal,
                 object: triangle.clone(),
                 is_empty: false,
             };

@@ -56,6 +56,22 @@ impl Vector3 {
         (self - other).square().component_add().sqrt()
     }
 
+    pub fn min(self, other: Vector3) -> Vector3 {
+        Vector3::new(
+            f64::min(self.x, other.x),
+             f64::min(self.y, other.y), 
+             f64::min(self.z, other.z)
+        )
+    }
+
+    pub fn max(self, other: Vector3) -> Vector3 {
+        Vector3::new(
+            f64::max(self.x, other.x),
+             f64::max(self.y, other.y), 
+             f64::max(self.z, other.z)
+        )
+    }
+
     pub fn rot_x(self, x_degrees: f64) -> Vector3 {
         let theta_x: f64 = x_degrees*2.0*PI/360.0;
         Vector3::new(
@@ -88,17 +104,55 @@ impl Vector3 {
     }
 
     pub fn random_normal() -> Vector3 {
-        Vector3::new(
+        /*Vector3::new(
             StdRng::from_entropy().sample(Standard),
             StdRng::from_entropy().sample(Standard),
             StdRng::from_entropy().sample(Standard)
+        ).normalize()*/
+
+        Vector3::new(
+            StdRng::from_entropy().gen_range(0.0..1.0),
+            StdRng::from_entropy().gen_range(0.0..1.0),
+            StdRng::from_entropy().gen_range(0.0..1.0)
         ).normalize()
     }
 
     pub fn random_hemisphere_normal(normal: Vector3) -> Vector3 {
-        let direction = Self::random_normal();
+        /*let mut direction = Self::random_normal();
+        direction.y -= 0.5;
         let sign = f64::signum(normal * direction);
-        sign * direction
+        sign * direction*/
+
+        let mut rng = rand::thread_rng();
+
+        // Generate a random point on a unit sphere
+        let mut random_vector = Vector3 {
+            x: rng.gen::<f64>() * 2.0 - 1.0,
+            y: rng.gen::<f64>() * 2.0 - 1.0,
+            z: rng.gen::<f64>() * 2.0 - 1.0,
+        };
+    
+        // Normalize the vector to make it a unit vector
+        let magnitude = (random_vector.x * random_vector.x
+            + random_vector.y * random_vector.y
+            + random_vector.z * random_vector.z)
+            .sqrt();
+        random_vector.x /= magnitude;
+        random_vector.y /= magnitude;
+        random_vector.z /= magnitude;
+    
+        // Reflect the vector if it's not in the same hemisphere as the normal
+        if random_vector.x * normal.x
+            + random_vector.y * normal.y
+            + random_vector.z * normal.z
+            < 0.0
+        {
+            random_vector.x *= -1.0;
+            random_vector.y *= -1.0;
+            random_vector.z *= -1.0;
+        }
+    
+        random_vector
     }
 
     pub fn normalize(self) -> Vector3 {
