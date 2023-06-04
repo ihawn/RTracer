@@ -33,8 +33,6 @@ mod spacial {
 
 
 fn main() {
-    let size_x: usize = 1200;
-    let size_y: usize = 900;
 
     /*let red_sphere = Mesh::new_sphere(
         700.0, 0.0, 0.0, 100.0, col1_mat
@@ -215,17 +213,20 @@ fn main() {
 
     //meshes.push(sphere);
 
+    let size_x: usize = 1400;
+    let size_y: usize = 1200;
+
     let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
     let camera: Camera = Camera::new(
         Vector3::new(-200.0, 0.0, 55.0),
         Vector3::new(0.0, 15.0, 0.0),
-        scene, 900.0, 2.0, 
+        scene, 1200.0, 2.0, 
         size_x, size_y,
-        3, 2
+        15, 6
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 5000);
+    frame_handler = camera.render_scene(frame_handler, 10000);
     
     pause();
 }

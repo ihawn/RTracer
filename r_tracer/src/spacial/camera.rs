@@ -55,7 +55,7 @@ impl Camera {
         let mut cached_first_hits: Vector2D<HitPoint> = Self::get_first_hits(self.clone(), pixel_projections.clone(), &bvh);
         let mut spheres: Vec<Mesh> = vec![];
         for m in camera.clone().scene.meshes {
-            if m.mesh_type == PrimitiveMeshType::Triangle { spheres.push(m) }
+            if m.mesh_type == PrimitiveMeshType::Sphere { spheres.push(m) }
         }
 
         (new_render, pixel_projections, cached_first_hits) = camera.render_sample(
