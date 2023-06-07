@@ -1,8 +1,9 @@
 use std::f64::consts::PI;
 use rand::{Rng, SeedableRng};
-use rand::distributions::Standard;
 use rand::rngs::StdRng;
 use crate::datatypes::color::Color;
+use crate::datatypes::vector2::Vector2;
+use std::ops::MulAssign;
 
 #[derive(Copy, Clone)]
 pub struct Vector3 {
@@ -108,12 +109,6 @@ impl Vector3 {
     }
 
     pub fn random_normal() -> Vector3 {
-        /*Vector3::new(
-            StdRng::from_entropy().sample(Standard),
-            StdRng::from_entropy().sample(Standard),
-            StdRng::from_entropy().sample(Standard)
-        ).normalize()*/
-
         Vector3::new(
             StdRng::from_entropy().gen_range(0.0..1.0),
             StdRng::from_entropy().gen_range(0.0..1.0),
@@ -122,41 +117,24 @@ impl Vector3 {
     }
 
     pub fn random_hemisphere_normal(normal: Vector3) -> Vector3 {
-        /*let mut direction = Self::random_normal();
-        direction.y -= 0.5;
-        let sign = f64::signum(normal * direction);
-        sign * direction*/
-
         let mut rng = rand::thread_rng();
+        let mut random_vector = Vector3::new(
+            rng.gen::<f64>() * 2.0 - 1.0,
+            rng.gen::<f64>() * 2.0 - 1.0,
+            rng.gen::<f64>() * 2.0 - 1.0,
+        ).normalize();
 
-        // Generate a random point on a unit sphere
-        let mut random_vector = Vector3 {
-            x: rng.gen::<f64>() * 2.0 - 1.0,
-            y: rng.gen::<f64>() * 2.0 - 1.0,
-            z: rng.gen::<f64>() * 2.0 - 1.0,
-        };
-    
-        // Normalize the vector to make it a unit vector
-        let magnitude = (random_vector.x * random_vector.x
-            + random_vector.y * random_vector.y
-            + random_vector.z * random_vector.z)
-            .sqrt();
-        random_vector.x /= magnitude;
-        random_vector.y /= magnitude;
-        random_vector.z /= magnitude;
-    
-        // Reflect the vector if it's not in the same hemisphere as the normal
-        if random_vector.x * normal.x
-            + random_vector.y * normal.y
-            + random_vector.z * normal.z
-            < 0.0
-        {
-            random_vector.x *= -1.0;
-            random_vector.y *= -1.0;
-            random_vector.z *= -1.0;
-        }
+        if random_vector * normal < 0.0 { random_vector *= -1.0 }
     
         random_vector
+    }
+
+    pub fn random_perturb(scale: Vector2) -> Vector3 {
+        let rand_val1: f64 = rand::thread_rng().gen_range(0.0..1.0);
+        let rand_val2: f64 = rand::thread_rng().gen_range(0.0..1.0);
+        let angle: f64 = rand_val1*2.0*PI;
+        let circle_pt: Vector2 = Vector2::new(angle.cos(), angle.sin());
+        rand_val2.sqrt()*Vector3::new(0.0, circle_pt.y/scale.x, circle_pt.x/scale.y)
     }
 
     pub fn normalize(self) -> Vector3 {
@@ -211,5 +189,13 @@ impl std::ops::Mul<Vector3> for f64 {
 
     fn mul(self, other: Vector3) -> Vector3 {
         Vector3::new(self * other.x, self * other.y, self * other.z)
+    }
+}
+
+impl MulAssign<f64> for Vector3 {
+    fn mul_assign(&mut self, rhs: f64) {
+        self.x *= rhs;
+        self.y *= rhs;
+        self.z *= rhs;
     }
 }

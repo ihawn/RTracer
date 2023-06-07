@@ -22,12 +22,12 @@ impl HitPoint {
         }
     }
 
-    pub fn new_from_tri(point: Vector3, ray: Ray, object: Mesh) -> HitPoint {
+    pub fn new_from_tri(point: Vector3, ray: &Ray, object: &Mesh) -> HitPoint {
         HitPoint {
             point: point,
-            hitting_ray: ray,
-            normal: (point - object.center).normalize(),
-            object: object,
+            hitting_ray: *ray,
+            normal: object.normal,
+            object: *object,
             is_empty: false
         }
     }

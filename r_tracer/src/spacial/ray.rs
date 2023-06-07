@@ -1,4 +1,5 @@
 use crate::datatypes::vector3::Vector3;
+use crate::datatypes::vector2::Vector2;
 use crate::spacial::camera::Camera;
 use crate::datatypes::color::Color;
 use crate::datatypes::hit_point::{HitPoint, self};
@@ -48,8 +49,18 @@ impl Ray {
         return tmax >= tmin;
     }
 
-    pub fn cast_ray(camera: Camera, pixel_projection: Vector3, 
-        cached_first_hit: HitPoint, bvh: &BVH, sphere_objects: &Vec<Mesh>) -> Color {
+    pub fn cast_ray(camera: &Camera, mut pixel_projection: Vector3, 
+        mut cached_first_hit: HitPoint, bvh: &BVH, sphere_objects: &Vec<Mesh>,
+        x: usize, y: usize) -> Color {
+
+        pixel_projection = camera.blur_strength *
+            Vector3::random_perturb(Vector2::new(camera.width as f64, camera.height as f64)) + 
+            Vector3::new(
+                camera.projection_distance,
+                y as f64 - (camera.width as f64)/2.0, 
+                (camera.height as f64)/2.0 - x as f64
+            ).normalize().rot(camera.rotation);
+
 
         let mut incoming_light: Color = Color::black();
         let mut ray_color: Color = Color::white();
@@ -58,11 +69,11 @@ impl Ray {
 
         for i in 0..camera.max_bounces + 1 {
 
-            if i == 0 {
+            /*if i == 0 {
                 hit_point = cached_first_hit;
-            } else {
+            } else {*/
                 hit_point = Mesh::ray_collision(ray, bvh, sphere_objects);
-            }
+            //}
 
             if !hit_point.is_empty {
 

@@ -17,6 +17,7 @@ mod utilities {
 mod datatypes {
     pub mod color;
     pub mod vector2d;
+    pub mod vector3d;
     pub mod vector2;
     pub mod vector3;
     pub mod hit_point;
@@ -97,7 +98,7 @@ fn main() {
         Color::white(), 0.0, 1.0, 0.1
     );
     let glossy_white4 = Material::new(Color::white(), Color::black(),
-        Color::white(), 0.0, 1.0, 0.025
+        Color::white(), 0.0, 1.0, 0.045
     );
 
 
@@ -158,7 +159,7 @@ fn main() {
     let side3 = load_model("C:/Users/Isaac/Desktop/models/side3.stl", white);
     let side4 = load_model("C:/Users/Isaac/Desktop/models/side4.stl", red);
     let top_light = load_model("C:/Users/Isaac/Desktop/models/top_light.stl", emiss_mat_1);
-    let suzanne = load_model("C:/Users/Isaac/Desktop/models/suzanne.stl", glossy_white1);
+    let suzanne = load_model("C:/Users/Isaac/Desktop/models/suzanne.stl", glossy_white4);
     let ico_sphere = load_model("C:/Users/Isaac/Desktop/models/ico.stl", mirror);
 
     let sphere1 = Mesh::new_sphere(10.0, -75.0, -75.0, 20.0, blue2);
@@ -213,16 +214,16 @@ fn main() {
 
     //meshes.push(sphere);
 
-    let size_x: usize = 1400;
-    let size_y: usize = 1200;
+    let size_x: usize = 1800;
+    let size_y: usize = 1400;
 
     let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
     let camera: Camera = Camera::new(
         Vector3::new(-200.0, 0.0, 55.0),
-        Vector3::new(0.0, 15.0, 0.0),
-        scene, 1200.0, 2.0, 
+        Vector3::new(0.0, 25.0, 0.0),
+        scene, 1400.0, 2.0, 
         size_x, size_y,
-        15, 6
+        3, 2, 0.2
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");

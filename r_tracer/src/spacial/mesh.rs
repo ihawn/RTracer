@@ -138,7 +138,7 @@ impl Mesh {
                 }
             }
         } else {
-            meshes_to_check.push(node.mesh.clone());
+            meshes_to_check.push(node.mesh);
         }
 
         meshes_to_check
@@ -213,13 +213,11 @@ impl Mesh {
     
         if t > epsilon {
             let point = ray.origin + t*ray.direction;
-            let hitpoint = HitPoint {
+            let hitpoint = HitPoint::new_from_tri(
                 point,
-                hitting_ray: ray.clone(),
-                normal: triangle.normal,
-                object: triangle.clone(),
-                is_empty: false,
-            };
+                ray,
+                &triangle
+            );
             existing_hitpoints.push(hitpoint);
         }
     
