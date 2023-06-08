@@ -7,6 +7,7 @@ use spacial::mesh::{Mesh, self};
 use spacial::scene::Scene;
 use spacial::camera::Camera;
 use utilities::model_loader::{load_model};
+use std::time::{Duration, Instant};
 
 
 mod utilities {
@@ -225,21 +226,33 @@ fn main() {
 
     //meshes.push(sphere);
 
-    let size_x: usize = 1800;
-    let size_y: usize = 1200;
+    let size_x: usize = 1200;
+    let size_y: usize = 800;
 
     let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
     let camera: Camera = Camera::new(
         Vector3::new(-200.0, 0.0, 55.0),
-        Vector3::new(0.0, 15.0, 0.0),
+        Vector3::new(0.0, 28.0, 0.0),
         scene, 2.2, 
         size_x, size_y,
-        20, 4, 0.4, 
-        0.0, 180.0, 1.25
+        3, 4, 0.2, 
+        20.0, 180.0, 1.25
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 10000);
+
+    let start_time = Instant::now();
+    frame_handler = camera.render_scene(frame_handler, 20);
+    let elapsed_time = start_time.elapsed();
+
+    let hours = elapsed_time.as_secs() / 3600;
+    let minutes = (elapsed_time.as_secs() % 3600) / 60;
+    let seconds = elapsed_time.as_secs() % 60;
+    let milliseconds = elapsed_time.subsec_millis();
+    println!(
+        "Elapsed time: {:02}:{:02}:{:02}:{:03}",
+        hours, minutes, seconds, milliseconds
+    );
     
     pause();
 }
