@@ -25,7 +25,10 @@ pub struct Camera {
     pub height: usize,
     pub max_bounces: u32,
     pub rays_per_pixel: u32,
-    pub blur_strength: f64
+    pub blur_strength: f64,
+    pub dof_strength: f64,
+    pub focal_distance: f64,
+    pub fov: f64
 }
 
 impl Camera {
@@ -33,7 +36,7 @@ impl Camera {
         position: Vector3, rotation: Vector3, scene: Scene,
         projection_dist: f64, exposure: f64, width: usize, 
         height: usize, max_bounces: u32, rays_per_pixel: u32,
-        blur_str: f64
+        blur_str: f64, dof_strength: f64, focal_distance: f64, fov: f64
     ) -> Camera {
         Camera {
              position: position,
@@ -45,7 +48,10 @@ impl Camera {
              height: height,
              max_bounces: max_bounces,
              rays_per_pixel: rays_per_pixel,
-             blur_strength: blur_str
+             blur_strength: blur_str,       
+             dof_strength: dof_strength,
+             focal_distance: focal_distance,
+             fov: fov,
         }
     }
 

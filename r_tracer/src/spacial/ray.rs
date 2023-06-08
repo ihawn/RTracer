@@ -53,27 +53,26 @@ impl Ray {
         mut cached_first_hit: HitPoint, bvh: &BVH, sphere_objects: &Vec<Mesh>,
         x: usize, y: usize) -> Color {
 
-        pixel_projection = camera.blur_strength *
+        let projection_point = camera.blur_strength *
             Vector3::random_perturb(Vector2::new(camera.width as f64, camera.height as f64)) + 
             Vector3::new(
-                camera.projection_distance,
+                camera.fov * (camera.width as f64) / camera.projection_distance,
                 y as f64 - (camera.width as f64)/2.0, 
                 (camera.height as f64)/2.0 - x as f64
             ).normalize().rot(camera.rotation);
 
+        let focal_point = camera.position + camera.focal_distance * projection_point.normalize();
+        let ray_origin = camera.position + camera.dof_strength * Vector3::random_perturb(Vector2::new(1.0, 1.0));
+        let ray_direction = (focal_point - ray_origin).normalize();
+
+        let mut ray: Ray = Ray::new(ray_origin, ray_direction);
+        let mut hit_point: HitPoint = HitPoint::empty();
 
         let mut incoming_light: Color = Color::black();
         let mut ray_color: Color = Color::white();
-        let mut ray: Ray = Ray::new(camera.position, pixel_projection);
-        let mut hit_point: HitPoint = HitPoint::empty();
 
         for i in 0..camera.max_bounces + 1 {
-
-            /*if i == 0 {
-                hit_point = cached_first_hit;
-            } else {*/
-                hit_point = Mesh::ray_collision(ray, bvh, sphere_objects);
-            //}
+            hit_point = Mesh::ray_collision(ray, bvh, sphere_objects);
 
             if !hit_point.is_empty {
 

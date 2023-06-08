@@ -137,6 +137,18 @@ impl Vector3 {
         rand_val2.sqrt()*Vector3::new(0.0, circle_pt.y/scale.x, circle_pt.x/scale.y)
     }
 
+    pub fn random_in_unit_disk() -> Vector3 {
+        loop {
+            let x = rand::thread_rng().gen_range(-1.0..1.0);
+            let y = rand::thread_rng().gen_range(-1.0..1.0);
+            let point = Vector3 { x, y, z: 0.0 };
+
+            if point.square().component_add() < 1.0 {
+                return point;
+            }
+        }
+    }
+
     pub fn normalize(self) -> Vector3 {
         let magnitude: f64 = self.magnitude();
         

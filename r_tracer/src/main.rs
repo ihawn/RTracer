@@ -184,6 +184,12 @@ fn main() {
 
     let sphere = Mesh::new_sphere(0.0, 0.0, 0.0, 60.0, mirror);
 
+
+    let sphere17 = Mesh::new_sphere(75.0, 0.0, 0.0, 20.0, mirror);
+    let sphere18 = Mesh::new_sphere(25.0, 0.0, 0.0, 20.0, mirror);
+    let sphere19 = Mesh::new_sphere(-25.0, 0.0, 0.0, 20.0, mirror);
+    let sphere20 = Mesh::new_sphere(-75.0, 0.0, 0.0, 20.0, mirror);
+
     let mut meshes: Vec<Mesh> = vec![];
     meshes.extend(ceiling);
     meshes.extend(floor);
@@ -210,20 +216,26 @@ fn main() {
     meshes.push(sphere14);
     meshes.push(sphere15);
     meshes.push(sphere16);
+
+    /*meshes.push(sphere17);
+    meshes.push(sphere18);
+    meshes.push(sphere19);
+    meshes.push(sphere20);*/
     
 
     //meshes.push(sphere);
 
-    let size_x: usize = 1800;
-    let size_y: usize = 1400;
+    let size_x: usize = 600;
+    let size_y: usize = 400;
 
     let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
     let camera: Camera = Camera::new(
-        Vector3::new(-200.0, 0.0, 55.0),
-        Vector3::new(0.0, 25.0, 0.0),
-        scene, 1400.0, 2.0, 
+        Vector3::new(-130.0, 70.0, 55.0),
+        Vector3::new(0.0, 15.0, -35.0),
+        scene, 450.0, 2.0, 
         size_x, size_y,
-        3, 2, 0.2
+        3, 2, 0.4, 
+        60.0, 150.0, 350.0
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
