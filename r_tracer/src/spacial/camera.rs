@@ -19,7 +19,6 @@ pub struct Camera {
     pub position: Vector3,
     pub rotation: Vector3,
     pub scene: Scene,
-    pub projection_distance: f64,
     pub exposure: f64,
     pub width: usize,
     pub height: usize,
@@ -34,15 +33,14 @@ pub struct Camera {
 impl Camera {
     pub fn new(
         position: Vector3, rotation: Vector3, scene: Scene,
-        projection_dist: f64, exposure: f64, width: usize, 
-        height: usize, max_bounces: u32, rays_per_pixel: u32,
-        blur_str: f64, dof_strength: f64, focal_distance: f64, fov: f64
+        exposure: f64, width: usize, height: usize, max_bounces: 
+        u32, rays_per_pixel: u32, blur_str: f64, dof_strength: 
+        f64, focal_distance: f64, fov: f64
     ) -> Camera {
         Camera {
              position: position,
              rotation: rotation,
              scene: scene,
-             projection_distance: projection_dist,
              exposure: exposure,
              width: width,
              height: height,
@@ -126,7 +124,7 @@ impl Camera {
                         &bvh, &sphere_objects, x, y
                     );
                 }
-                pixel_color /= self.rays_per_pixel as u32;             
+                pixel_color /= self.rays_per_pixel;             
                 let mut frame: MutexGuard<Vector2D<Color>> = frame.lock().unwrap();             
                 frame.set(x, y, pixel_color);
             });

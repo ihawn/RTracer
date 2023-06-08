@@ -56,7 +56,7 @@ impl Ray {
         let projection_point = camera.blur_strength *
             Vector3::random_perturb(Vector2::new(camera.width as f64, camera.height as f64)) + 
             Vector3::new(
-                camera.fov * (camera.width as f64) / camera.projection_distance,
+                (camera.width as f64) / camera.fov,
                 y as f64 - (camera.width as f64)/2.0, 
                 (camera.height as f64)/2.0 - x as f64
             ).normalize().rot(camera.rotation);
