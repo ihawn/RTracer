@@ -4,6 +4,7 @@ use rand::rngs::StdRng;
 use crate::datatypes::color::Color;
 use crate::datatypes::vector2::Vector2;
 use std::ops::MulAssign;
+use packed_simd::f64x4;
 
 #[derive(Copy, Clone)]
 pub struct Vector3 {
@@ -39,6 +40,27 @@ impl Vector3 {
             y: cross_y,
             z: cross_z,
         }
+    }
+
+    pub fn magnitude(&self) -> f64 {
+        let simd_self = f64x4::from_slice_unaligned(&[self.x, self.y, self.z, 0.0]);
+        let squared_sum = simd_self * simd_self;
+        let reduced_sum = squared_sum.extract(0) + squared_sum.extract(1) + squared_sum.extract(2);
+        let magnitude = reduced_sum.sqrt();
+
+        magnitude
+    }
+
+    pub fn normalize(&self) -> Vector3 {
+        let simd_self = f64x4::from_slice_unaligned(&[self.x, self.y, self.z, 0.0]);
+        let squared_sum = simd_self * simd_self;
+        let reduced_sum = squared_sum.extract(0) + squared_sum.extract(1) + squared_sum.extract(2);
+        let magnitude = reduced_sum.sqrt();
+
+        let simd_magnitude = f64x4::splat(magnitude);
+        let simd_normalized = simd_self / simd_magnitude;
+
+        Vector3::new(simd_normalized.extract(0), simd_normalized.extract(1), simd_normalized.extract(2))
     }
 
     pub fn self_dot(self) -> f64 {
@@ -149,26 +171,8 @@ impl Vector3 {
         }
     }
 
-    pub fn normalize(self) -> Vector3 {
-        let magnitude: f64 = self.magnitude();
-        
-        if magnitude != 0.0 {
-            Vector3::new(
-                self.x / magnitude,
-                self.y / magnitude,
-                self.z / magnitude
-            )
-        } else {
-            self
-        }
-    }
-
     pub fn lerp(v1: Vector3, v2: Vector3, t: f64) -> Vector3 {
         (1.0 - t)*v1 + t*v2
-    }
-
-    pub fn magnitude(self) -> f64 {
-        self.square().component_add().sqrt()
     }
 }
 
@@ -176,7 +180,9 @@ impl std::ops::Add<Vector3> for Vector3 {
     type Output = Vector3;
 
     fn add(self, other: Vector3) -> Vector3 {
-        Vector3::new(self.x + other.x, self.y + other.y, self.z + other.z)
+        let res = f64x4::from_slice_unaligned(&[self.x, self.y, self.z, 0.0]) + 
+            f64x4::from_slice_unaligned(&[other.x, other.y, other.z, 0.0]);
+        Vector3::new(res.extract(0), res.extract(1), res.extract(2))
     }
 }
 
@@ -184,15 +190,18 @@ impl std::ops::Sub<Vector3> for Vector3 {
     type Output = Vector3;
 
     fn sub(self, other: Vector3) -> Vector3 {
-        Vector3::new(self.x - other.x, self.y - other.y, self.z - other.z)
+        let res = f64x4::from_slice_unaligned(&[self.x, self.y, self.z, 0.0]) - 
+            f64x4::from_slice_unaligned(&[other.x, other.y, other.z, 0.0]);
+        Vector3::new(res.extract(0), res.extract(1), res.extract(2))
     }
 }
 
 impl std::ops::Mul<Vector3> for Vector3 {
     type Output = f64;
-
     fn mul(self, other: Vector3) -> f64 {
-        self.x * other.x + self.y * other.y + self.z * other.z
+        let res = f64x4::from_slice_unaligned(&[self.x, self.y, self.z, 0.0]) * 
+            f64x4::from_slice_unaligned(&[other.x, other.y, other.z, 0.0]);
+        res.extract(0) + res.extract(1) + res.extract(2)
     }
 }
 
@@ -200,7 +209,9 @@ impl std::ops::Mul<Vector3> for f64 {
     type Output = Vector3;
 
     fn mul(self, other: Vector3) -> Vector3 {
-        Vector3::new(self * other.x, self * other.y, self * other.z)
+        let res = f64x4::from_slice_unaligned(&[self, self, self, 0.0]) * 
+            f64x4::from_slice_unaligned(&[other.x, other.y, other.z, 0.0]);
+        Vector3::new(res.extract(0), res.extract(1), res.extract(2))
     }
 }
 
