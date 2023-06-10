@@ -1,8 +1,9 @@
 use crate::spacial::mesh::Mesh;
 use crate::datatypes::vector3::Vector3;
 use std::cmp::Ordering;
+use rand::Rng;
 
-use super::mesh::PrimitiveMeshType;
+use super::mesh::{PrimitiveMeshType, self};
 
 pub struct BVH {
     pub bvh_obj_1: Option<Box<BVH>>,
@@ -19,61 +20,84 @@ impl BVH {
         for m in meshes {
             if m.mesh_type == PrimitiveMeshType::Triangle { tris.push(*m) }
         }
-        Self::construct_recursive(&tris)
+        Self::construct_recursive(&tris, 0, tris.len())
     }
 
-    fn construct_recursive(meshes: &Vec<Mesh>) -> BVH {
-        let num_meshes = meshes.len();
-        if num_meshes == 1 {
-            let mesh = meshes.into_iter().next().unwrap();
-            let bb = mesh.bounding_box;
-            BVH {
+    fn construct_recursive(meshes: &Vec<Mesh>, start: usize, end: usize) -> BVH {
+        let object_span = end - start;
+        if object_span == 1 {
+            let bb = meshes[start].bounding_box;
+            return BVH {
                 bvh_obj_1: None,
                 bvh_obj_2: None,
-                mesh: *mesh,
+                mesh: meshes[start].clone(),
                 bb_corner_1: bb.0,
                 bb_corner_2: bb.1,
                 is_leaf: true,
+            };
+        } else if object_span == 2 {
+            if Self::box_compare(&meshes[start], &meshes[start + 1], 0) == Ordering::Less {
+                let bv1 = Self::construct_recursive(meshes, start, start + 1);
+                let bv2 = Self::construct_recursive(meshes, start + 1, end);
+                let bounding_box = Self::merge_bounding_boxes(
+                    (bv1.bb_corner_1, bv1.bb_corner_2),
+                    (bv2.bb_corner_1, bv2.bb_corner_2),
+                );
+                return BVH {
+                    bvh_obj_1: Some(Box::new(bv1)),
+                    bvh_obj_2: Some(Box::new(bv2)),
+                    mesh: Mesh::empty(),
+                    bb_corner_1: bounding_box.0,
+                    bb_corner_2: bounding_box.1,
+                    is_leaf: false,
+                };
+            } else {
+                let bv1 = Self::construct_recursive(meshes, start + 1, end);
+                let bv2 = Self::construct_recursive(meshes, start, start + 1);
+                let bounding_box = Self::merge_bounding_boxes(
+                    (bv1.bb_corner_1, bv1.bb_corner_2),
+                    (bv2.bb_corner_1, bv2.bb_corner_2),
+                );
+                return BVH {
+                    bvh_obj_1: Some(Box::new(bv1)),
+                    bvh_obj_2: Some(Box::new(bv2)),
+                    mesh: Mesh::empty(),
+                    bb_corner_1: bounding_box.0,
+                    bb_corner_2: bounding_box.1,
+                    is_leaf: false,
+                };
             }
-        } else {
-            let mut sorted_meshes = meshes.clone();
-            sorted_meshes.sort_by(|a, b| {
-                let a_center = a.bounding_box_center;
-                let b_center = b.bounding_box_center;
-            
-                match a_center.x.partial_cmp(&b_center.x) {
-                    Some(Ordering::Equal) => {
-                        match a_center.y.partial_cmp(&b_center.y) {
-                            Some(Ordering::Equal) => {
-                                a_center.z.partial_cmp(&b_center.z).unwrap_or(Ordering::Equal)
-                            }
-                            other => other.unwrap(),
-                        }
-                    }
-                    other => other.unwrap(),
-                }
-            });
+        }
+    
+        let axis = rand::thread_rng().gen_range(0..=2);
+        let mut sub_meshes = meshes.clone();
+        sub_meshes[start..end].sort_by(|a, b| Self::box_compare(a, b, axis));
+    
+        let mid = start + object_span / 2;
+        let bvh_obj_1 = Self::construct_recursive(&sub_meshes, start, mid);
+        let bvh_obj_2 = Self::construct_recursive(&sub_meshes, mid, end);
+        let bounding_box = Self::merge_bounding_boxes(
+            (bvh_obj_1.bb_corner_1, bvh_obj_1.bb_corner_2),
+            (bvh_obj_2.bb_corner_1, bvh_obj_2.bb_corner_2),
+        );
+    
+        BVH {
+            bvh_obj_1: Some(Box::new(bvh_obj_1)),
+            bvh_obj_2: Some(Box::new(bvh_obj_2)),
+            mesh: Mesh::empty(),
+            bb_corner_1: bounding_box.0,
+            bb_corner_2: bounding_box.1,
+            is_leaf: false,
+        }
+    }
+    
 
-            let mid = num_meshes / 2;
-            let (meshes_1, meshes_2) = sorted_meshes.split_at(mid);
-
-            let m1 = meshes_1.to_vec();
-            let m2 = meshes_2.to_vec();
-            let bvh_obj_1 = Self::construct_recursive(&m1);
-            let bvh_obj_2 = Self::construct_recursive(&m2);
-            let bounding_box = Self::merge_bounding_boxes(
-                (bvh_obj_1.bb_corner_1, bvh_obj_1.bb_corner_2),
-                (bvh_obj_2.bb_corner_1, bvh_obj_2.bb_corner_2),
-            );
-
-            BVH {
-                bvh_obj_1: Some(Box::new(bvh_obj_1)),
-                bvh_obj_2: Some(Box::new(bvh_obj_2)),
-                mesh: Mesh::empty(),
-                bb_corner_1: bounding_box.0,
-                bb_corner_2: bounding_box.1,
-                is_leaf: false,
-            }
+    fn box_compare(a: &Mesh, b: &Mesh, axis: usize) -> Ordering {
+        match axis {
+            0 => a.bounding_box_center.x.partial_cmp(&b.bounding_box_center.x).unwrap_or(Ordering::Equal),
+            1 => a.bounding_box_center.y.partial_cmp(&b.bounding_box_center.y).unwrap_or(Ordering::Equal),
+            2 => a.bounding_box_center.z.partial_cmp(&b.bounding_box_center.z).unwrap_or(Ordering::Equal),
+            _ => panic!("Invalid axis value"),
         }
     }
 
