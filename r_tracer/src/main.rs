@@ -33,7 +33,6 @@ mod spacial {
     pub mod bvh;
 }
 
-
 fn main() {
 
     /*let red_sphere = Mesh::new_sphere(
@@ -153,15 +152,15 @@ fn main() {
 
 
 
-    let ceiling = load_model("C:/Users/Isaac/Desktop/models/ceil.stl", white);
-    let floor = load_model("C:/Users/Isaac/Desktop/models/floor.stl", green);
-    let side1 = load_model("C:/Users/Isaac/Desktop/models/side1.stl", mirror_rough);
-    let side2 = load_model("C:/Users/Isaac/Desktop/models/side2.stl", blue);
-    let side3 = load_model("C:/Users/Isaac/Desktop/models/side3.stl", white);
-    let side4 = load_model("C:/Users/Isaac/Desktop/models/side4.stl", red);
-    let top_light = load_model("C:/Users/Isaac/Desktop/models/top_light.stl", emiss_mat_1);
-    let suzanne = load_model("C:/Users/Isaac/Desktop/models/suzanne.stl", glossy_white4);
-    let ico_sphere = load_model("C:/Users/Isaac/Desktop/models/ico.stl", mirror);
+    let ceiling = load_model("../Models/ceil.stl", white);
+    let floor = load_model("../Models/floor.stl", green);
+    let side1 = load_model("../Models/side1.stl", mirror_rough);
+    let side2 = load_model("../Models/side2.stl", blue);
+    let side3 = load_model("../Models/side3.stl", white);
+    let side4 = load_model("../Models/side4.stl", red);
+    let top_light = load_model("../Models/top_light.stl", emiss_mat_1);
+    let suzanne = load_model("../Models/suzanne.stl", glossy_white4);
+    let ico_sphere = load_model("../Models/ico.stl", mirror);
 
     let sphere1 = Mesh::new_sphere(10.0, -75.0, -75.0, 20.0, blue2);
     let sphere2 = Mesh::new_sphere(10.0, -25.0, -75.0, 20.0, green2);
@@ -199,9 +198,9 @@ fn main() {
     meshes.extend(side3);
     meshes.extend(side4);
     meshes.extend(top_light);
-    //meshes.extend(suzanne);
+    meshes.extend(suzanne);
     //meshes.extend(ico_sphere);
-    meshes.push(sphere1);
+    /*meshes.push(sphere1);
     meshes.push(sphere2);
     meshes.push(sphere3);
     meshes.push(sphere4);
@@ -216,7 +215,7 @@ fn main() {
     meshes.push(sphere13);
     meshes.push(sphere14);
     meshes.push(sphere15);
-    meshes.push(sphere16);
+    meshes.push(sphere16);*/
 
     /*meshes.push(sphere17);
     meshes.push(sphere18);
@@ -226,23 +225,23 @@ fn main() {
 
     //meshes.push(sphere);
 
-    let size_x: usize = 1800;
-    let size_y: usize = 1200;
+    let size_x: usize = 600;
+    let size_y: usize = 400;
 
     let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
     let camera: Camera = Camera::new(
-        Vector3::new(-200.0, 0.0, 75.0),
-        Vector3::new(0.0, 17.5, 0.0),
+        Vector3::new(-200.0, 0.0, 55.0),
+        Vector3::new(0.0, 28.0, 0.0),
         scene, 2.2, 
         size_x, size_y,
-        15, 5, 0.3, 
-        0.0, 180.0, 1.3
+        3, 2, 0.3, 
+        5.0, 180.0, 1.3
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
 
     let start_time = Instant::now();
-    frame_handler = camera.render_scene(frame_handler, 200000);
+    frame_handler = camera.render_scene(frame_handler, 50);
     let elapsed_time = start_time.elapsed();
 
     let hours = elapsed_time.as_secs() / 3600;
