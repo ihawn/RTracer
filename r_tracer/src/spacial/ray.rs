@@ -35,24 +35,21 @@ impl Ray {
     }
 
     pub fn bb_intersects(&self, bb_corner_1: Vector3, bb_corner_2: Vector3) -> bool {
-        let inv_direction = Vector3::new(1.0 / self.direction.x, 1.0 / self.direction.y, 1.0 / self.direction.z);
-        let t1 = (bb_corner_1.x - self.origin.x) * inv_direction.x;
-        let t2 = (bb_corner_2.x - self.origin.x) * inv_direction.x;
-        let t3 = (bb_corner_1.y - self.origin.y) * inv_direction.y;
-        let t4 = (bb_corner_2.y - self.origin.y) * inv_direction.y;
-        let t5 = (bb_corner_1.z - self.origin.z) * inv_direction.z;
-        let t6 = (bb_corner_2.z - self.origin.z) * inv_direction.z;
-
-        let tmin = t1.min(t2).max(t3.min(t4)).max(t5.min(t6));
-        let tmax = t1.max(t2).min(t3.max(t4)).min(t5.max(t6));
-
-        return tmax >= tmin;
+        let mut t_min: f64 = 0.0;
+        let mut t_max: f64 = f64::MAX;
+        for a in 0..3 {
+            let inverse_dir: f64 = 1.0 / self.direction[a];
+            let mut t0: f64 = (bb_corner_1[a] - self.origin[a]) * inverse_dir;
+            let mut t1: f64 = (bb_corner_2[a] - self.origin[a]) * inverse_dir;
+            if inverse_dir < 0.0 { (t0, t1) = (t1, t0) }
+            if t0 > t_min { t_min = t0 }
+            if t1 < t_max { t_max = t1 }
+            if t_max <= t_min { return false }
+        }
+        true
     }
 
-    pub fn cast_ray(camera: &Camera, mut pixel_projection: Vector3, 
-        mut cached_first_hit: HitPoint, bvh: &BVH, sphere_objects: &Vec<Mesh>,
-        x: usize, y: usize) -> Color {
-
+    pub fn cast_ray(camera: &Camera, bvh: &BVH, sphere_objects: &Vec<Mesh>, x: usize, y: usize) -> Color {
         let projection_point = camera.blur_strength *
             Vector3::random_perturb(Vector2::new(camera.width as f64, camera.height as f64)) + 
             Vector3::new(
