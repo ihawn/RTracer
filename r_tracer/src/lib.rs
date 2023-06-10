@@ -84,10 +84,10 @@ pub fn render_suzanne(n: u64) {
         Vector3::new(0.0, 28.0, 0.0),
         scene, 2.2, 
         size_x, size_y,
-        5, 4, 0.3, 
-        10.0, 180.0, 1.3
+        3, 2, 0.3, 
+        5.0, 180.0, 1.3
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 1);
+    frame_handler = camera.render_scene(frame_handler, 5);
 }
