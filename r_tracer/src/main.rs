@@ -241,7 +241,7 @@ fn main() {
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
 
     let start_time = Instant::now();
-    frame_handler = camera.render_scene(frame_handler, 200000);
+    frame_handler = camera.render_scene(frame_handler, 50);
     let elapsed_time = start_time.elapsed();
 
     let hours = elapsed_time.as_secs() / 3600;
