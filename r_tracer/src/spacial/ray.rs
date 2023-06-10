@@ -5,7 +5,7 @@ use crate::datatypes::color::Color;
 use crate::datatypes::hit_point::{HitPoint, self};
 use crate::spacial::mesh::Mesh;
 use crate::spacial::bvh::BVH;
-use crate::datatypes::material::Material;
+use crate::datatypes::material::{Material, self};
 use rand::Rng;
 
 
@@ -32,6 +32,11 @@ impl Ray {
 
     pub fn reflect(self, normal: Vector3) -> Vector3 {
         (self.direction - 2.0*normal*self.direction*normal).normalize()
+    }
+
+    pub fn refract(self, normal: Vector3, eta_ratio: f64, cos_theta: f64) -> Vector3 {
+        let perpendicular = eta_ratio*(self.direction.normalize() + cos_theta*normal);
+        perpendicular - (1.0 - perpendicular.magnitude_squared()).abs().sqrt() * normal
     }
 
     pub fn bb_intersects(&self, bb_corner_1: Vector3, bb_corner_2: Vector3) -> bool {
@@ -74,28 +79,28 @@ impl Ray {
             if !hit_point.is_empty {
 
                 let material: Material = hit_point.object.material;
+                let random_val: f64 = rand::thread_rng().gen_range(0.0..1.0);
 
                 ray.origin = hit_point.point;
-                let diffuse_direction = Vector3::random_hemisphere_normal(hit_point.normal);
-                let specular_direction = ray.reflect(hit_point.normal);
-                let is_specular_bounce = ((material.specular >= rand::thread_rng().gen_range(0.0..1.0)) as u8) as f64;
-                ray.direction = Vector3::lerp(
-                    diffuse_direction, specular_direction, material.smoothness * is_specular_bounce
-                );
+                ray.direction = ray.ray_redirect(hit_point, random_val);
 
-                let emitted_light: Color = material.emission_color;
-                let light_strength: f64 = hit_point.normal * ray.direction;
-                incoming_light = emitted_light * ray_color + incoming_light;
+                if material.is_dielectric {
+                    ray_color = ray_color * material.color;
+                } else {
+                    let emitted_light: Color = material.emission_color;
+                    let light_strength: f64 = hit_point.normal * ray.direction;
+                    incoming_light = emitted_light * ray_color + incoming_light;
 
-                if i > 3 && incoming_light.to_vector3().magnitude() < 0.015 {
-                    break;
+                    if i > 3 && incoming_light.to_vector3().magnitude() < 0.015 {
+                        break;
+                    }
+                    
+                    ray_color = ray_color * Color::lerp(
+                        material.color * light_strength * camera.exposure, 
+                        material.specular_color * light_strength * camera.exposure, 
+                        ((material.specular >= random_val) as u8) as f64
+                    );
                 }
-                
-                ray_color = ray_color * Color::lerp(
-                    material.color * light_strength * camera.exposure, 
-                    material.specular_color * light_strength * camera.exposure, 
-                    is_specular_bounce
-                );
 
             } else {
                 incoming_light = camera.scene.env_color * ray_color + incoming_light;
@@ -104,5 +109,36 @@ impl Ray {
         }
 
         incoming_light
+    }
+
+    fn ray_redirect(mut self: Ray, hit: HitPoint, random_val: f64) -> Vector3 {
+        let mat: Material = hit.object.material;
+        if mat.is_dielectric {
+            let mut ior = mat.index_of_refraction;
+            let dir = self.direction.normalize();
+            if hit.is_front_face { 
+                ior = 1.0/ior;
+            } 
+
+            let cos_theta: f64 = f64::min(-1.0*dir*hit.normal, 1.0);
+            let sin_theta: f64 = (1.0 - cos_theta*cos_theta).sqrt();
+
+            if ior*sin_theta > 1.0 || Self::get_reflectance(cos_theta, ior) > random_val {
+                return self.reflect(hit.normal)
+            } else {
+                return self.refract(hit.normal, ior, cos_theta)
+            }
+        } else {
+            let diffuse_direction = Vector3::random_hemisphere_normal(hit.normal);
+            let specular_direction = self.reflect(hit.normal);
+            let is_specular_bounce = ((mat.specular >= random_val) as u8) as f64;
+            return Vector3::lerp(diffuse_direction, specular_direction, mat.smoothness * is_specular_bounce);
+        }
+    }
+
+    fn get_reflectance(cosine: f64, ior: f64) -> f64 {
+        let mut r0: f64 = (1.0 - ior) / (1.0 + ior);
+        r0 *= r0;
+        r0 + (1.0 - r0) * (1.0 - cosine).powf(5.0)
     }
 }

@@ -8,27 +8,34 @@ pub struct HitPoint {
     pub hitting_ray: Ray,
     pub normal: Vector3,
     pub object: Mesh,
-    pub is_empty: bool
+    pub is_empty: bool,
+    pub is_front_face: bool
 }
 
 impl HitPoint {
     pub fn new_from_sphere(point: Vector3, ray: Ray, object: Mesh) -> HitPoint {
+        let outward_normal = (point - object.center).normalize();
+        let is_front = ray.direction * outward_normal < 0.0;
         HitPoint {
             point: point,
             hitting_ray: ray,
-            normal: (point - object.center).normalize(),
+            normal: if is_front { outward_normal } else { -1.0 * outward_normal },
             object: object,
-            is_empty: false
+            is_empty: false,
+            is_front_face: is_front
         }
     }
 
     pub fn new_from_tri(point: Vector3, ray: &Ray, object: &Mesh) -> HitPoint {
+        let outward_normal = object.normal.normalize();
+        let is_front = ray.direction * outward_normal < 0.0;
         HitPoint {
             point: point,
             hitting_ray: *ray,
-            normal: object.normal,
+            normal: if is_front { outward_normal } else { -1.0 * outward_normal },
             object: *object,
-            is_empty: false
+            is_empty: false,
+            is_front_face: is_front
         }
     }
 
@@ -38,7 +45,8 @@ impl HitPoint {
             hitting_ray: Ray::empty(),
             normal: Vector3::zero(),
             object: Mesh::empty(),
-            is_empty: true
+            is_empty: true,
+            is_front_face: false
         }
     }
 

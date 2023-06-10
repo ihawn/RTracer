@@ -149,8 +149,12 @@ impl Vector3 {
         (1.0 - t)*v1 + t*v2
     }
 
+    pub fn magnitude_squared(self) -> f64 {
+        self.square().component_add()
+    }
+
     pub fn magnitude(self) -> f64 {
-        self.square().component_add().sqrt()
+        self.magnitude_squared().sqrt()
     }
 }
 

@@ -166,7 +166,7 @@ impl Mesh {
             let hp1 = HitPoint::new_from_sphere(pt1, *ray, *sphere);
             let hp2 = HitPoint::new_from_sphere(pt2, *ray, *sphere);
 
-            if hp1.normal*ray.direction < 0.0 {
+            if hp1.normal*ray.direction > 0.0 {
                 existing_hitpoints.push(hp1);
             } else {
                 existing_hitpoints.push(hp2);

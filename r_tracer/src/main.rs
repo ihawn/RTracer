@@ -74,6 +74,9 @@ fn main() {
     let blue = Material::new(Color::new(0.3, 0.3, 1.0), Color::black(), 
         Color::white(), 0.0, 0.9, 0.15
     );
+    let yellow = Material::new(Color::new(1.0, 1.0, 0.3), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.15
+    );
     let white = Material::new(Color::white(), Color::black(), 
         Color::white(), 0.0, 1.0, 0.0
     );
@@ -150,16 +153,18 @@ fn main() {
         Color::white(), 5.0, 0.0, 0.0
     );
 
+    let glass = Material::new_dieletric(Color::white(), 1.0, 1.5);
+
 
 
     let ceiling = load_model("../Models/ceil.stl", white);
     let floor = load_model("../Models/floor.stl", green);
-    let side1 = load_model("../Models/side1.stl", mirror_rough);
+    let side1 = load_model("../Models/side1.stl", yellow);//mirror_rough);
     let side2 = load_model("../Models/side2.stl", blue);
     let side3 = load_model("../Models/side3.stl", white);
     let side4 = load_model("../Models/side4.stl", red);
     let top_light = load_model("../Models/top_light.stl", emiss_mat_1);
-    let suzanne = load_model("../Models/suzanne.stl", glossy_white4);
+    let suzanne = load_model("../Models/suzanne.stl", glass);//glossy_white4);
     let ico_sphere = load_model("../Models/ico.stl", mirror);
 
     let sphere1 = Mesh::new_sphere(10.0, -75.0, -75.0, 20.0, blue2);
@@ -174,7 +179,7 @@ fn main() {
 
     let sphere9 = Mesh::new_sphere(10.0, -75.0, 25.0, 20.0, mirror4);
     let sphere10 = Mesh::new_sphere(10.0, -25.0, 25.0, 20.0, mirror3);
-    let sphere11 = Mesh::new_sphere(10.0, 25.0, 25.0, 20.0, mirror2);
+    let sphere11 = Mesh::new_sphere(10.0, 25.0, 25.0, 20.0, glass);
     let sphere12 = Mesh::new_sphere(10.0, 75.0, 25.0, 20.0, mirror1);
 
     let sphere13 = Mesh::new_sphere(10.0, -75.0, 75.0, 20.0, blue1);
@@ -182,13 +187,13 @@ fn main() {
     let sphere15 = Mesh::new_sphere(10.0, 25.0, 75.0, 20.0, yellow1);
     let sphere16 = Mesh::new_sphere(10.0, 75.0, 75.0, 20.0, red1);
 
-    let sphere = Mesh::new_sphere(0.0, 0.0, 0.0, 60.0, mirror);
+    let sphere = Mesh::new_sphere(0.0, 0.0, 0.0, 60.0, glass);
 
 
-    let sphere17 = Mesh::new_sphere(75.0, 0.0, 0.0, 20.0, mirror);
-    let sphere18 = Mesh::new_sphere(25.0, 0.0, 0.0, 20.0, mirror);
-    let sphere19 = Mesh::new_sphere(-25.0, 0.0, 0.0, 20.0, mirror);
-    let sphere20 = Mesh::new_sphere(-75.0, 0.0, 0.0, 20.0, mirror);
+    let sphere17 = Mesh::new_sphere(75.0, 0.0, 0.0, 25.0, glass);
+    let sphere18 = Mesh::new_sphere(25.0, 0.0, 0.0, 20.0, red);
+    let sphere19 = Mesh::new_sphere(-25.0, 0.0, 0.0, 15.0, blue);
+    let sphere20 = Mesh::new_sphere(-75.0, 0.0, 0.0, 10.0, green);
 
     let mut meshes: Vec<Mesh> = vec![];
     meshes.extend(ceiling);
@@ -223,7 +228,7 @@ fn main() {
     meshes.push(sphere20);*/
     
 
-    //meshes.push(sphere);
+   // meshes.push(sphere);
 
     let size_x: usize = 600;
     let size_y: usize = 400;
@@ -234,14 +239,14 @@ fn main() {
         Vector3::new(0.0, 28.0, 0.0),
         scene, 2.2, 
         size_x, size_y,
-        3, 2, 0.3, 
-        5.0, 180.0, 1.3
+        8, 3, 0.3, 
+        0.0, 180.0, 1.3
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
 
     let start_time = Instant::now();
-    frame_handler = camera.render_scene(frame_handler, 50);
+    frame_handler = camera.render_scene(frame_handler, 5000);
     let elapsed_time = start_time.elapsed();
 
     let hours = elapsed_time.as_secs() / 3600;
