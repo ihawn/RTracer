@@ -101,21 +101,21 @@ fn main() {
         Color::white(), 0.0, 1.0, 0.1
     );
     let glossy_white4 = Material::new(Color::white(), Color::black(),
-        Color::white(), 0.0, 1.0, 0.045
+        Color::white(), 0.0, 1.0, 0.05
     );
 
 
-    let red1 = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.035
+    let red1 = Material::new(Color::new(0.6, 0.3, 0.3), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.07
     );
     let yellow1 = Material::new(Color::new(1.0, 1.0, 0.3), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.035
+        Color::white(), 0.0, 0.9, 0.07
     );
-    let green1 = Material::new(Color::new(0.3, 1.0, 0.3), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.035
+    let green1 = Material::new(Color::new(0.3, 0.6, 0.3), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.07
     );
-    let blue1 = Material::new(Color::new(0.3, 0.3, 1.0), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.035
+    let blue1 = Material::new(Color::new(0.3, 0.3, 0.6), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.07
     );
 
 
@@ -154,18 +154,36 @@ fn main() {
     );
 
     let glass = Material::new_dieletric(Color::white(), 1.0, 1.5);
+    let blue_glass = Material::new_dieletric(Color::new(0.8, 0.8, 1.0), 1.0, 1.5);
 
 
 
     let ceiling = load_model("../Models/ceil.stl", white);
-    let floor = load_model("../Models/floor.stl", green);
-    let side1 = load_model("../Models/side1.stl", yellow);//mirror_rough);
+    let floor = load_model("../Models/floor.stl", glossy_white4);//green);
+    let side1 = load_model("../Models/side1.stl", green);//yellow);//mirror_rough);
     let side2 = load_model("../Models/side2.stl", blue);
     let side3 = load_model("../Models/side3.stl", white);
     let side4 = load_model("../Models/side4.stl", red);
     let top_light = load_model("../Models/top_light.stl", emiss_mat_1);
     let suzanne = load_model("../Models/suzanne.stl", glass);//glossy_white4);
     let ico_sphere = load_model("../Models/ico.stl", mirror);
+
+    let dave1 = load_model("../Models/dave1.stl", blue2);
+    let dave2 = load_model("../Models/dave2.stl", green2);
+    let dave3 = load_model("../Models/dave3.stl", red2);
+    let dave4 = load_model("../Models/dave4.stl", glass);
+    let dave5 = load_model("../Models/dave5.stl", blue);
+    let dave6 = load_model("../Models/dave6.stl", green);
+    let dave7 = load_model("../Models/dave7.stl", red);
+    let dave8 = load_model("../Models/dave8.stl", mirror);
+    let dave9 = load_model("../Models/dave9.stl", red);
+    let dave10 = load_model("../Models/dave10.stl", yellow);
+    let dave11 = load_model("../Models/dave11.stl", mirror);
+    let dave12 = load_model("../Models/dave12.stl", mirror);
+    let dave13 = load_model("../Models/dave13.stl", blue_glass);
+    let dave14 = load_model("../Models/dave14.stl", blue2);
+    let dave_cube = load_model("../Models/dave_cube.stl", emiss_mat_1);
+    let cubes = load_model("../Models/cubes.stl", emiss_mat_1);
 
     let sphere1 = Mesh::new_sphere(10.0, -75.0, -75.0, 20.0, blue2);
     let sphere2 = Mesh::new_sphere(10.0, -25.0, -75.0, 20.0, green2);
@@ -187,7 +205,7 @@ fn main() {
     let sphere15 = Mesh::new_sphere(10.0, 25.0, 75.0, 20.0, yellow1);
     let sphere16 = Mesh::new_sphere(10.0, 75.0, 75.0, 20.0, red1);
 
-    let sphere = Mesh::new_sphere(0.0, 0.0, 0.0, 60.0, glass);
+    let sphere = Mesh::new_sphere(0.0, 0.0, 0.0, 60.0, mirror);
 
 
     let sphere17 = Mesh::new_sphere(75.0, 0.0, 0.0, 25.0, glass);
@@ -203,7 +221,7 @@ fn main() {
     meshes.extend(side3);
     meshes.extend(side4);
     meshes.extend(top_light);
-    meshes.extend(suzanne);
+    //meshes.extend(suzanne);
     //meshes.extend(ico_sphere);
     /*meshes.push(sphere1);
     meshes.push(sphere2);
@@ -228,25 +246,42 @@ fn main() {
     meshes.push(sphere20);*/
     
 
-   // meshes.push(sphere);
+    //meshes.push(sphere);
 
-    let size_x: usize = 600;
-    let size_y: usize = 400;
+    meshes.extend(dave1);
+    meshes.extend(dave2);
+    meshes.extend(dave3);
+    meshes.extend(dave4);
+    meshes.extend(dave5);
+    meshes.extend(dave6);
+    meshes.extend(dave7);
+    meshes.extend(dave8);
+    meshes.extend(dave9);
+    meshes.extend(dave10);
+    //meshes.extend(dave11);
+    meshes.extend(dave12);
+    meshes.extend(dave13);
+    meshes.extend(dave14);
+    meshes.extend(dave_cube);
+    meshes.extend(cubes);
+
+    let size_x: usize = 1800;
+    let size_y: usize = 1200;
 
     let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
     let camera: Camera = Camera::new(
-        Vector3::new(-200.0, 0.0, 55.0),
-        Vector3::new(0.0, 28.0, 0.0),
+        Vector3::new(-200.0, 0.0, -20.0),
+        Vector3::new(0.0, 6.0, 0.0),
         scene, 2.2, 
         size_x, size_y,
-        8, 3, 0.3, 
-        0.0, 180.0, 1.3
+        25, 5, 0.3, 
+        2.5, 210.0, 1.3
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
 
     let start_time = Instant::now();
-    frame_handler = camera.render_scene(frame_handler, 5000);
+    frame_handler = camera.render_scene(frame_handler, 50000);
     let elapsed_time = start_time.elapsed();
 
     let hours = elapsed_time.as_secs() / 3600;

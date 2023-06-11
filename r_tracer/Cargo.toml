@@ -7,10 +7,8 @@ edition = "2021"
 [dependencies]
 minifb = "0.24"
 rand = "0.8.5"
-rand_distr = "0.3.0"
 rayon = "1.7.0"
 pk_stl = "0.3.1"
-packed_simd = "0.3.8"
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
@@ -19,11 +17,3 @@ criterion = { version = "0.5.1", features = ["html_reports"] }
 name = "benches"
 harness = false
 path = "benches/benches.rs"
-
-[dependencies.uuid]
-version = "1.3.3"
-features = [
-    "v4",
-    "fast-rng",
-    "macro-diagnostics",
-]

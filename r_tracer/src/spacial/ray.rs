@@ -12,21 +12,24 @@ use rand::Rng;
 #[derive(Copy, Clone)]
 pub struct Ray {
     pub origin: Vector3,
-    pub direction: Vector3
+    pub direction: Vector3,
+    pub refract_color: Color
 }
 
 impl Ray {
     pub fn new(origin: Vector3, direction: Vector3) -> Ray {
         Ray {
             origin: origin,
-            direction: direction
+            direction: direction,
+            refract_color: Color::black()
         }
     }
     
     pub fn empty() -> Ray {
         Ray {
             origin: Vector3::zero(),
-            direction: Vector3::zero()
+            direction: Vector3::zero(),
+            refract_color: Color::black()
         }
     }
 
@@ -34,7 +37,13 @@ impl Ray {
         (self.direction - 2.0*normal*self.direction*normal).normalize()
     }
 
-    pub fn refract(self, normal: Vector3, eta_ratio: f64, cos_theta: f64) -> Vector3 {
+    pub fn refract(self, normal: Vector3, eta_ratio: f64) -> Vector3 {
+        let cos_theta = f64::min(-1.0*self.direction*normal, 1.0);
+        let perpendicular = eta_ratio*(self.direction.normalize() + cos_theta*normal);
+        perpendicular - (1.0 - perpendicular.magnitude_squared()).abs().sqrt() * normal
+    }
+
+    pub fn refract_precomputed_cos_theta(self, normal: Vector3, eta_ratio: f64, cos_theta: f64) -> Vector3 {
         let perpendicular = eta_ratio*(self.direction.normalize() + cos_theta*normal);
         perpendicular - (1.0 - perpendicular.magnitude_squared()).abs().sqrt() * normal
     }
@@ -54,41 +63,47 @@ impl Ray {
         true
     }
 
-    pub fn cast_ray(camera: &Camera, bvh: &BVH, sphere_objects: &Vec<Mesh>, x: usize, y: usize) -> Color {
+    pub fn cast_ray_from_camera(camera: &Camera, bvh: &BVH, sphere_objects: &Vec<Mesh>, x: usize, y: usize) -> Color {
         let projection_point = camera.blur_strength *
-            Vector3::random_perturb(Vector2::new(camera.width as f64, camera.height as f64)) + 
-            Vector3::new(
-                (camera.width as f64) / camera.fov,
-                y as f64 - (camera.width as f64)/2.0, 
-                (camera.height as f64)/2.0 - x as f64
-            ).normalize().rot(camera.rotation);
+        Vector3::random_perturb(Vector2::new(camera.width as f64, camera.height as f64)) + 
+        Vector3::new(
+            (camera.width as f64) / camera.fov,
+            y as f64 - (camera.width as f64)/2.0, 
+            (camera.height as f64)/2.0 - x as f64
+        ).normalize().rot(camera.rotation);
 
         let focal_point = camera.position + camera.focal_distance * projection_point.normalize();
         let ray_origin = camera.position + camera.dof_strength * Vector3::random_perturb(Vector2::new(1.0, 1.0));
         let ray_direction = (focal_point - ray_origin).normalize();
 
-        let mut ray: Ray = Ray::new(ray_origin, ray_direction);
+        Ray::new(ray_origin, ray_direction)
+            .cast_ray(bvh, sphere_objects, camera.max_bounces, camera.exposure, camera.scene.env_color)
+    }
+
+    pub fn cast_ray(mut self, bvh: &BVH, sphere_objects: &Vec<Mesh>, 
+        max_bounces: u32, exposure: f64, env_color: Color) -> Color {
+
         let mut hit_point: HitPoint = HitPoint::empty();
 
         let mut incoming_light: Color = Color::black();
         let mut ray_color: Color = Color::white();
 
-        for i in 0..camera.max_bounces + 1 {
-            hit_point = Mesh::ray_collision(ray, bvh, sphere_objects);
+        for i in 0..max_bounces + 1 {
+            hit_point = Mesh::ray_collision(self, bvh, sphere_objects);
 
             if !hit_point.is_empty {
 
                 let material: Material = hit_point.object.material;
                 let random_val: f64 = rand::thread_rng().gen_range(0.0..1.0);
 
-                ray.origin = hit_point.point;
-                ray.direction = ray.ray_redirect(hit_point, random_val);
+                self.origin = hit_point.point;
+                self.direction = self.ray_redirect(hit_point, random_val);
 
                 if material.is_dielectric {
                     ray_color = ray_color * material.color;
                 } else {
                     let emitted_light: Color = material.emission_color;
-                    let light_strength: f64 = hit_point.normal * ray.direction;
+                    let light_strength: f64 = hit_point.normal * self.direction;
                     incoming_light = emitted_light * ray_color + incoming_light;
 
                     if i > 3 && incoming_light.to_vector3().magnitude() < 0.015 {
@@ -96,14 +111,14 @@ impl Ray {
                     }
                     
                     ray_color = ray_color * Color::lerp(
-                        material.color * light_strength * camera.exposure, 
-                        material.specular_color * light_strength * camera.exposure, 
+                        material.color * light_strength * exposure, 
+                        material.specular_color * light_strength * exposure, 
                         ((material.specular >= random_val) as u8) as f64
                     );
                 }
 
             } else {
-                incoming_light = camera.scene.env_color * ray_color + incoming_light;
+                incoming_light = env_color * ray_color + incoming_light;
                 return incoming_light;
             }
         }
@@ -111,22 +126,19 @@ impl Ray {
         incoming_light
     }
 
-    fn ray_redirect(mut self: Ray, hit: HitPoint, random_val: f64) -> Vector3 {
+    fn ray_redirect(self: Ray, hit: HitPoint, random_val: f64) -> Vector3 {
         let mat: Material = hit.object.material;
         if mat.is_dielectric {
             let mut ior = mat.index_of_refraction;
-            let dir = self.direction.normalize();
-            if hit.is_front_face { 
-                ior = 1.0/ior;
-            } 
+            if hit.is_front_face { ior = 1.0/ior } 
 
-            let cos_theta: f64 = f64::min(-1.0*dir*hit.normal, 1.0);
+            let cos_theta: f64 = f64::min(-1.0*self.direction*hit.normal, 1.0);
             let sin_theta: f64 = (1.0 - cos_theta*cos_theta).sqrt();
 
             if ior*sin_theta > 1.0 || Self::get_reflectance(cos_theta, ior) > random_val {
                 return self.reflect(hit.normal)
             } else {
-                return self.refract(hit.normal, ior, cos_theta)
+                return self.refract_precomputed_cos_theta(hit.normal, ior, cos_theta)
             }
         } else {
             let diffuse_direction = Vector3::random_hemisphere_normal(hit.normal);
