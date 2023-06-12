@@ -34,7 +34,7 @@ mod spacial {
 
 
 pub fn render_suzanne(n: u64) {
-    let red = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
+    /*let red = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
         Color::white(), 0.0, 0.9, 0.15
     );
     let green = Material::new(Color::new(0.3, 1.0, 0.3), Color::black(), 
@@ -89,5 +89,5 @@ pub fn render_suzanne(n: u64) {
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 5);
+    frame_handler = camera.render_scene(frame_handler, 5);*/
 }

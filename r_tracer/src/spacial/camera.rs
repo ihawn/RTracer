@@ -61,7 +61,7 @@ impl Camera {
 
         let mut new_render: Vector2D<Color> = Vector2D::new(self.width, self.height, Color::black());
         let mut spheres: Vec<Mesh> = vec![];
-        for m in &self.scene.meshes {
+        for m in &self.scene.spheres {
             if m.mesh_type == PrimitiveMeshType::Sphere { spheres.push(*m) }
         }
 

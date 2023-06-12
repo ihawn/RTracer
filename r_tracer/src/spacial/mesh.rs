@@ -3,7 +3,19 @@ use crate::datatypes::hit_point::HitPoint;
 use crate::spacial::ray::Ray;
 use crate::spacial::bvh::BVH;
 use crate::datatypes::material::Material;
-use rand::Rng;
+
+
+#[derive(Clone)]
+pub struct MeshObject {
+    pub tris: Vec<Mesh>
+}
+
+impl MeshObject {
+    pub fn new(tris: Vec<Mesh>) -> MeshObject {
+        MeshObject { tris: tris }
+    }
+}
+
 
 #[derive(Copy, Clone)]
 pub struct Mesh {
@@ -15,6 +27,9 @@ pub struct Mesh {
     pub p1: Vector3,
     pub p2: Vector3,
     pub p3: Vector3,
+    pub p1_normal: Vector3,
+    pub p2_normal: Vector3,
+    pub p3_normal: Vector3,
     pub normal: Vector3,
 
     pub bounding_box: (Vector3, Vector3),
@@ -41,6 +56,9 @@ impl Mesh {
             p1: Vector3::zero(),
             p2: Vector3::zero(),
             p3: Vector3::zero(),
+            p1_normal: Vector3::zero(),
+            p2_normal: Vector3::zero(),
+            p3_normal: Vector3::zero(),
             normal: Vector3::zero(),
 
             bounding_box: bb,
@@ -58,6 +76,9 @@ impl Mesh {
             p1: p1,
             p2: p2,
             p3: p3,
+            p1_normal: Vector3::zero(),
+            p2_normal: Vector3::zero(),
+            p3_normal: Vector3::zero(),
             normal: normal,
             material: material,
             is_empty: false,
@@ -79,6 +100,9 @@ impl Mesh {
             p1: Vector3::zero(),
             p2: Vector3::zero(),
             p3: Vector3::zero(),
+            p1_normal: Vector3::zero(),
+            p2_normal: Vector3::zero(),
+            p3_normal: Vector3::zero(),
             normal: Vector3::zero(),
             is_empty: true,
             bounding_box: (Vector3::zero(), Vector3::zero()),

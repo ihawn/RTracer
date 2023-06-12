@@ -6,6 +6,7 @@ use datatypes::color::Color;
 use spacial::mesh::{Mesh, self};
 use spacial::scene::Scene;
 use spacial::camera::Camera;
+use spacial::mesh::MeshObject;
 use utilities::model_loader::{load_model};
 use std::time::{Duration, Instant};
 
@@ -32,6 +33,7 @@ mod spacial {
     pub mod ray;
     pub mod bvh;
 }
+
 
 fn main() {
 
@@ -213,69 +215,33 @@ fn main() {
     let sphere19 = Mesh::new_sphere(-25.0, 0.0, 0.0, 15.0, blue);
     let sphere20 = Mesh::new_sphere(-75.0, 0.0, 0.0, 10.0, green);
 
-    let mut meshes: Vec<Mesh> = vec![];
-    meshes.extend(ceiling);
-    meshes.extend(floor);
-    meshes.extend(side1);
-    meshes.extend(side2);
-    meshes.extend(side3);
-    meshes.extend(side4);
-    meshes.extend(top_light);
-    //meshes.extend(suzanne);
-    //meshes.extend(ico_sphere);
-    /*meshes.push(sphere1);
-    meshes.push(sphere2);
-    meshes.push(sphere3);
-    meshes.push(sphere4);
-    meshes.push(sphere5);
-    meshes.push(sphere6);
-    meshes.push(sphere7);
-    meshes.push(sphere8);
-    meshes.push(sphere9);
-    meshes.push(sphere10);
-    meshes.push(sphere11);
-    meshes.push(sphere12);
-    meshes.push(sphere13);
-    meshes.push(sphere14);
-    meshes.push(sphere15);
-    meshes.push(sphere16);*/
+    let mut spheres: Vec<Mesh> = vec![];
 
-    /*meshes.push(sphere17);
-    meshes.push(sphere18);
-    meshes.push(sphere19);
-    meshes.push(sphere20);*/
-    
 
-    //meshes.push(sphere);
+    let mut meshes: Vec<MeshObject> = vec![];
+    meshes.push(MeshObject::new(ceiling));
+    meshes.push(MeshObject::new(floor));
+    meshes.push(MeshObject::new(side1));
+    meshes.push(MeshObject::new(side2));
+    meshes.push(MeshObject::new(side3));
+    meshes.push(MeshObject::new(side4));
+    meshes.push(MeshObject::new(top_light));
+    meshes.push(MeshObject::new(suzanne));
 
-    meshes.extend(dave1);
-    meshes.extend(dave2);
-    meshes.extend(dave3);
-    meshes.extend(dave4);
-    meshes.extend(dave5);
-    meshes.extend(dave6);
-    meshes.extend(dave7);
-    meshes.extend(dave8);
-    meshes.extend(dave9);
-    meshes.extend(dave10);
-    //meshes.extend(dave11);
-    meshes.extend(dave12);
-    meshes.extend(dave13);
-    meshes.extend(dave14);
-    meshes.extend(dave_cube);
-    meshes.extend(cubes);
+    meshes.push(MeshObject::new(dave1));
 
-    let size_x: usize = 1800;
-    let size_y: usize = 1200;
 
-    let scene: Scene = Scene::new(meshes, Color::white() * 0.3);
+    let size_x: usize = 600;
+    let size_y: usize = 400;
+
+    let scene: Scene = Scene::new(meshes, spheres, Color::white() * 0.3);
     let camera: Camera = Camera::new(
         Vector3::new(-200.0, 0.0, -20.0),
         Vector3::new(0.0, 6.0, 0.0),
         scene, 2.2, 
         size_x, size_y,
-        25, 5, 0.3, 
-        2.5, 210.0, 1.3
+        5, 2, 0.3, 
+        0.0, 210.0, 1.3
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");

@@ -1,4 +1,5 @@
 use crate::spacial::mesh::Mesh;
+use crate::spacial::mesh::MeshObject;
 use crate::datatypes::vector3::Vector3;
 use std::cmp::Ordering;
 use rand::Rng;
@@ -15,10 +16,12 @@ pub struct BVH {
 }
 
 impl BVH {
-    pub fn new(meshes: &Vec<Mesh>) -> BVH {
+    pub fn new(mesh_objects: &Vec<MeshObject>) -> BVH {
         let mut tris: Vec<Mesh> = vec![];
-        for m in meshes {
-            if m.mesh_type == PrimitiveMeshType::Triangle { tris.push(*m) }
+        for mesh in mesh_objects {
+            for m in &mesh.tris {
+                if m.mesh_type == PrimitiveMeshType::Triangle { tris.push(*m) }
+            }
         }
         Self::construct_recursive(&tris, 0, tris.len())
     }

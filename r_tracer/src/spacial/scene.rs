@@ -1,17 +1,21 @@
 use crate::spacial::mesh::Mesh;
+use crate::spacial::mesh::MeshObject;
 use crate::datatypes::color::Color;
+
 
 #[derive(Clone)]
 pub struct Scene {
-    pub meshes: Vec<Mesh>,
+    pub meshes: Vec<MeshObject>,
+    pub spheres: Vec<Mesh>,
     pub env_color: Color,
 }
 
 impl Scene {
-    pub fn new(meshes: Vec<Mesh>, env_color: Color) -> Scene {
+    pub fn new(meshes: Vec<MeshObject>, spheres: Vec<Mesh>, env_color: Color) -> Scene {
         Scene {
             meshes: meshes,
-            env_color,
+            spheres: spheres,
+            env_color: env_color,
         }
     }
 }
