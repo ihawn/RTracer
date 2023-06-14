@@ -12,24 +12,21 @@ use rand::Rng;
 #[derive(Copy, Clone)]
 pub struct Ray {
     pub origin: Vector3,
-    pub direction: Vector3,
-    pub refract_color: Color
+    pub direction: Vector3
 }
 
 impl Ray {
     pub fn new(origin: Vector3, direction: Vector3) -> Ray {
         Ray {
             origin: origin,
-            direction: direction,
-            refract_color: Color::black()
+            direction: direction
         }
     }
     
     pub fn empty() -> Ray {
         Ray {
             origin: Vector3::zero(),
-            direction: Vector3::zero(),
-            refract_color: Color::black()
+            direction: Vector3::zero()
         }
     }
 
