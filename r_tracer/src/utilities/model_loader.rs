@@ -5,6 +5,7 @@ use crate::datatypes::vector3::Vector3;
 use std::fs;
 
 pub fn load_model(file_path: &str, material: Material) -> Vec<Mesh>  {
+    println!("Loading model {}", file_path);
     let content = fs::read(file_path).expect("Failed to read model file");
     let model = parse_stl(content.as_slice()).unwrap();
 
@@ -65,6 +66,7 @@ pub fn load_model(file_path: &str, material: Material) -> Vec<Mesh>  {
         }
     }
 
+    println!("Done");
     model_tris
 }
 

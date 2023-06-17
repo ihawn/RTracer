@@ -7,12 +7,16 @@ use crate::datatypes::material::Material;
 
 #[derive(Clone)]
 pub struct MeshObject {
-    pub tris: Vec<Mesh>
+    pub tris: Vec<Mesh>,
+    pub smooth_shading: bool
 }
 
 impl MeshObject {
-    pub fn new(tris: Vec<Mesh>) -> MeshObject {
-        MeshObject { tris: tris }
+    pub fn new(mut tris: Vec<Mesh>, smooth_shading: bool) -> MeshObject {
+        for i in 0..tris.len() {
+            tris[i].smooth_shading = smooth_shading;
+        }
+        MeshObject { tris: tris, smooth_shading }
     }
 }
 
@@ -31,6 +35,7 @@ pub struct Mesh {
     pub p2_normal: Vector3,
     pub p3_normal: Vector3,
     pub normal: Vector3,
+    pub smooth_shading: bool,
 
     pub bounding_box: (Vector3, Vector3),
     pub bounding_box_center: Vector3,
@@ -60,6 +65,7 @@ impl Mesh {
             p2_normal: Vector3::zero(),
             p3_normal: Vector3::zero(),
             normal: Vector3::zero(),
+            smooth_shading: false,
 
             bounding_box: bb,
             bounding_box_center: Self::get_bounding_box_center(bb)
@@ -84,6 +90,7 @@ impl Mesh {
             normal: normal,
             material: material,
             is_empty: false,
+            smooth_shading: false,
 
             center: Vector3::zero(),
             radius: 0.0,
@@ -106,6 +113,7 @@ impl Mesh {
             p2_normal: Vector3::zero(),
             p3_normal: Vector3::zero(),
             normal: Vector3::zero(),
+            smooth_shading: false,
             is_empty: true,
             bounding_box: (Vector3::zero(), Vector3::zero()),
             bounding_box_center: Vector3::zero()
@@ -239,7 +247,8 @@ impl Mesh {
     
         if t > epsilon {
             let point = ray.origin + t*ray.direction;
-            let normal: Vector3 = triangle.compute_hitpoint_normal(point);
+            let mut normal: Vector3 = triangle.normal;
+            if triangle.smooth_shading { normal = triangle.compute_hitpoint_normal(point); }
             let hitpoint = HitPoint::new_from_tri(
                 point,
                 ray,
@@ -282,13 +291,6 @@ impl Mesh {
         let u = 1.0 - v - w;
 
         Vector3::new(u, v, w)
-
-
-        /*Vector3::new(          
-            1.0 - (dot20 + dot21) / denom,        
-            (dot11 * dot20 - dot01 * dot21) / denom,
-            (dot00 * dot21 - dot01 * dot20) / denom,
-        )*/
     }
 }
 

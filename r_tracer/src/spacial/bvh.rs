@@ -26,8 +26,10 @@ impl BVH {
             }
         }
         let start_time = Instant::now();
+        println!("Building BVH");
         let bvh: BVH = Self::construct_recursive(&tris, 0, tris.len());
         let elapsed_time = start_time.elapsed().as_millis();
+        println!("Done");
         println!("Built BVH in {} seconds", elapsed_time as f64 / 1000.0);
 
         bvh

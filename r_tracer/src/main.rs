@@ -160,8 +160,11 @@ fn main() {
     let blue_glass = Material::new_dieletric(Color::new(0.8, 0.8, 1.0), 1.0, 1.5);
 
 
-    //let fluid = load_model("../Models/fluid.stl", water);
+    let light_ball = load_model("../Models/light_ball.stl", emiss_mat_1);
+    let fluid = load_model("../Models/fluid.stl", water);
     let test_tris = load_model("../Models/test_tris.stl", mirror);
+    let suzanne_noeyes = load_model("../Models/suzanne_noeyes.stl", yellow1);
+    let suzanne_eyes = load_model("../Models/suzanne_eyes.stl", emiss_mat_1);
     let suzanne = load_model("../Models/suzanne.stl", yellow1);
     let ceiling = load_model("../Models/ceil.stl", white);
     let floor = load_model("../Models/floor.stl", glossy_white4);//green);
@@ -221,15 +224,18 @@ fn main() {
 
 
     let mut meshes: Vec<MeshObject> = vec![];
-    meshes.push(MeshObject::new(ceiling));
-    meshes.push(MeshObject::new(floor));
-    meshes.push(MeshObject::new(side1));
-    meshes.push(MeshObject::new(side2));
-    meshes.push(MeshObject::new(side3));
-    meshes.push(MeshObject::new(side4));
-    meshes.push(MeshObject::new(top_light));
-    meshes.push(MeshObject::new(suzanne));
-   // meshes.push(MeshObject::new(fluid));
+    meshes.push(MeshObject::new(ceiling, false));
+    meshes.push(MeshObject::new(floor, false));
+    meshes.push(MeshObject::new(side1, false));
+    meshes.push(MeshObject::new(side2, false));
+    meshes.push(MeshObject::new(side3, false));
+    meshes.push(MeshObject::new(side4, false));
+    meshes.push(MeshObject::new(top_light, false));
+    meshes.push(MeshObject::new(suzanne, true));
+    meshes.push(MeshObject::new(fluid, true));
+    meshes.push(MeshObject::new(light_ball, true));
+    //meshes.push(MeshObject::new(suzanne_eyes));
+    //meshes.push(MeshObject::new(suzanne_noeyes));
 
     //meshes.push(MeshObject::new(dave8));
 
@@ -241,9 +247,9 @@ fn main() {
     let camera: Camera = Camera::new(
         Vector3::new(-200.0, 0.0, -30.0),
         Vector3::new(0.0, 6.0, 0.0),
-        scene, 2.4, 
+        scene, 2.7, 
         size_x, size_y,
-        5, 2, 0.3, 
+        20, 5, 0.3, 
         0.0, 165.0, 1.3
     );
 

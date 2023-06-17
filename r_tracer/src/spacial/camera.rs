@@ -55,9 +55,7 @@ impl Camera {
 
     pub fn render_scene(self, mut handler: FrameHandler, sample_count: u32) -> FrameHandler {
 
-        println!("Building BVH");
         let bvh: BVH = BVH::new(&self.scene.meshes);
-        println!("Done");
 
         let mut new_render: Vector2D<Color> = Vector2D::new(self.width, self.height, Color::black());
         let mut spheres: Vec<Mesh> = vec![];
