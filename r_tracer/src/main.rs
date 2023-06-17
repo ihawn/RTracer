@@ -156,10 +156,13 @@ fn main() {
     );
 
     let glass = Material::new_dieletric(Color::white(), 1.0, 1.5);
+    let water = Material::new_dieletric(Color::white(), 1.0, 1.333);
     let blue_glass = Material::new_dieletric(Color::new(0.8, 0.8, 1.0), 1.0, 1.5);
 
 
-
+    //let fluid = load_model("../Models/fluid.stl", water);
+    let test_tris = load_model("../Models/test_tris.stl", mirror);
+    let suzanne = load_model("../Models/suzanne.stl", yellow1);
     let ceiling = load_model("../Models/ceil.stl", white);
     let floor = load_model("../Models/floor.stl", glossy_white4);//green);
     let side1 = load_model("../Models/side1.stl", green);//yellow);//mirror_rough);
@@ -167,7 +170,6 @@ fn main() {
     let side3 = load_model("../Models/side3.stl", white);
     let side4 = load_model("../Models/side4.stl", red);
     let top_light = load_model("../Models/top_light.stl", emiss_mat_1);
-    let suzanne = load_model("../Models/suzanne.stl", glass);//glossy_white4);
     let ico_sphere = load_model("../Models/ico.stl", mirror);
 
     let dave1 = load_model("../Models/dave1.stl", blue2);
@@ -227,21 +229,22 @@ fn main() {
     meshes.push(MeshObject::new(side4));
     meshes.push(MeshObject::new(top_light));
     meshes.push(MeshObject::new(suzanne));
+   // meshes.push(MeshObject::new(fluid));
 
-    meshes.push(MeshObject::new(dave1));
+    //meshes.push(MeshObject::new(dave8));
 
 
-    let size_x: usize = 600;
-    let size_y: usize = 400;
+    let size_x: usize = 1200;
+    let size_y: usize = 800;
 
     let scene: Scene = Scene::new(meshes, spheres, Color::white() * 0.3);
     let camera: Camera = Camera::new(
-        Vector3::new(-200.0, 0.0, -20.0),
+        Vector3::new(-200.0, 0.0, -30.0),
         Vector3::new(0.0, 6.0, 0.0),
-        scene, 2.2, 
+        scene, 2.4, 
         size_x, size_y,
         5, 2, 0.3, 
-        0.0, 210.0, 1.3
+        0.0, 165.0, 1.3
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");

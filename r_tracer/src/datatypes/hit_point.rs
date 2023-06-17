@@ -26,8 +26,7 @@ impl HitPoint {
         }
     }
 
-    pub fn new_from_tri(point: Vector3, ray: &Ray, object: &Mesh) -> HitPoint {
-        let outward_normal = object.normal.normalize();
+    pub fn new_from_tri(point: Vector3, ray: &Ray, object: &Mesh, outward_normal: Vector3) -> HitPoint {
         let is_front = ray.direction * outward_normal < 0.0;
         HitPoint {
             point: point,

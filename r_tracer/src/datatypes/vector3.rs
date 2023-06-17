@@ -1,5 +1,6 @@
 use crate::datatypes::color::Color;
 use crate::datatypes::vector2::Vector2;
+use std::ops::AddAssign;
 use std::f64::consts::PI;
 use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
@@ -165,6 +166,14 @@ impl std::ops::Add<Vector3> for Vector3 {
     }
 }
 
+impl std::ops::AddAssign<Vector3> for Vector3 {
+    fn add_assign(&mut self, other: Vector3) {
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
+    }
+}
+
 impl std::ops::Sub<Vector3> for Vector3 {
     type Output = Vector3;
 
@@ -186,6 +195,22 @@ impl std::ops::Mul<Vector3> for f64 {
 
     fn mul(self, other: Vector3) -> Vector3 {
         Vector3::new(self * other.x, self * other.y, self * other.z)
+    }
+}
+
+impl std::ops::Mul<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, other: f64) -> Vector3 {
+        Vector3::new(self.x * other, self.y * other, self.z * other)
+    }
+}
+
+impl std::ops::Div<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn div(self, other: f64) -> Vector3 {
+        Vector3::new(self.x / other, self.y / other, self.z / other)
     }
 }
 

@@ -3,6 +3,8 @@ use crate::spacial::mesh::MeshObject;
 use crate::datatypes::vector3::Vector3;
 use std::cmp::Ordering;
 use rand::Rng;
+use rayon::prelude::*;
+use std::time::{Duration, Instant};
 
 use super::mesh::{PrimitiveMeshType, self};
 
@@ -23,7 +25,12 @@ impl BVH {
                 if m.mesh_type == PrimitiveMeshType::Triangle { tris.push(*m) }
             }
         }
-        Self::construct_recursive(&tris, 0, tris.len())
+        let start_time = Instant::now();
+        let bvh: BVH = Self::construct_recursive(&tris, 0, tris.len());
+        let elapsed_time = start_time.elapsed().as_millis();
+        println!("Built BVH in {} seconds", elapsed_time as f64 / 1000.0);
+
+        bvh
     }
 
     fn construct_recursive(meshes: &Vec<Mesh>, start: usize, end: usize) -> BVH {
@@ -40,8 +47,10 @@ impl BVH {
             };
         } else if object_span == 2 {
             if Self::box_compare(&meshes[start], &meshes[start + 1], 0) == Ordering::Less {
-                let bv1 = Self::construct_recursive(meshes, start, start + 1);
-                let bv2 = Self::construct_recursive(meshes, start + 1, end);
+                let (bv1, bv2) = rayon::join(
+                    || Self::construct_recursive(meshes, start, start + 1),
+                    || Self::construct_recursive(meshes, start + 1, end),
+                );
                 let bounding_box = Self::merge_bounding_boxes(
                     (bv1.bb_corner_1, bv1.bb_corner_2),
                     (bv2.bb_corner_1, bv2.bb_corner_2),
@@ -55,8 +64,10 @@ impl BVH {
                     is_leaf: false,
                 };
             } else {
-                let bv1 = Self::construct_recursive(meshes, start + 1, end);
-                let bv2 = Self::construct_recursive(meshes, start, start + 1);
+                let (bv1, bv2) = rayon::join(
+                    || Self::construct_recursive(meshes, start + 1, end),
+                    || Self::construct_recursive(meshes, start, start + 1),
+                );
                 let bounding_box = Self::merge_bounding_boxes(
                     (bv1.bb_corner_1, bv1.bb_corner_2),
                     (bv2.bb_corner_1, bv2.bb_corner_2),
@@ -77,8 +88,10 @@ impl BVH {
         sub_meshes[start..end].sort_by(|a, b| Self::box_compare(a, b, axis));
     
         let mid = start + object_span / 2;
-        let bvh_obj_1 = Self::construct_recursive(&sub_meshes, start, mid);
-        let bvh_obj_2 = Self::construct_recursive(&sub_meshes, mid, end);
+        let (bvh_obj_1, bvh_obj_2) = rayon::join(
+            || Self::construct_recursive(&sub_meshes, start, mid),
+            || Self::construct_recursive(&sub_meshes, mid, end),
+        );
         let bounding_box = Self::merge_bounding_boxes(
             (bvh_obj_1.bb_corner_1, bvh_obj_1.bb_corner_2),
             (bvh_obj_2.bb_corner_1, bvh_obj_2.bb_corner_2),

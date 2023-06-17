@@ -27,6 +27,9 @@ pub struct Mesh {
     pub p1: Vector3,
     pub p2: Vector3,
     pub p3: Vector3,
+    pub p1_normal: Vector3,
+    pub p2_normal: Vector3,
+    pub p3_normal: Vector3,
     pub normal: Vector3,
 
     pub bounding_box: (Vector3, Vector3),
@@ -53,6 +56,9 @@ impl Mesh {
             p1: Vector3::zero(),
             p2: Vector3::zero(),
             p3: Vector3::zero(),
+            p1_normal: Vector3::zero(),
+            p2_normal: Vector3::zero(),
+            p3_normal: Vector3::zero(),
             normal: Vector3::zero(),
 
             bounding_box: bb,
@@ -60,7 +66,9 @@ impl Mesh {
         }
     }
 
-    pub fn new_triangle(p1: Vector3, p2: Vector3, p3: Vector3, normal: Vector3, material: Material) -> Mesh {
+    pub fn new_triangle(p1: Vector3, p2: Vector3, p3: Vector3, 
+        p1_normal: Vector3, p2_normal: Vector3, p3_normal: Vector3,
+        normal: Vector3, material: Material) -> Mesh {
         let bb = Self::get_bounding_box(
             PrimitiveMeshType::Triangle, p1, 
             p2, p3, Vector3::zero(), 0.0
@@ -70,6 +78,9 @@ impl Mesh {
             p1: p1,
             p2: p2,
             p3: p3,
+            p1_normal: p1_normal,
+            p2_normal: p2_normal,
+            p3_normal: p3_normal,
             normal: normal,
             material: material,
             is_empty: false,
@@ -91,6 +102,9 @@ impl Mesh {
             p1: Vector3::zero(),
             p2: Vector3::zero(),
             p3: Vector3::zero(),
+            p1_normal: Vector3::zero(),
+            p2_normal: Vector3::zero(),
+            p3_normal: Vector3::zero(),
             normal: Vector3::zero(),
             is_empty: true,
             bounding_box: (Vector3::zero(), Vector3::zero()),
@@ -225,15 +239,56 @@ impl Mesh {
     
         if t > epsilon {
             let point = ray.origin + t*ray.direction;
+            let normal: Vector3 = triangle.compute_hitpoint_normal(point);
             let hitpoint = HitPoint::new_from_tri(
                 point,
                 ray,
-                &triangle
+                &triangle,
+                normal
             );
             existing_hitpoints.push(hitpoint);
         }
     
         existing_hitpoints
+    }
+
+    pub fn compute_hitpoint_normal(&self, hit_location: Vector3) -> Vector3 {
+        let barycentric_coords = self.compute_barycentric_coords(hit_location);
+
+        let p1_normal_weight = barycentric_coords.x;
+        let p2_normal_weight = barycentric_coords.y;
+        let p3_normal_weight = barycentric_coords.z;
+
+        let interpolated_normal =
+            self.p1_normal * p1_normal_weight + self.p2_normal * p2_normal_weight + self.p3_normal * p3_normal_weight;
+
+        interpolated_normal.normalize()
+    }
+    
+    fn compute_barycentric_coords(&self, point: Vector3) -> Vector3 {
+        let v0 = self.p2 - self.p1;
+        let v1 = self.p3 - self.p1;
+        let v2 = point - self.p1;
+
+        let dot00 = v0*v0;
+        let dot01 = v0*v1;
+        let dot11 = v1*v1;
+        let dot20 = v2*v0;
+        let dot21 = v2*v1;
+
+        let denom: f64 = dot00 * dot11 - dot01 * dot01;
+        let v: f64 = (dot11 * dot20 - dot01 * dot21) / denom;
+        let w: f64 = (dot00 * dot21 - dot01 * dot20) / denom;
+        let u = 1.0 - v - w;
+
+        Vector3::new(u, v, w)
+
+
+        /*Vector3::new(          
+            1.0 - (dot20 + dot21) / denom,        
+            (dot11 * dot20 - dot01 * dot21) / denom,
+            (dot00 * dot21 - dot01 * dot20) / denom,
+        )*/
     }
 }
 
