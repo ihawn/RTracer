@@ -5,22 +5,6 @@ use crate::spacial::bvh::BVH;
 use crate::datatypes::material::Material;
 
 
-#[derive(Clone)]
-pub struct MeshObject {
-    pub tris: Vec<Mesh>,
-    pub smooth_shading: bool
-}
-
-impl MeshObject {
-    pub fn new(mut tris: Vec<Mesh>, smooth_shading: bool) -> MeshObject {
-        for i in 0..tris.len() {
-            tris[i].smooth_shading = smooth_shading;
-        }
-        MeshObject { tris: tris, smooth_shading }
-    }
-}
-
-
 #[derive(Copy, Clone)]
 pub struct Mesh {
     pub mesh_type: PrimitiveMeshType,
@@ -210,7 +194,7 @@ impl Mesh {
         existing_hitpoints
     }
 
-    fn intersect_triangle(ray: &Ray, triangle: &Mesh, mut existing_hitpoints: Vec<HitPoint>) -> Vec<HitPoint> {
+    pub fn intersect_triangle(ray: &Ray, triangle: &Mesh, mut existing_hitpoints: Vec<HitPoint>) -> Vec<HitPoint> {
 
         if triangle.normal*ray.direction > 0.0 {
             return existing_hitpoints

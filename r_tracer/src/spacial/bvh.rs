@@ -1,12 +1,11 @@
 use crate::spacial::mesh::Mesh;
-use crate::spacial::mesh::MeshObject;
+use crate::spacial::mesh_object::MeshObject;
 use crate::datatypes::vector3::Vector3;
 use std::cmp::Ordering;
 use rand::Rng;
-use rayon::prelude::*;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
-use super::mesh::{PrimitiveMeshType, self};
+use super::mesh::PrimitiveMeshType;
 
 pub struct BVH {
     pub bvh_obj_1: Option<Box<BVH>>,

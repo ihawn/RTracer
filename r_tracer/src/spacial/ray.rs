@@ -2,10 +2,10 @@ use crate::datatypes::vector3::Vector3;
 use crate::datatypes::vector2::Vector2;
 use crate::spacial::camera::Camera;
 use crate::datatypes::color::Color;
-use crate::datatypes::hit_point::{HitPoint, self};
+use crate::datatypes::hit_point::HitPoint;
 use crate::spacial::mesh::Mesh;
 use crate::spacial::bvh::BVH;
-use crate::datatypes::material::{Material, self};
+use crate::datatypes::material::Material;
 use rand::Rng;
 
 

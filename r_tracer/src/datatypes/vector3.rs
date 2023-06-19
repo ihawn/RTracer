@@ -1,6 +1,5 @@
 use crate::datatypes::color::Color;
 use crate::datatypes::vector2::Vector2;
-use std::ops::AddAssign;
 use std::f64::consts::PI;
 use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;

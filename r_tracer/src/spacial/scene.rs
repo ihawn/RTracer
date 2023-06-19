@@ -1,5 +1,5 @@
 use crate::spacial::mesh::Mesh;
-use crate::spacial::mesh::MeshObject;
+use crate::spacial::mesh_object::MeshObject;
 use crate::datatypes::color::Color;
 
 

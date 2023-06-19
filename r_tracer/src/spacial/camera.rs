@@ -110,7 +110,7 @@ impl Camera {
         vert_slice.par_iter().for_each(|&x| {
             horz_slice.par_iter().for_each(|&y| {
                 let mut pixel_color: Color = Color::black();
-                for s in 0..self.rays_per_pixel {
+                for _s in 0..self.rays_per_pixel {
                     pixel_color += Ray::cast_ray_from_camera(
                         &self,
                         &bvh, &sphere_objects, x, y

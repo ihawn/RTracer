@@ -1,38 +1,16 @@
 use std::io::{stdin, stdout, Read, Write};
-use crate::datatypes::vector3::Vector3;
-use datatypes::material::Material;
-use utilities::frame_handler::FrameHandler;
-use datatypes::color::Color;
-use spacial::mesh::{Mesh, self};
-use spacial::scene::Scene;
-use spacial::camera::Camera;
-use spacial::mesh::MeshObject;
-use utilities::model_loader::{load_model};
+use r_tracer::datatypes::vector3::Vector3;
+use r_tracer::datatypes::material::Material;
+use r_tracer::utilities::frame_handler::FrameHandler;
+use r_tracer::datatypes::color::Color;
+use r_tracer::spacial::mesh::{Mesh, self};
+use r_tracer::spacial::scene::Scene;
+use r_tracer::spacial::camera::Camera;
+use r_tracer::spacial::mesh_object::MeshObject;
+use r_tracer::utilities::model_loader::{load_model};
 use std::time::{Duration, Instant};
 
 
-mod utilities {
-    pub mod frame_handler;
-    pub mod model_loader;
-}
-
-mod datatypes {
-    pub mod color;
-    pub mod vector2d;
-    pub mod vector3d;
-    pub mod vector2;
-    pub mod vector3;
-    pub mod hit_point;
-    pub mod material;
-}
-
-mod spacial {
-    pub mod camera;
-    pub mod scene;
-    pub mod mesh;
-    pub mod ray;
-    pub mod bvh;
-}
 
 
 fn main() {
@@ -154,6 +132,9 @@ fn main() {
     let emiss_mat_1 = Material::new(Color::black(), Color::white(),
         Color::white(), 5.0, 0.0, 0.0
     );
+    let emiss_mat_2 = Material::new(Color::black(), Color::white(),
+    Color::white(), 0.2, 0.0, 0.0
+);
 
     let glass = Material::new_dieletric(Color::white(), 1.0, 1.5);
     let water = Material::new_dieletric(Color::white(), 1.0, 1.333);
@@ -161,7 +142,7 @@ fn main() {
 
 
     let light_ball = load_model("../Models/light_ball.stl", emiss_mat_1);
-    let fluid = load_model("../Models/fluid.stl", water);
+    //let fluid = load_model("../Models/fluid.stl", water);
     let test_tris = load_model("../Models/test_tris.stl", mirror);
     let suzanne_noeyes = load_model("../Models/suzanne_noeyes.stl", yellow1);
     let suzanne_eyes = load_model("../Models/suzanne_eyes.stl", emiss_mat_1);
@@ -232,7 +213,7 @@ fn main() {
     meshes.push(MeshObject::new(side4, false));
     meshes.push(MeshObject::new(top_light, false));
     meshes.push(MeshObject::new(suzanne, true));
-    meshes.push(MeshObject::new(fluid, true));
+    //meshes.push(MeshObject::new(fluid, true));
     meshes.push(MeshObject::new(light_ball, true));
     //meshes.push(MeshObject::new(suzanne_eyes));
     //meshes.push(MeshObject::new(suzanne_noeyes));
@@ -247,9 +228,9 @@ fn main() {
     let camera: Camera = Camera::new(
         Vector3::new(-200.0, 0.0, -30.0),
         Vector3::new(0.0, 6.0, 0.0),
-        scene, 2.7, 
+        scene, 2.4, 
         size_x, size_y,
-        20, 5, 0.3, 
+        15, 5, 0.3, 
         0.0, 165.0, 1.3
     );
 
