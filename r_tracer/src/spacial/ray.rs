@@ -85,7 +85,7 @@ impl Ray {
         let mut incoming_light: Color = Color::black();
         let mut ray_color: Color = Color::white();
 
-        for i in 0..max_bounces + 1 {
+        for _i in 0..max_bounces + 1 {
             hit_point = Mesh::ray_collision(self, bvh, sphere_objects);
 
             if !hit_point.is_empty {
@@ -96,17 +96,15 @@ impl Ray {
                 self.origin = hit_point.point;
                 self.direction = self.ray_redirect(hit_point, random_val);
 
-                if material.is_dielectric {
+                let emitted_light: Color = material.emission_color;
+                if material.visible {
+                    incoming_light = emitted_light * ray_color + incoming_light;
+                }
+                
+                if material.dielectric > 0.0 {
                     ray_color = ray_color * material.color;
                 } else {
-                    let emitted_light: Color = material.emission_color;
                     let light_strength: f64 = hit_point.normal * self.direction;
-                    incoming_light = emitted_light * ray_color + incoming_light;
-
-                    if i > 3 && incoming_light.to_vector3().magnitude() < 0.015 {
-                        break;
-                    }
-                    
                     ray_color = ray_color * Color::lerp(
                         material.color * light_strength * exposure, 
                         material.specular_color * light_strength * exposure, 
@@ -123,25 +121,32 @@ impl Ray {
         incoming_light
     }
 
-    fn ray_redirect(self: Ray, hit: HitPoint, random_val: f64) -> Vector3 {
+    fn ray_redirect(self: Ray, hit: HitPoint, random_val: f64) -> Vector3 {        
         let mat: Material = hit.object.material;
-        if mat.is_dielectric {
+        let is_specular_bounce = (mat.specular >= random_val) as u8 as f64;
+
+        let diffuse_direction: Vector3 = Vector3::random_hemisphere_normal(hit.normal);
+        let specular_direction: Vector3 = self.reflect(hit.normal);
+        let glossy_direction: Vector3 = Vector3::lerp(diffuse_direction, specular_direction, mat.smoothness * is_specular_bounce);
+
+        if mat.dielectric > 0.0 {
             let mut ior = mat.index_of_refraction;
-            if hit.is_front_face { ior = 1.0/ior } 
-
-            let cos_theta: f64 = f64::min(-1.0*self.direction*hit.normal, 1.0);
-            let sin_theta: f64 = (1.0 - cos_theta*cos_theta).sqrt();
-
-            if ior*sin_theta > 1.0 || Self::get_reflectance(cos_theta, ior) > random_val {
-                return self.reflect(hit.normal)
+            if hit.is_front_face { ior = 1.0 / ior }
+            let random_val_2 = rand::thread_rng().gen_range(0.0..1.0);
+    
+            let cos_theta: f64 = f64::min(-1.0 * self.direction * hit.normal, 1.0);
+            let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
+    
+            if ior * sin_theta > 1.0 || Self::get_reflectance(cos_theta, ior) > random_val_2 {
+                return glossy_direction
             } else {
-                return self.refract_precomputed_cos_theta(hit.normal, ior, cos_theta)
+                let random_val_3 = rand::thread_rng().gen_range(0.0..1.0);
+                let is_dielectric_bounce = (mat.dielectric >= random_val_3) as u8 as f64;
+                let refracted_direction = self.refract_precomputed_cos_theta(hit.normal, ior, cos_theta);  
+                return Vector3::lerp(glossy_direction, refracted_direction, is_dielectric_bounce);
             }
         } else {
-            let diffuse_direction = Vector3::random_hemisphere_normal(hit.normal);
-            let specular_direction = self.reflect(hit.normal);
-            let is_specular_bounce = ((mat.specular >= random_val) as u8) as f64;
-            return Vector3::lerp(diffuse_direction, specular_direction, mat.smoothness * is_specular_bounce);
+            return glossy_direction
         }
     }
 

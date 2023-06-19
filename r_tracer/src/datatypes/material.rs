@@ -8,13 +8,15 @@ pub struct Material {
     pub emission_strength: f64,
     pub smoothness: f64,
     pub specular: f64,
-    pub is_dielectric: bool,
-    pub index_of_refraction: f64
+    pub dielectric: f64,
+    pub index_of_refraction: f64,
+    pub visible: bool
 }
 
 impl Material {
     pub fn new(color: Color, emiss_color: Color, spec_color: Color, 
-        emiss_strength: f64, smoothness: f64, specular: f64) -> Material {
+        emiss_strength: f64, smoothness: f64, specular: f64,
+        dielectric: f64, ior: f64, visible: bool) -> Material {
         Material {
             color: color,
             emission_color: emiss_color,
@@ -22,21 +24,9 @@ impl Material {
             emission_strength: emiss_strength,
             smoothness: smoothness,
             specular: specular,
-            is_dielectric: false,
-            index_of_refraction: 0.0
-        }
-    }
-
-    pub fn new_dieletric(color: Color, smoothness: f64, ior: f64) -> Material {
-        Material {
-            color: color,
-            emission_color: Color::black(),
-            specular_color: Color::black(),
-            emission_strength: 0.0,
-            smoothness: smoothness,
-            specular: 0.0,
-            is_dielectric: true,
-            index_of_refraction: ior
+            dielectric: dielectric,
+            index_of_refraction: ior,
+            visible: visible
         }
     }
 
@@ -48,8 +38,9 @@ impl Material {
             emission_strength: 0.0,
             smoothness: 0.0,
             specular: 0.0,
-            is_dielectric: false,
-            index_of_refraction: 0.0
+            dielectric: 0.0,
+            index_of_refraction: 0.0,
+            visible: false
         }
     }
 }

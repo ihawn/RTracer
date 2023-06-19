@@ -1,6 +1,7 @@
 use std::ops::Mul;
 use std::ops::AddAssign;
 use std::ops::Add;
+use std::ops::MulAssign;
 use crate::datatypes::color::Color;
 
 #[derive(Clone)]
@@ -43,20 +44,17 @@ impl<T> Vector2D<T> {
 }
 
 
-impl<T> Mul<f64> for Vector2D<T>
-where
-    T: Mul<f64, Output = T> + Copy,
+impl<Color> MulAssign<f64> for Vector2D<Color>
+where Color: MulAssign<f64>
 {
-    type Output = Vector2D<T>;
-
-    fn mul(self, scalar: f64) -> Vector2D<T> {
-        let mut result = self.clone();
+    fn mul_assign(&mut self, other: f64) {
         for i in 0..self.data.len() {
-            result.data[i] = self.data[i] * scalar;
+            self.data[i] *= other;
         }
-        result
     }
 }
+
+
 
 impl<T> Mul<Vector2D<Color>> for Vector2D<T>
 where
@@ -97,6 +95,27 @@ where
         result
     }
 }
+
+impl<T> Add<&Vector2D<T>> for &Vector2D<T>
+where
+    T: Add<T, Output = T> + Copy,
+{
+    type Output = Vector2D<T>;
+
+    fn add(self, other: &Vector2D<T>) -> Vector2D<T> {
+        assert_eq!(self.width, other.width);
+        assert_eq!(self.height, other.height);
+
+        let mut result = Vector2D::new(self.width, self.height, self.default);
+
+        for i in 0..self.data.len() {
+            result.data[i] = self.data[i] + other.data[i];
+        }
+
+        result
+    }
+}
+
 
 impl<T> AddAssign<Vector2D<T>> for Vector2D<T>
 where

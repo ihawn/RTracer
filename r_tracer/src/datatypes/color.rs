@@ -1,6 +1,7 @@
 use crate::datatypes::vector3::Vector3;
 use std::ops::AddAssign;
 use std::ops::DivAssign;
+use std::ops::MulAssign;
 
 #[derive(Copy, Clone)]
 pub struct Color {
@@ -80,6 +81,14 @@ impl AddAssign<Color> for Color {
         self.red = self.red + other.red;
         self.green = self.green + other.green;
         self.blue = self.blue + other.blue;
+    }
+}
+
+impl MulAssign<f64> for Color {
+    fn mul_assign(&mut self, other: f64) {
+        self.red *= other;
+        self.green *= other;
+        self.blue *= other;
     }
 }
 

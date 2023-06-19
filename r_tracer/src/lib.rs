@@ -7,12 +7,12 @@ use spacial::mesh::{Mesh, self};
 use spacial::mesh_object::MeshObject;
 use spacial::scene::Scene;
 use spacial::camera::Camera;
-use utilities::model_loader::{load_model};
+use utilities::tracer_io::{load_model};
 use std::time::{Duration, Instant};
 
 pub mod utilities {
     pub mod frame_handler;
-    pub mod model_loader;
+    pub mod tracer_io;
 }
 
 pub mod datatypes {
@@ -37,26 +37,26 @@ pub mod spacial {
 
 
 pub fn render_suzanne(n: u64) {
-    let red = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.15
+    /*let red = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
+        Color::white(), 0.0, 0.9, 0.15, true
     );
     let green = Material::new(Color::new(0.3, 1.0, 0.3), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.15
+        Color::white(), 0.0, 0.9, 0.15, true
     );
     let blue = Material::new(Color::new(0.3, 0.3, 1.0), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.15
+        Color::white(), 0.0, 0.9, 0.15, true
     );
     let white = Material::new(Color::white(), Color::black(), 
-        Color::white(), 0.0, 1.0, 0.0
+        Color::white(), 0.0, 1.0, 0.0, true
     );
     let mirror_rough = Material::new(Color::white(), Color::black(), 
-        Color::white() * 0.9, 0.0, 0.93, 1.0
+        Color::white() * 0.9, 0.0, 0.93, 1.0, true
     );
     let emiss_mat_1 = Material::new(Color::black(), Color::white(),
-        Color::white(), 5.0, 0.0, 0.0
+        Color::white(), 5.0, 0.0, 0.0, true
     );
     let glossy_white4 = Material::new(Color::white(), Color::black(),
-        Color::white(), 0.0, 1.0, 0.045
+        Color::white(), 0.0, 1.0, 0.045, true
     );
 
     let ceiling = load_model("../Models/ceil.stl", white);
@@ -88,9 +88,10 @@ pub fn render_suzanne(n: u64) {
         scene, 2.7, 
         size_x, size_y,
         3, 2, 0.3, 
-        0.0, 165.0, 1.3
+        0.0, 165.0, 1.3,
+        0
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
-    frame_handler = camera.render_scene(frame_handler, 5);
+    camera.render_scene(frame_handler, 5);*/
 }

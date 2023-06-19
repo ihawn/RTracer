@@ -1,7 +1,10 @@
 use pk_stl::parse_stl;
+use image::{Rgb, RgbImage};
 use crate::spacial::mesh::Mesh;
 use crate::datatypes::material::Material;
 use crate::datatypes::vector3::Vector3;
+use crate::datatypes::color::Color;
+use crate::datatypes::vector2d::Vector2D;
 use std::fs;
 
 pub fn load_model(file_path: &str, material: Material) -> Vec<Mesh>  {
@@ -75,4 +78,23 @@ pub fn compute_area(p1: Vector3, p2: Vector3, p3: Vector3) -> f64 {
     let v1 = p3 - p1;
     let cross_product = v0.cross(&v1);
     cross_product.magnitude() * 0.5
+}
+
+
+pub fn save_vector2d_as_png(vector: &Vector2D<Color>, filename: &str) -> Result<(), image::ImageError> {
+    let mut image = RgbImage::new(vector.width as u32, vector.height as u32);
+    for (i, color) in vector.data.iter().enumerate() {
+        let x = (i % vector.width) as u32;
+        let y = (i / vector.width) as u32;
+
+        let rgb_color = Rgb([
+            (color.red * 255.0) as u8,
+            (color.green * 255.0) as u8,
+            (color.blue * 255.0) as u8,
+        ]);
+
+        image.put_pixel(x, y, rgb_color);
+    }
+
+    image.save(filename)
 }
