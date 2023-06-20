@@ -74,7 +74,7 @@ impl Camera {
             let frame: Vector2D<Color> = Vector2D::new(self.width, self.height, Color::black());
 
             let frame: Mutex<Vector2D<Color>> = Mutex::new(frame);
-            let counter = Arc::new(AtomicUsize::new(0));
+            let counter: Arc<AtomicUsize> = Arc::new(AtomicUsize::new(0));
             let total_tiles = tile_slice.len();
             
             tile_slice.par_iter().for_each(|&t| {
@@ -100,7 +100,7 @@ impl Camera {
                     }
                 }
             
-                let current_tile = counter.fetch_add(1, Ordering::Relaxed);
+                let current_tile: usize = counter.fetch_add(1, Ordering::Relaxed);
                 println!("Render progress: {}%", (100.0 * ((current_tile + 1) as f64) / (total_tiles as f64)) as usize);
             });
             

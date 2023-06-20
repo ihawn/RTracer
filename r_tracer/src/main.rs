@@ -137,8 +137,20 @@ fn main() {
         Color::white(), 0.2, 0.0, 0.0, 0.0, 0.0, true
     );
 
+    let emiss_mat_red = Material::new(Color::black(), Color::new(1.0, 0.3, 0.3),
+    Color::black(), 5.0, 0.0, 0.0, 0.0, 0.0, true
+    );
+
+    let emiss_mat_green = Material::new(Color::black(), Color::new(0.3, 1.0, 0.3),
+    Color::black(), 5.0, 0.0, 0.0, 0.0, 0.0, true
+    );
+
+    let emiss_mat_blue = Material::new(Color::black(), Color::new(0.3, 0.3, 1.0),
+    Color::black(), 5.0, 0.0, 0.0, 0.0, 0.0, true
+    );
+
     let glass = Material::new(Color::white(), Color::black(),
-        Color::white(), 0.0, 0.9, 0.5, 0.5, 1.5, true
+        Color::white(), 0.0, 0.9, 0.05, 0.95, 1.5, true
     );
     /*let frosted_glass = Material::new_dieletric(Color::white(), 0.9, 1.5);
     let water = Material::new_dieletric(Color::white(), 1.0, 1.333);
@@ -146,11 +158,13 @@ fn main() {
 
 
     let light_ball = load_model("../Models/light_ball.stl", emiss_mat_2);
-    //let fluid = load_model("../Models/fluid.stl", water);
+    //let fluid = load_model("../Models/fluid.stl", glass);
     //let test_tris = load_model("../Models/test_tris.stl", mirror);
     //let suzanne_noeyes = load_model("../Models/suzanne_noeyes.stl", yellow1);
     //let suzanne_eyes = load_model("../Models/suzanne_eyes.stl", emiss_mat_1);
     let suzanne = load_model("../Models/suzanne.stl", glass);
+    let test_plane = load_model("../Models/test_plane.stl", emiss_mat_1);
+    //let fluid_splash = load_model("../Models/fluid_splash.stl", glass);
     let ceiling = load_model("../Models/ceil.stl", white);
     let floor = load_model("../Models/floor.stl", glossy_white4);//green);
     let side1 = load_model("../Models/side1.stl", green);//yellow);//mirror_rough);
@@ -158,6 +172,10 @@ fn main() {
     let side3 = load_model("../Models/side3.stl", white);
     let side4 = load_model("../Models/side4.stl", red);
     let top_light = load_model("../Models/top_light.stl", emiss_mat_1);
+    let top_light1 = load_model("../Models/top_light1.stl", emiss_mat_red);
+    let top_light2 = load_model("../Models/top_light2.stl", emiss_mat_green);
+    let top_light3 = load_model("../Models/top_light3.stl", emiss_mat_blue);
+    let bot_light = load_model("../Models/bot_light.stl", emiss_mat_1);
     let ico_sphere = load_model("../Models/ico.stl", mirror);
 
 
@@ -165,14 +183,20 @@ fn main() {
 
 
     let mut meshes: Vec<MeshObject> = vec![];
-    meshes.push(MeshObject::new(ceiling, false));
+    /*meshes.push(MeshObject::new(ceiling, false));
     meshes.push(MeshObject::new(floor, false));
     meshes.push(MeshObject::new(side1, false));
     meshes.push(MeshObject::new(side2, false));
     meshes.push(MeshObject::new(side3, false));
     meshes.push(MeshObject::new(side4, false));
-    meshes.push(MeshObject::new(top_light, false));
-    meshes.push(MeshObject::new(suzanne, true));
+    meshes.push(MeshObject::new(top_light, false));*/
+    meshes.push(MeshObject::new(bot_light, false));
+    /*meshes.push(MeshObject::new(top_light1, false));
+    meshes.push(MeshObject::new(top_light2, false));
+    meshes.push(MeshObject::new(top_light3, false));*/
+    //meshes.push(MeshObject::new(suzanne, true));
+    meshes.push(MeshObject::new(fluid_splash, true));
+    //meshes.push(MeshObject::new(test_plane, true));
     //meshes.push(MeshObject::new(fluid, true));
     //meshes.push(MeshObject::new(light_ball, true));
     //meshes.push(MeshObject::new(suzanne_eyes));
@@ -181,18 +205,18 @@ fn main() {
     //meshes.push(MeshObject::new(dave8));
 
 
-    let size_x: usize = 600;
-    let size_y: usize = 400;
+    let size_x: usize = 1200;
+    let size_y: usize = 800;
 
-    let scene: Scene = Scene::new(meshes, spheres, Color::white() * 0.3);
+    let scene: Scene = Scene::new(meshes, spheres, Color::white() * 0.0);
     let camera: Camera = Camera::new(
-        Vector3::new(-200.0, 0.0, -30.0),
-        Vector3::new(0.0, 6.0, 0.0),
+        Vector3::new(-200.0, 0.0, -50.0),
+        Vector3::new(0.0, -11.0, 0.0),
         scene, 2.7, 
         size_x, size_y,
-        3, 2, 0.3, 
+        3, 3, 0.3, 
         0.0, 165.0, 1.3,
-        0
+        32
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");

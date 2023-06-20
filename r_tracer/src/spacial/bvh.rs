@@ -52,6 +52,7 @@ impl BVH {
                     || Self::construct_recursive(meshes, start, start + 1),
                     || Self::construct_recursive(meshes, start + 1, end),
                 );
+                
                 let bounding_box = Self::merge_bounding_boxes(
                     (bv1.bb_corner_1, bv1.bb_corner_2),
                     (bv2.bb_corner_1, bv2.bb_corner_2),
