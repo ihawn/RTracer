@@ -150,7 +150,7 @@ fn main() {
     );
 
     let glass = Material::new(Color::white(), Color::black(),
-        Color::white(), 0.0, 0.9, 0.05, 0.95, 1.5, true
+        Color::white(), 0.0, 1.0, 0.0, 1.0, 1.5, true
     );
     /*let frosted_glass = Material::new_dieletric(Color::white(), 0.9, 1.5);
     let water = Material::new_dieletric(Color::white(), 1.0, 1.333);
@@ -183,19 +183,19 @@ fn main() {
 
 
     let mut meshes: Vec<MeshObject> = vec![];
-    /*meshes.push(MeshObject::new(ceiling, false));
+    meshes.push(MeshObject::new(ceiling, false));
     meshes.push(MeshObject::new(floor, false));
     meshes.push(MeshObject::new(side1, false));
     meshes.push(MeshObject::new(side2, false));
     meshes.push(MeshObject::new(side3, false));
     meshes.push(MeshObject::new(side4, false));
-    meshes.push(MeshObject::new(top_light, false));*/
-    meshes.push(MeshObject::new(bot_light, false));
+    meshes.push(MeshObject::new(top_light, false));
+    //meshes.push(MeshObject::new(bot_light, false));
     /*meshes.push(MeshObject::new(top_light1, false));
     meshes.push(MeshObject::new(top_light2, false));
     meshes.push(MeshObject::new(top_light3, false));*/
-    //meshes.push(MeshObject::new(suzanne, true));
-    meshes.push(MeshObject::new(fluid_splash, true));
+    meshes.push(MeshObject::new(suzanne, true));
+    //meshes.push(MeshObject::new(fluid_splash, true));
     //meshes.push(MeshObject::new(test_plane, true));
     //meshes.push(MeshObject::new(fluid, true));
     //meshes.push(MeshObject::new(light_ball, true));
@@ -214,15 +214,15 @@ fn main() {
         Vector3::new(0.0, -11.0, 0.0),
         scene, 2.7, 
         size_x, size_y,
-        3, 3, 0.3, 
-        0.0, 165.0, 1.3,
-        32
+        3, 2, 0.3, 
+        5.0, 165.0, 1.3,
+        0
     );
 
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
 
     let start_time = Instant::now();
-    let frame: Vector2D<Color> = camera.render_scene(frame_handler, 100);
+    let frame: Vector2D<Color> = camera.render_scene(frame_handler, 5);
     let elapsed_time = start_time.elapsed();
 
     let hours = elapsed_time.as_secs() / 3600;
