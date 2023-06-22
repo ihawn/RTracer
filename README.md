@@ -5,6 +5,6 @@
 - Still under active development
 
   
-![Cornell Balls](https://github.com/ihawn/RTracer/blob/main/Renders/cornell_balls.PNG](https://github.com/ihawn/RTracer/blob/main/Renders/splash.png)https://github.com/ihawn/RTracer/blob/main/Renders/splash.png)
+![Splash](https://github.com/ihawn/RTracer/blob/main/Renders/splash.png)
 
 ![Cornell Balls](https://github.com/ihawn/RTracer/blob/main/Renders/cornell_balls.PNG)
