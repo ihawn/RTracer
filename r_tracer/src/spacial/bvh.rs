@@ -34,7 +34,7 @@ impl BVH {
         bvh
     }
 
-    fn construct_recursive(meshes: &Vec<Mesh>, start: usize, end: usize) -> BVH {
+    fn construct_recursive(meshes: &[Mesh], start: usize, end: usize) -> BVH {
         let object_span = end - start;
         if object_span == 1 {
             let bb = meshes[start].bounding_box;
@@ -85,8 +85,8 @@ impl BVH {
             }
         }
     
-        let axis = rand::thread_rng().gen_range(0..=2);
-        let mut sub_meshes = meshes.clone();
+        let axis: usize = rand::thread_rng().gen_range(0..=2);
+        let mut sub_meshes: Vec<Mesh> = meshes.to_vec();
         sub_meshes[start..end].sort_by(|a, b| Self::box_compare(a, b, axis));
     
         let mid = start + object_span / 2;
