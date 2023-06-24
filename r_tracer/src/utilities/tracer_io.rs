@@ -1,7 +1,7 @@
 use pk_stl::parse_stl;
 use image::{Rgb, RgbImage};
 use rayon::prelude::*;
-use crate::spacial::mesh::Mesh;
+use crate::spacial::tri::Tri;
 use crate::datatypes::material::Material;
 use crate::datatypes::vector3::Vector3;
 use crate::datatypes::color::Color;
@@ -10,7 +10,7 @@ use std::fs;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
-pub fn load_model(file_path: &str, material: Material) -> Vec<Mesh>  {
+pub fn load_model(file_path: &str, material: Material) -> Vec<Tri>  {
     println!("Loading model {}", file_path);
     let content = fs::read(file_path).expect("Failed to read model file");
     let model = parse_stl(content.as_slice()).unwrap();
@@ -18,7 +18,7 @@ pub fn load_model(file_path: &str, material: Material) -> Vec<Mesh>  {
     println!("Computing vertex normals for {}", file_path);
     let i: usize = 0;
     let counter: Arc<AtomicUsize> = Arc::new(AtomicUsize::new(0));
-    let model_tris: Vec<Mesh> = model.triangles.par_iter().map(|tri| {
+    let model_tris: Vec<Tri> = model.triangles.par_iter().map(|tri| {
         let vertex1: Vector3 = Vector3::new(tri.vertices[0].x.into(), tri.vertices[0].y.into(), tri.vertices[0].z.into());
         let vertex2: Vector3 = Vector3::new(tri.vertices[1].x.into(), tri.vertices[1].y.into(), tri.vertices[1].z.into());
         let vertex3: Vector3 = Vector3::new(tri.vertices[2].x.into(), tri.vertices[2].y.into(), tri.vertices[2].z.into());
@@ -59,10 +59,9 @@ pub fn load_model(file_path: &str, material: Material) -> Vec<Mesh>  {
         vertex2_normal = vertex2_normal.normalize();
         vertex3_normal = vertex3_normal.normalize();
     
-        let tri: Mesh = Mesh::new_triangle(
-            vertex1, vertex2, vertex3, 
-            vertex1_normal, vertex2_normal, vertex3_normal,
-            face_normal, material
+        let tri: Tri = Tri::new(
+            vertex1, vertex2, vertex3, vertex1_normal, 
+            vertex2_normal, vertex3_normal, face_normal, material
         );
 
         let current: usize = counter.fetch_add(1, Ordering::Relaxed);

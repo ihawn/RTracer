@@ -3,7 +3,7 @@ use crate::datatypes::vector2::Vector2;
 use crate::spacial::camera::Camera;
 use crate::datatypes::color::Color;
 use crate::datatypes::hit_point::HitPoint;
-use crate::spacial::mesh::Mesh;
+use crate::spacial::tri::Tri;
 use crate::spacial::bvh::BVH;
 use crate::datatypes::material::Material;
 use rand::Rng;
@@ -60,7 +60,7 @@ impl Ray {
         true
     }
 
-    pub fn cast_ray_from_camera(camera: &Camera, bvh: &BVH, sphere_objects: &Vec<Mesh>, x: usize, y: usize) -> Color {
+    pub fn cast_ray_from_camera(camera: &Camera, bvh: &BVH, x: usize, y: usize) -> Color {
         let projection_point = camera.blur_strength *
         Vector3::random_perturb(Vector2::new(camera.width as f64, camera.height as f64)) + 
         Vector3::new(
@@ -74,11 +74,10 @@ impl Ray {
         let ray_direction = (focal_point - ray_origin).normalize();
 
         Ray::new(ray_origin, ray_direction)
-            .cast_ray(bvh, sphere_objects, camera.max_bounces, camera.exposure, camera.scene.env_color)
+            .cast_ray(bvh, camera.max_bounces, camera.exposure, camera.scene.env_color)
     }
 
-    pub fn cast_ray(mut self, bvh: &BVH, sphere_objects: &Vec<Mesh>, 
-        max_bounces: u32, exposure: f64, env_color: Color) -> Color {
+    pub fn cast_ray(mut self, bvh: &BVH, max_bounces: u32, exposure: f64, env_color: Color) -> Color {
 
         let mut hit_point: HitPoint = HitPoint::empty();
 
@@ -86,7 +85,7 @@ impl Ray {
         let mut ray_color: Color = Color::white();
 
         for _i in 0..max_bounces + 1 {
-            hit_point = Mesh::ray_collision(self, bvh, sphere_objects);
+            hit_point = Tri::ray_collision(self, bvh);
 
             if !hit_point.is_empty {
 
@@ -130,9 +129,9 @@ impl Ray {
         let glossy_direction: Vector3 = Vector3::lerp(diffuse_direction, specular_direction, mat.smoothness * is_specular_bounce);
 
         if mat.dielectric > 0.0 {
-            let mut ior = mat.index_of_refraction;
+            let mut ior: f64 = mat.index_of_refraction;
             if hit.is_front_face { ior = 1.0 / ior }
-            let random_val_2 = rand::thread_rng().gen_range(0.0..1.0);
+            let random_val_2: f64 = rand::thread_rng().gen_range(0.0..1.0);
     
             let cos_theta: f64 = f64::min(-1.0 * self.direction * hit.normal, 1.0);
             let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();

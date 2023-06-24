@@ -5,11 +5,11 @@ use crate::datatypes::color::Color;
 use crate::datatypes::vector2d::Vector2D;
 use crate::utilities::frame_handler::FrameHandler;
 use crate::spacial::scene::Scene;
-use crate::spacial::mesh::{Mesh, PrimitiveMeshType};
+use crate::spacial::tri::Tri;
 use crate::spacial::ray::Ray;
 use crate::spacial::bvh::BVH;
 use rayon::prelude::*;
-use std::sync::{Mutex, MutexGuard, Arc};
+use std::sync::{Mutex, MutexGuard, Arc, RwLock};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 
@@ -57,12 +57,6 @@ impl Camera {
     pub fn render_scene(self, mut handler: FrameHandler, sample_count: u32) -> Vector2D<Color> {
 
         let bvh: BVH = BVH::new(&self.scene.meshes);
-
-        let mut spheres: Vec<Mesh> = vec![];
-        for m in &self.scene.spheres {
-            if m.mesh_type == PrimitiveMeshType::Sphere { spheres.push(*m) }
-        }
-
         let height: usize = self.height;
         let width: usize = self.width;
         let tile_size: usize = self.tile_size;
@@ -85,7 +79,6 @@ impl Camera {
                     usize::min(height, t.1 + tile_size),
                     sample_count as usize,
                     &bvh,
-                    &spheres,
                     (0..sample_count).map(|s| 1.0 / (s as f64 + 1.0)).collect()
                 );
             
@@ -104,16 +97,13 @@ impl Camera {
                 println!("Render progress: {}%", (100.0 * ((current_tile + 1) as f64) / (total_tiles as f64)) as usize);
             });
             
-            
             let frame: MutexGuard<Vector2D<Color>> = frame.lock().unwrap();
             let converted_values: Vec<u32> = frame.data.iter()
             .map(|color| color.as_buffer_color()).collect();
-         
+            
             let _update: Result<(), Error> = handler.window.update_with_buffer(
                 &converted_values.clone(), width, height
             );
-
-
             frame_out = frame.clone();
         } else {
             let mut new_render: Vector2D<Color> = Vector2D::new(self.width, self.height, Color::black());
@@ -127,7 +117,7 @@ impl Camera {
                 println!("Sample {}/{}", i + 1, sample_count);
 
                 old_render = pixel_accumulation;
-                new_render = self.render_whole_sample(&bvh, &spheres);
+                new_render = self.render_whole_sample(&bvh);
                 old_render *= 1.0 - weight_slice[i];
                 new_render *= weight_slice[i];
                 pixel_accumulation = old_render + new_render;            
@@ -147,7 +137,7 @@ impl Camera {
 
     pub fn render_tile(self: &Camera, start_x: usize, end_x: usize, 
         start_y: usize, end_y: usize, sample_count: usize,
-         bvh: &BVH, sphere_objects: &Vec<Mesh>, weight_slice: Vec<f64>) 
+         bvh: &BVH, weight_slice: Vec<f64>) 
     -> Vector2D<Color> {
 
         let mut frame: Vector2D<Color> = Vector2D::new(
@@ -168,7 +158,7 @@ impl Camera {
                     for _s in 0..self.rays_per_pixel {
                         pixel_color += Ray::cast_ray_from_camera(
                             &self,
-                            &bvh, &sphere_objects, x, y
+                            &bvh, x, y
                         );
                     }
                     pixel_color /= self.rays_per_pixel;     
@@ -183,7 +173,7 @@ impl Camera {
         pixel_accumulation
     }
 
-    pub fn render_whole_sample(self: &Camera, bvh: &BVH, sphere_objects: &Vec<Mesh>) 
+    pub fn render_whole_sample(self: &Camera, bvh: &BVH) 
         -> Vector2D<Color> {
         let mut frame: Vector2D<Color> = Vector2D::new(
             self.width, 
@@ -201,10 +191,7 @@ impl Camera {
             horz_slice.par_iter().for_each(|&y| {
                 let mut pixel_color: Color = Color::black();
                 for _s in 0..self.rays_per_pixel {
-                    pixel_color += Ray::cast_ray_from_camera(
-                        &self,
-                        &bvh, &sphere_objects, x, y
-                    );
+                    pixel_color += Ray::cast_ray_from_camera(&self, &bvh, x, y);
                 }
                 pixel_color /= self.rays_per_pixel;             
                 let mut frame: MutexGuard<Vector2D<Color>> = frame.lock().unwrap();             

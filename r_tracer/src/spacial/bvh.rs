@@ -1,16 +1,14 @@
-use crate::spacial::mesh::Mesh;
+use crate::spacial::tri::Tri;
 use crate::spacial::mesh_object::MeshObject;
 use crate::datatypes::vector3::Vector3;
 use std::cmp::Ordering;
 use rand::Rng;
 use std::time::Instant;
 
-use super::mesh::PrimitiveMeshType;
-
 pub struct BVH {
     pub bvh_obj_1: Option<Box<BVH>>,
     pub bvh_obj_2: Option<Box<BVH>>,
-    pub mesh: Mesh,
+    pub mesh: Tri,
     pub bb_corner_1: Vector3,
     pub bb_corner_2: Vector3,
     pub is_leaf: bool
@@ -18,10 +16,10 @@ pub struct BVH {
 
 impl BVH {
     pub fn new(mesh_objects: &Vec<MeshObject>) -> BVH {
-        let mut tris: Vec<Mesh> = vec![];
+        let mut tris: Vec<Tri> = vec![];
         for mesh in mesh_objects {
             for m in &mesh.tris {
-                if m.mesh_type == PrimitiveMeshType::Triangle { tris.push(*m) }
+                tris.push(*m);
             }
         }
         let start_time = Instant::now();
@@ -34,7 +32,7 @@ impl BVH {
         bvh
     }
 
-    fn construct_recursive(meshes: &[Mesh], start: usize, end: usize) -> BVH {
+    fn construct_recursive(meshes: &[Tri], start: usize, end: usize) -> BVH {
         let object_span = end - start;
         if object_span == 1 {
             let bb = meshes[start].bounding_box;
@@ -60,7 +58,7 @@ impl BVH {
                 return BVH {
                     bvh_obj_1: Some(Box::new(bv1)),
                     bvh_obj_2: Some(Box::new(bv2)),
-                    mesh: Mesh::empty(),
+                    mesh: Tri::empty(),
                     bb_corner_1: bounding_box.0,
                     bb_corner_2: bounding_box.1,
                     is_leaf: false,
@@ -77,7 +75,7 @@ impl BVH {
                 return BVH {
                     bvh_obj_1: Some(Box::new(bv1)),
                     bvh_obj_2: Some(Box::new(bv2)),
-                    mesh: Mesh::empty(),
+                    mesh: Tri::empty(),
                     bb_corner_1: bounding_box.0,
                     bb_corner_2: bounding_box.1,
                     is_leaf: false,
@@ -86,7 +84,7 @@ impl BVH {
         }
     
         let axis: usize = rand::thread_rng().gen_range(0..=2);
-        let mut sub_meshes: Vec<Mesh> = meshes.to_vec();
+        let mut sub_meshes: Vec<Tri> = meshes.to_vec();
         sub_meshes[start..end].sort_by(|a, b| Self::box_compare(a, b, axis));
     
         let mid = start + object_span / 2;
@@ -102,7 +100,7 @@ impl BVH {
         BVH {
             bvh_obj_1: Some(Box::new(bvh_obj_1)),
             bvh_obj_2: Some(Box::new(bvh_obj_2)),
-            mesh: Mesh::empty(),
+            mesh: Tri::empty(),
             bb_corner_1: bounding_box.0,
             bb_corner_2: bounding_box.1,
             is_leaf: false,
@@ -110,7 +108,7 @@ impl BVH {
     }
     
 
-    fn box_compare(a: &Mesh, b: &Mesh, axis: usize) -> Ordering {
+    fn box_compare(a: &Tri, b: &Tri, axis: usize) -> Ordering {
         match axis {
             0 => a.bounding_box_center.x.partial_cmp(&b.bounding_box_center.x).unwrap_or(Ordering::Equal),
             1 => a.bounding_box_center.y.partial_cmp(&b.bounding_box_center.y).unwrap_or(Ordering::Equal),

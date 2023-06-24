@@ -3,7 +3,7 @@ use crate::datatypes::vector3::Vector3;
 use datatypes::material::Material;
 use utilities::frame_handler::FrameHandler;
 use datatypes::color::Color;
-use spacial::mesh::{Mesh, self};
+use spacial::tri::{Tri, self};
 use spacial::mesh_object::MeshObject;
 use spacial::scene::Scene;
 use spacial::camera::Camera;
@@ -28,7 +28,7 @@ pub mod datatypes {
 pub mod spacial {
     pub mod camera;
     pub mod scene;
-    pub mod mesh;  
+    pub mod tri;  
     pub mod mesh_object;
     pub mod ray;
     pub mod bvh;
