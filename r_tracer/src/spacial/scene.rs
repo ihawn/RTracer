@@ -1,4 +1,3 @@
-use crate::spacial::tri::Tri;
 use crate::spacial::mesh_object::MeshObject;
 use crate::datatypes::color::Color;
 

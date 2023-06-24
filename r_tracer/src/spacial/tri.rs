@@ -28,9 +28,7 @@ impl Tri {
     pub fn new(p1: Vector3, p2: Vector3, p3: Vector3, 
         p1_normal: Vector3, p2_normal: Vector3, p3_normal: Vector3,
         normal: Vector3, material: Material) -> Tri {
-        let bb = Self::get_bounding_box(
-            p1, p2, p3, Vector3::zero(), 0.0
-        );
+        let bb = Self::get_bounding_box(p1, p2, p3);
         Tri {
             p1: p1,
             p2: p2,
@@ -64,8 +62,7 @@ impl Tri {
         }
     }
 
-    pub fn get_bounding_box(p1: Vector3, p2: Vector3, 
-        p3: Vector3, center: Vector3, r: f64) -> (Vector3, Vector3) {
+    pub fn get_bounding_box(p1: Vector3, p2: Vector3, p3: Vector3) -> (Vector3, Vector3) {
         let rand_vec_1: Vector3 = Vector3::new(
             rand::thread_rng().gen_range(0.0..1.0), 
             rand::thread_rng().gen_range(0.0..1.0),
@@ -76,10 +73,9 @@ impl Tri {
             rand::thread_rng().gen_range(0.0..1.0),
                 rand::thread_rng().gen_range(0.0..1.0)
         );
-        (
-            p1.min(p2.min(p3)) - rand_vec_1,
-            p1.max(p2.max(p3)) + rand_vec_2
-        )
+        let (bb1, bb2) = (p1.min(p2.min(p3)), p1.max(p2.max(p3)));
+        let size: f64 = 0.1*(bb1 - bb2).magnitude();
+        (bb1 - rand_vec_1*size, bb2 + rand_vec_2*size)
     }
 
     pub fn get_bounding_box_center(bb: (Vector3, Vector3)) -> Vector3 {
@@ -88,17 +84,21 @@ impl Tri {
 
     pub fn ray_collision(ray: Ray, bvh: &BVH) -> HitPoint {
         let meshes_to_check = Self::traverse_bvh_for_meshes(ray, bvh, Vec::new());
-        let mut hit_points: Vec<HitPoint> = Vec::new();
+        let mut closest_hit_point: HitPoint = HitPoint::empty();
+        let mut closest_hit_distance: f64 = f64::MAX;
 
         for mesh in meshes_to_check {
-            hit_points = Self::intersect_triangle(&ray, &mesh, hit_points);
+            let hit_point: HitPoint = Self::intersect_tri(&ray, &mesh);
+            if !hit_point.is_empty {
+                let dist: f64 = hit_point.point.distance(hit_point.hitting_ray.origin);
+                if closest_hit_point.is_empty || dist < closest_hit_distance {
+                    closest_hit_distance = dist;
+                    closest_hit_point = hit_point;
+                }
+            }
         }
 
-        if hit_points.len() > 0 {
-            HitPoint::closest_front_hit_point(hit_points)
-        } else {
-            HitPoint::empty()
-        }
+        closest_hit_point
     }
     
     fn traverse_bvh_for_meshes(ray: Ray, node: &BVH, mut meshes_to_check: Vec<Tri>) -> Vec<Tri> {
@@ -120,10 +120,10 @@ impl Tri {
         meshes_to_check
     }
 
-    pub fn intersect_triangle(ray: &Ray, triangle: &Tri, mut existing_hitpoints: Vec<HitPoint>) -> Vec<HitPoint> {
+    pub fn intersect_tri(ray: &Ray, triangle: &Tri) -> HitPoint {
 
         if triangle.normal*ray.direction > 0.0 {
-            return existing_hitpoints
+            return HitPoint::empty()
         }
 
         let epsilon = 1e-6;
@@ -135,7 +135,7 @@ impl Tri {
         let a = edge1*h;
     
         if a.abs() < epsilon {
-            return existing_hitpoints;
+            return HitPoint::empty()
         }
     
         let f = 1.0 / a;
@@ -143,14 +143,14 @@ impl Tri {
         let u = f*s*h;
     
         if u < 0.0 || u > 1.0 {
-            return existing_hitpoints;
+            return HitPoint::empty()
         }
     
         let q = s.cross(&edge1);
         let v = f * ray.direction*q;
     
         if v < 0.0 || u + v > 1.0 {
-            return existing_hitpoints;
+            return HitPoint::empty()
         }
     
         let t = f * edge2*q;
@@ -165,10 +165,10 @@ impl Tri {
                 &triangle,
                 normal
             );
-            existing_hitpoints.push(hitpoint);
+            return hitpoint
         }
     
-        existing_hitpoints
+        HitPoint::empty()
     }
 
     pub fn compute_hitpoint_normal(&self, hit_location: Vector3) -> Vector3 {
@@ -201,5 +201,18 @@ impl Tri {
         let u = 1.0 - v - w;
 
         Vector3::new(u, v, w)
+    }
+
+    pub fn compute_face_normal(p1: Vector3, p2: Vector3, p3: Vector3) -> Vector3 {
+        let u: Vector3 = p2 - p1;
+        let v: Vector3 = p3 - p1;
+    
+        let unnormalized_normal: Vector3 = Vector3 {
+            x: u.y * v.z - u.z * v.y,
+            y: u.z * v.x - u.x * v.z,
+            z: u.x * v.y - u.y * v.x,
+        };
+    
+        unnormalized_normal.normalize()
     }
 }

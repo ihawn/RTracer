@@ -1,15 +1,13 @@
 use minifb::Error;
 use crate::datatypes::vector3::Vector3;
-use crate::datatypes::vector2::Vector2;
 use crate::datatypes::color::Color;
 use crate::datatypes::vector2d::Vector2D;
 use crate::utilities::frame_handler::FrameHandler;
 use crate::spacial::scene::Scene;
-use crate::spacial::tri::Tri;
 use crate::spacial::ray::Ray;
 use crate::spacial::bvh::BVH;
 use rayon::prelude::*;
-use std::sync::{Mutex, MutexGuard, Arc, RwLock};
+use std::sync::{Mutex, MutexGuard, Arc};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 
@@ -60,7 +58,7 @@ impl Camera {
         let height: usize = self.height;
         let width: usize = self.width;
         let tile_size: usize = self.tile_size;
-        let mut frame_out: Vector2D<Color> = Vector2D::new(self.width, self.height, Color::black());
+        let frame_out: Vector2D<Color>;
         
         if self.tile_size > 0 {
             let tiles: Vec<(usize, usize)> = Self::get_tiles(width, height, tile_size);
@@ -143,9 +141,7 @@ impl Camera {
         let mut frame: Vector2D<Color> = Vector2D::new(
             self.tile_size as usize, self.tile_size as usize, Color::black()
         );
-        let mut old_frame: Vector2D<Color> = Vector2D::new(
-            self.tile_size as usize, self.tile_size as usize, Color::black()
-        );
+        let mut old_frame: Vector2D<Color>;
         let mut pixel_accumulation: Vector2D<Color> = Vector2D::new(
             self.tile_size as usize, self.tile_size as usize, Color::black()
         );
@@ -175,7 +171,7 @@ impl Camera {
 
     pub fn render_whole_sample(self: &Camera, bvh: &BVH) 
         -> Vector2D<Color> {
-        let mut frame: Vector2D<Color> = Vector2D::new(
+        let frame: Vector2D<Color> = Vector2D::new(
             self.width, 
             self.height, 
             Color::black()

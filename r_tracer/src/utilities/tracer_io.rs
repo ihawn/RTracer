@@ -1,4 +1,5 @@
 use pk_stl::parse_stl;
+use obj::{load_obj, Obj, TexturedVertex};
 use image::{Rgb, RgbImage};
 use rayon::prelude::*;
 use crate::spacial::tri::Tri;
@@ -9,9 +10,23 @@ use crate::datatypes::vector2d::Vector2D;
 use std::fs;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::fs::File;
+use std::io::BufReader;
 
-pub fn load_model(file_path: &str, material: Material) -> Vec<Tri>  {
-    println!("Loading model {}", file_path);
+pub fn load_model(file_path: &str, material: Material) -> Vec<Tri> {
+    if file_path.ends_with(".obj") {
+        println!("Processing .obj file: {}", file_path);
+        return import_obj(file_path, material)
+    } else if file_path.ends_with(".stl") {
+        println!("Processing .stl file: {}", file_path);
+        return import_stl(file_path, material)
+    } else {
+        println!("Unsupported file extension");
+        return vec![]
+    }
+}
+
+fn import_stl(file_path: &str, material: Material) -> Vec<Tri> {
     let content = fs::read(file_path).expect("Failed to read model file");
     let model = parse_stl(content.as_slice()).unwrap();
 
@@ -73,13 +88,45 @@ pub fn load_model(file_path: &str, material: Material) -> Vec<Tri>  {
     model_tris
 }
 
-pub fn compute_area(p1: Vector3, p2: Vector3, p3: Vector3) -> f64 {
-    let v0 = p2 - p1;
-    let v1 = p3 - p1;
-    let cross_product = v0.cross(&v1);
-    cross_product.magnitude() * 0.5
-}
+fn import_obj(file_path: &str, material: Material) -> Vec<Tri> {
+    let input = BufReader::new(File::open(file_path).expect("Failed to read OBJ"));
+    let dome:  Obj<TexturedVertex> = load_obj(input).expect("Failed to load OBJ");
+    let vertices = dome.vertices;
+    let indices = dome.indices;
+    let mut triangles: Vec<Tri> = Vec::new();
 
+    for chunk in indices.chunks(3) {
+        if chunk.len() != 3 {
+            continue;
+        }
+
+        let p1_index = chunk[0] as usize;
+        let p2_index = chunk[1] as usize;
+        let p3_index = chunk[2] as usize;
+
+        let vert1 = vertices[p1_index];
+        let vert2 = vertices[p2_index];
+        let vert3 = vertices[p3_index];
+
+        let p1: Vector3 = Vector3::new(vert1.position[0] as f64, vert1.position[1] as f64, vert1.position[2] as f64);
+        let p2: Vector3 = Vector3::new(vert2.position[0] as f64, vert2.position[1] as f64, vert2.position[2] as f64);
+        let p3: Vector3 = Vector3::new(vert3.position[0] as f64, vert3.position[1] as f64, vert3.position[2] as f64);
+
+        let p1_normal: Vector3 = Vector3::new(vert1.normal[0] as f64, vert1.normal[1] as f64, vert1.normal[2] as f64);
+        let p2_normal: Vector3 = Vector3::new(vert2.normal[0] as f64, vert2.normal[1] as f64, vert2.normal[2] as f64);
+        let p3_normal: Vector3 = Vector3::new(vert3.normal[0] as f64, vert3.normal[1] as f64, vert3.normal[2] as f64);
+
+
+        let triangle = Tri::new(p1, p2, p3, p1_normal, p2_normal, p3_normal,
+            Tri::compute_face_normal(p1, p2, p3), material,
+        );
+
+        triangles.push(triangle);
+    }
+
+
+    triangles
+}
 
 pub fn save_vector2d_as_png(vector: &Vector2D<Color>, filename: &str) -> Result<(), image::ImageError> {
     let mut image = RgbImage::new(vector.width as u32, vector.height as u32);

@@ -3,12 +3,12 @@ name = "r_tracer"
 version = "0.1.0"
 edition = "2021"
 
-
 [dependencies]
 minifb = "0.24"
 rand = "0.8.5"
 rayon = "1.7.0"
 pk_stl = "0.3.1"
+obj-rs = "0.7.1"
 image = "0.24.6"
 
 [dev-dependencies]

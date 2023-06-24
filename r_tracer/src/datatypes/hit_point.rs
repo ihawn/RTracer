@@ -35,26 +35,4 @@ impl HitPoint {
             is_front_face: false
         }
     }
-
-    pub fn closest_front_hit_point(hit_points: Vec<HitPoint>) -> HitPoint {
-        let mut min_dist: f64 = hit_points[0].point.distance(hit_points[0].hitting_ray.origin);
-        let mut min_i: usize = 0;
-        for i in 1..hit_points.len() {
-            let dist = hit_points[i].point.distance(hit_points[1].hitting_ray.origin);
-            if dist < min_dist
-            && (hit_points[i].point - hit_points[i].hitting_ray.origin) * hit_points[i].hitting_ray.direction > 0.0 {
-                min_i = i;
-                min_dist = dist;
-            }
-        }
-
-        if min_i > 0 {
-            return hit_points[min_i];
-        } else if (hit_points[0].point - hit_points[0].hitting_ray.origin) * hit_points[0].hitting_ray.direction > 0.0 {
-            return hit_points[min_i];
-        } else {
-            return HitPoint::empty();
-        }  
-    }
-
 }

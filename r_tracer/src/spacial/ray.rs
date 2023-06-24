@@ -79,8 +79,7 @@ impl Ray {
 
     pub fn cast_ray(mut self, bvh: &BVH, max_bounces: u32, exposure: f64, env_color: Color) -> Color {
 
-        let mut hit_point: HitPoint = HitPoint::empty();
-
+        let mut hit_point: HitPoint;
         let mut incoming_light: Color = Color::black();
         let mut ray_color: Color = Color::white();
 
