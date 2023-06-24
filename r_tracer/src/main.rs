@@ -117,7 +117,7 @@ fn main() {
     //let suzanne_eyes = load_model("../Models/suzanne_eyes.stl", emiss_mat_1);
     let suzanne = load_model("../Models/suzanne.stl", yellow);
     //let test_plane = load_model("../Models/test_plane.stl", emiss_mat_1);
-    //let fluid_splash = load_model("../Models/fluid_splash.stl", glass);
+    let fluid_splash = load_model("../Models/fluid_splash.stl", glass);
     let ceiling = load_model("../Models/ceil.stl", white);
     let floor = load_model("../Models/floor.stl", white);
     let side1 = load_model("../Models/side1.stl", red);
@@ -142,7 +142,7 @@ fn main() {
     meshes.push(MeshObject::new(top_light2, false));
     meshes.push(MeshObject::new(top_light3, false));*/
     meshes.push(MeshObject::new(suzanne, true));
-    //meshes.push(MeshObject::new(fluid_splash, true));
+    meshes.push(MeshObject::new(fluid_splash, true));
     //meshes.push(MeshObject::new(test_plane, true));
     //meshes.push(MeshObject::new(fluid, true));
     //meshes.push(MeshObject::new(light_ball, true));
@@ -169,7 +169,7 @@ fn main() {
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
 
     let start_time = Instant::now();
-    let frame: Vector2D<Color> = camera.render_scene(frame_handler, 200);
+    let frame: Vector2D<Color> = camera.render_scene(frame_handler, 25);
     let elapsed_time = start_time.elapsed();
 
     let hours = elapsed_time.as_secs() / 3600;

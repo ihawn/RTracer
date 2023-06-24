@@ -114,7 +114,7 @@ impl Tri {
                 }
             }
         } else {
-            meshes_to_check.push(node.mesh);
+            meshes_to_check.push(node.tri);
         }
 
         meshes_to_check

@@ -8,14 +8,14 @@ use std::time::Instant;
 pub struct BVH {
     pub bvh_obj_1: Option<Box<BVH>>,
     pub bvh_obj_2: Option<Box<BVH>>,
-    pub mesh: Tri,
+    pub tri: Tri,
     pub bb_corner_1: Vector3,
     pub bb_corner_2: Vector3,
-    pub is_leaf: bool
+    pub is_leaf: bool,
 }
 
 impl BVH {
-    pub fn new(mesh_objects: &Vec<MeshObject>) -> BVH {
+    pub fn new(mesh_objects: &[MeshObject]) -> BVH {
         let mut tris: Vec<Tri> = vec![];
         for mesh in mesh_objects {
             for m in &mesh.tris {
@@ -24,7 +24,8 @@ impl BVH {
         }
         let start_time = Instant::now();
         println!("Building BVH");
-        let bvh: BVH = Self::construct_recursive(&tris, 0, tris.len());
+        let len: usize = tris.len();
+        let bvh: BVH = Self::construct_recursive(&mut tris, 0, len);
         let elapsed_time = start_time.elapsed().as_millis();
         println!("Done");
         println!("Built BVH in {} seconds", elapsed_time as f64 / 1000.0);
@@ -32,25 +33,27 @@ impl BVH {
         bvh
     }
 
-    fn construct_recursive(meshes: &[Tri], start: usize, end: usize) -> BVH {
+    fn construct_recursive(tris: &mut [Tri], start: usize, end: usize) -> BVH {
         let object_span = end - start;
         if object_span == 1 {
-            let bb = meshes[start].bounding_box;
+            let bb = tris[start].bounding_box;
             return BVH {
                 bvh_obj_1: None,
                 bvh_obj_2: None,
-                mesh: meshes[start].clone(),
+                tri: tris[start].clone(),
                 bb_corner_1: bb.0,
                 bb_corner_2: bb.1,
                 is_leaf: true,
             };
         } else if object_span == 2 {
-            if Self::box_compare(&meshes[start], &meshes[start + 1], 0) == Ordering::Less {
+            if Self::box_compare(&tris[start], &tris[start + 1], 0) == Ordering::Less {
+                let mid = start + 1;
+                let (tris1, tris2) = tris.split_at_mut(mid);
                 let (bv1, bv2) = rayon::join(
-                    || Self::construct_recursive(meshes, start, start + 1),
-                    || Self::construct_recursive(meshes, start + 1, end),
+                    || Self::construct_recursive(tris1, start, mid),
+                    || Self::construct_recursive(tris2, 0, end - mid),
                 );
-                
+
                 let bounding_box = Self::merge_bounding_boxes(
                     (bv1.bb_corner_1, bv1.bb_corner_2),
                     (bv2.bb_corner_1, bv2.bb_corner_2),
@@ -58,15 +61,17 @@ impl BVH {
                 return BVH {
                     bvh_obj_1: Some(Box::new(bv1)),
                     bvh_obj_2: Some(Box::new(bv2)),
-                    mesh: Tri::empty(),
+                    tri: Tri::empty(),
                     bb_corner_1: bounding_box.0,
                     bb_corner_2: bounding_box.1,
                     is_leaf: false,
                 };
             } else {
+                let mid = start + 1;
+                let (tris1, tris2) = tris.split_at_mut(mid);
                 let (bv1, bv2) = rayon::join(
-                    || Self::construct_recursive(meshes, start + 1, end),
-                    || Self::construct_recursive(meshes, start, start + 1),
+                    || Self::construct_recursive(tris2, 0, end - mid),
+                    || Self::construct_recursive(tris1, start, mid),
                 );
                 let bounding_box = Self::merge_bounding_boxes(
                     (bv1.bb_corner_1, bv1.bb_corner_2),
@@ -75,38 +80,37 @@ impl BVH {
                 return BVH {
                     bvh_obj_1: Some(Box::new(bv1)),
                     bvh_obj_2: Some(Box::new(bv2)),
-                    mesh: Tri::empty(),
+                    tri: Tri::empty(),
                     bb_corner_1: bounding_box.0,
                     bb_corner_2: bounding_box.1,
                     is_leaf: false,
                 };
             }
         }
-    
+
         let axis: usize = rand::thread_rng().gen_range(0..=2);
-        let mut sub_meshes: Vec<Tri> = meshes.to_vec();
-        sub_meshes[start..end].sort_by(|a, b| Self::box_compare(a, b, axis));
-    
-        let mid = start + object_span / 2;
+        tris[start..end].sort_by(|a, b| Self::box_compare(a, b, axis));
+
+        let mid: usize = start + object_span / 2;
+        let (tris1, tris2) = tris.split_at_mut(mid);
         let (bvh_obj_1, bvh_obj_2) = rayon::join(
-            || Self::construct_recursive(&sub_meshes, start, mid),
-            || Self::construct_recursive(&sub_meshes, mid, end),
+            || Self::construct_recursive(tris1, start, mid),
+            || Self::construct_recursive(tris2, 0, end - mid),
         );
         let bounding_box = Self::merge_bounding_boxes(
             (bvh_obj_1.bb_corner_1, bvh_obj_1.bb_corner_2),
             (bvh_obj_2.bb_corner_1, bvh_obj_2.bb_corner_2),
         );
-    
+
         BVH {
             bvh_obj_1: Some(Box::new(bvh_obj_1)),
             bvh_obj_2: Some(Box::new(bvh_obj_2)),
-            mesh: Tri::empty(),
+            tri: Tri::empty(),
             bb_corner_1: bounding_box.0,
             bb_corner_2: bounding_box.1,
             is_leaf: false,
         }
     }
-    
 
     fn box_compare(a: &Tri, b: &Tri, axis: usize) -> Ordering {
         match axis {
@@ -118,6 +122,9 @@ impl BVH {
     }
 
     pub fn merge_bounding_boxes(box1: (Vector3, Vector3), box2: (Vector3, Vector3)) -> (Vector3, Vector3) {
-        (box1.0.min(box1.1.min(box2.0.min(box2.1))), box1.0.max(box1.1.max(box2.0.max(box2.1))))
+        (
+            box1.0.min(box1.1.min(box2.0.min(box2.1))),
+            box1.0.max(box1.1.max(box2.0.max(box2.1))),
+        )
     }
 }

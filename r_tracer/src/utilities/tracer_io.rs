@@ -16,7 +16,6 @@ pub fn load_model(file_path: &str, material: Material) -> Vec<Tri>  {
     let model = parse_stl(content.as_slice()).unwrap();
 
     println!("Computing vertex normals for {}", file_path);
-    let i: usize = 0;
     let counter: Arc<AtomicUsize> = Arc::new(AtomicUsize::new(0));
     let model_tris: Vec<Tri> = model.triangles.par_iter().map(|tri| {
         let vertex1: Vector3 = Vector3::new(tri.vertices[0].x.into(), tri.vertices[0].y.into(), tri.vertices[0].z.into());
