@@ -164,7 +164,7 @@ fn main() {
     //let suzanne_eyes = load_model("../Models/suzanne_eyes.stl", emiss_mat_1);
     let suzanne = load_model("../Models/suzanne.stl", glass);
     //let test_plane = load_model("../Models/test_plane.stl", emiss_mat_1);
-    let fluid_splash = load_model("../Models/fluid_splash.stl", glass);
+    //let fluid_splash = load_model("../Models/fluid_splash.stl", glass);
     let ceiling = load_model("../Models/ceil.stl", white);
     let floor = load_model("../Models/floor.stl", glossy_white4);//green);
     let side1 = load_model("../Models/side1.stl", green);//yellow);//mirror_rough);
@@ -183,19 +183,19 @@ fn main() {
 
 
     let mut meshes: Vec<MeshObject> = vec![];
-    /*meshes.push(MeshObject::new(ceiling, false));
+    meshes.push(MeshObject::new(ceiling, false));
     meshes.push(MeshObject::new(floor, false));
     meshes.push(MeshObject::new(side1, false));
     meshes.push(MeshObject::new(side2, false));
     meshes.push(MeshObject::new(side3, false));
     meshes.push(MeshObject::new(side4, false));
-    meshes.push(MeshObject::new(top_light, false));*/
-    meshes.push(MeshObject::new(bot_light, false));
+    meshes.push(MeshObject::new(top_light, false));
+    //meshes.push(MeshObject::new(bot_light, false));
     /*meshes.push(MeshObject::new(top_light1, false));
     meshes.push(MeshObject::new(top_light2, false));
     meshes.push(MeshObject::new(top_light3, false));*/
-    //meshes.push(MeshObject::new(suzanne, true));
-    meshes.push(MeshObject::new(fluid_splash, true));
+    meshes.push(MeshObject::new(suzanne, true));
+    //meshes.push(MeshObject::new(fluid_splash, true));
     //meshes.push(MeshObject::new(test_plane, true));
     //meshes.push(MeshObject::new(fluid, true));
     //meshes.push(MeshObject::new(light_ball, true));
@@ -205,8 +205,8 @@ fn main() {
     //meshes.push(MeshObject::new(dave8));
 
 
-    let size_x: usize = 3600;
-    let size_y: usize = 2400;
+    let size_x: usize = 1200;
+    let size_y: usize = 800;
 
     let scene: Scene = Scene::new(meshes, spheres, Color::white() * 0.0);
     let camera: Camera = Camera::new(
@@ -214,8 +214,8 @@ fn main() {
         Vector3::new(0.0, -11.0, 0.0),
         scene, 2.7, 
         size_x, size_y,
-        10, 3, 0.3, 
-        2.5, 192.0, 1.3,
+        10, 2, 0.3, 
+        5.0, 192.0, 1.3,
         0
     );
 
