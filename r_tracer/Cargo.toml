@@ -11,6 +11,9 @@ pk_stl = "0.3.1"
 obj-rs = "0.7.1"
 image = "0.24.6"
 
+[profile.release]
+debug = true
+
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
 

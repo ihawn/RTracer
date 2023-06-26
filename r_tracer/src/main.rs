@@ -34,10 +34,10 @@ fn main() {
     let mirror = Material::new(Color::white(), Color::black(), 
         Color::white(), 0.0, 1.0, 1.0, 0.0, 0.0, true
     );
-    /*let mirror_rough = Material::new(Color::white(), Color::black(), 
-        Color::white() * 0.9, 0.0, 0.93, 1.0, 0.0, 0.0, true
+    let mirror_rough = Material::new(Color::white(), Color::black(), 
+        Color::white() * 0.9, 0.0, 0.8, 1.0, 0.0, 0.0, true
     );
-    let mirror_rough2 = Material::new(Color::white(), Color::black(), 
+    /*let mirror_rough2 = Material::new(Color::white(), Color::black(), 
     Color::white() * 0.9, 0.0, 0.8, 1.0, 0.0, 0.0, true
 );
 
@@ -96,15 +96,20 @@ fn main() {
         Color::white(), 0.0, 0.3, 1.0, 0.0, 0.0, true
     );*/
 
+    let glossy_white = Material::new(Color::new(0.95, 0.05, 1.0), Color::black(),
+        Color::new(0.1, 1.0, 0.1), 0.0, 1.0, 0.5, 0.0, 0.0, true
+    );
 
 
 
     let emiss_mat_1 = Material::new(Color::black(), Color::white(),
         Color::white(), 1.0, 0.0, 0.0, 0.0, 0.0, true
     );
-
-    let glass = Material::new(Color::white()*0.8, Color::black(),
-        Color::white(), 0.0, 1.0, 0.5, 0.5, 1.5, true
+    let plastic = Material::new(Color::white()*0.9, Color::black(),
+        Color::white(), 0.0, 0.95, 0.35, 0.65, 1.5, true
+    );
+    let glass = Material::new(Color::white()*0.9, Color::black(),
+        Color::white(), 0.0, 0.9, 0.0, 1.0, 1.5, true
     );
     /*let frosted_glass = Material::new_dieletric(Color::white(), 0.9, 1.5);
     let water = Material::new_dieletric(Color::white(), 1.0, 1.333);
@@ -115,6 +120,10 @@ fn main() {
     //let suzanne_noeyes = load_model("../Models/suzanne_noeyes.stl", yellow1);
     //let suzanne_eyes = load_model("../Models/suzanne_eyes.stl", emiss_mat_1);
     let suzanne = load_model("../Models/suzanne.stl", yellow);
+    let suzanne2 = load_model("../Models/suzanne2.stl", glossy_white);
+    let suzanne3 = load_model("../Models/suzanne3.stl", plastic);
+    let suzanne4 = load_model("../Models/suzanne4.stl", mirror);
+    let suzanne5 = load_model("../Models/suzanne5.stl", mirror_rough);
     //let test_plane = load_model("../Models/test_plane.stl", emiss_mat_1);
     //let fluid_splash = load_model("../Models/fluid_splash.stl", glass);
     let ceiling = load_model("../Models/ceil.stl", white);
@@ -141,6 +150,10 @@ fn main() {
     meshes.push(MeshObject::new(top_light2, false));
     meshes.push(MeshObject::new(top_light3, false));*/
     meshes.push(MeshObject::new(suzanne, true));
+    meshes.push(MeshObject::new(suzanne2, true));
+    meshes.push(MeshObject::new(suzanne3, true));
+    meshes.push(MeshObject::new(suzanne4, true));
+    meshes.push(MeshObject::new(suzanne5, true));
     //meshes.push(MeshObject::new(fluid_splash, true));
     //meshes.push(MeshObject::new(test_plane, true));
     //meshes.push(MeshObject::new(fluid, true));
@@ -151,16 +164,16 @@ fn main() {
     //meshes.push(MeshObject::new(dave8));
 
 
-    let size_x: usize = 1200;
-    let size_y: usize = 800;
+    let size_x: usize = 1800;
+    let size_y: usize = 1200;
 
     let scene: Scene = Scene::new(meshes, Color::white() * 0.0);
     let camera: Camera = Camera::new(
         Vector3::new(-200.0, 0.0, 10.0),
-        Vector3::new(0.0, 18.0, 0.0),
+        Vector3::new(0.0, 22.0, 0.0),
         scene, 2.0, 
         size_x, size_y,
-        10, 2, 0.3, 
+        15, 3, 0.3, 
         0.0, 192.0, 1.3,
         0
     );
@@ -168,7 +181,7 @@ fn main() {
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
 
     let start_time = Instant::now();
-    let frame: Vector2D<Color> = camera.render_scene(frame_handler, 2500);
+    let frame: Vector2D<Color> = camera.render_scene(frame_handler, 1000);
     let elapsed_time = start_time.elapsed();
 
     let hours = elapsed_time.as_secs() / 3600;

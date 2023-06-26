@@ -7,6 +7,7 @@ use crate::datatypes::material::Material;
 use crate::datatypes::vector3::Vector3;
 use crate::datatypes::color::Color;
 use crate::datatypes::vector2d::Vector2D;
+use crate::utilities::postprocessing::remove_fireflies;
 use std::fs;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -79,7 +80,7 @@ fn import_stl(file_path: &str, material: Material) -> Vec<Tri> {
         );
 
         let current: usize = counter.fetch_add(1, Ordering::Relaxed);
-        if current % 1000 == 0 {
+        if current % 1000 == 0 || model.triangles.len() == current {
             println!("Computing vertex normals: {}/{}", current, model.triangles.len());
         }
         tri
@@ -130,7 +131,7 @@ fn import_obj(file_path: &str, material: Material) -> Vec<Tri> {
 
 pub fn save_vector2d_as_png(vector: &Vector2D<Color>, filename: &str) -> Result<(), image::ImageError> {
     let mut image = RgbImage::new(vector.width as u32, vector.height as u32);
-    for (i, color) in vector.data.iter().enumerate() {
+    for (i, color) in remove_fireflies(vector).data.iter().enumerate() {
         let x = (i % vector.width) as u32;
         let y = (i / vector.width) as u32;
 

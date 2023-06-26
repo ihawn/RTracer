@@ -3,6 +3,7 @@ use crate::datatypes::vector3::Vector3;
 use crate::datatypes::color::Color;
 use crate::datatypes::vector2d::Vector2D;
 use crate::utilities::frame_handler::FrameHandler;
+use crate::utilities::postprocessing::remove_fireflies;
 use crate::spacial::scene::Scene;
 use crate::spacial::ray::Ray;
 use crate::spacial::bvh::BVH;
@@ -120,7 +121,7 @@ impl Camera {
                 new_render *= weight_slice[i];
                 pixel_accumulation = old_render + new_render;            
                 
-                let converted_values: Vec<u32> = pixel_accumulation.data.iter()
+                let converted_values: Vec<u32> = remove_fireflies(&pixel_accumulation).data.iter()
                     .map(|color| color.as_buffer_color()).collect();
 
                 let _update: Result<(), Error> = handler.window.update_with_buffer(

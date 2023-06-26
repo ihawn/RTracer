@@ -13,6 +13,7 @@ use std::time::{Duration, Instant};
 pub mod utilities {
     pub mod frame_handler;
     pub mod tracer_io;
+    pub mod postprocessing;
 }
 
 pub mod datatypes {

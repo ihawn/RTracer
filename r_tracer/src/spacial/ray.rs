@@ -140,8 +140,10 @@ impl Ray {
             } else {
                 let random_val_3 = rand::thread_rng().gen_range(0.0..1.0);
                 let is_dielectric_bounce = (mat.dielectric >= random_val_3) as u8 as f64;
-                let refracted_direction = self.refract_precomputed_cos_theta(hit.normal, ior, cos_theta);  
-                return Vector3::lerp(glossy_direction, refracted_direction, is_dielectric_bounce * mat.smoothness);
+                let refracted_direction = Vector3::lerp(
+                    -1.0*diffuse_direction, self.refract_precomputed_cos_theta(hit.normal, ior, cos_theta), mat.smoothness
+                );  
+                return Vector3::lerp(glossy_direction, refracted_direction, is_dielectric_bounce);
             }
         } else {
             return glossy_direction

@@ -155,6 +155,22 @@ impl Vector3 {
     pub fn magnitude(self) -> f64 {
         self.magnitude_squared().sqrt()
     }
+
+    pub fn morton_code(&self) -> u64 {
+        let mut morton_code: u64 = 0;
+
+        let fixed_x = (self.x * 1024.0).floor() as u64;
+        let fixed_y = (self.y * 1024.0).floor() as u64;
+        let fixed_z = (self.z * 1024.0).floor() as u64;
+
+        for i in 0..10 {
+            morton_code |= (fixed_x & (1 << i)) << (2 * i);
+            morton_code |= (fixed_y & (1 << i)) << ((2 * i) + 1);
+            morton_code |= (fixed_z & (1 << i)) << ((2 * i) + 2);
+        }
+
+        morton_code
+    }
 }
 
 impl std::ops::Add<Vector3> for Vector3 {
