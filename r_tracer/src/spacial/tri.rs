@@ -208,9 +208,9 @@ impl Tri {
         let v: Vector3 = p3 - p1;
     
         let unnormalized_normal: Vector3 = Vector3 {
-            x: u.y * v.z - u.z * v.y,
-            y: u.z * v.x - u.x * v.z,
-            z: u.x * v.y - u.y * v.x,
+            x: u.z * v.y - u.y * v.z,
+            y: u.x * v.z - u.z * v.x,
+            z: u.y * v.x - u.x * v.y,
         };
     
         unnormalized_normal.normalize()

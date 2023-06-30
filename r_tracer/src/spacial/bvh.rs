@@ -58,7 +58,7 @@ impl BVH {
                 bb_corner_1: bb.0,
                 bb_corner_2: bb.1,
                 is_leaf: true,
-                bounding_box_surface_area: Self::get_bounding_box_volume(bb.0, bb.1),
+                bounding_box_surface_area: Self::get_bounding_box_surface_area(bb.0, bb.1),
             };
         } else if object_span == 2 {
             if Self::box_compare(&tris[start], &tris[start + 1], 0) == Ordering::Less {
@@ -80,7 +80,7 @@ impl BVH {
                     bb_corner_1: bounding_box.0,
                     bb_corner_2: bounding_box.1,
                     is_leaf: false,
-                    bounding_box_surface_area: Self::get_bounding_box_volume(bounding_box.0, bounding_box.1),
+                    bounding_box_surface_area: Self::get_bounding_box_surface_area(bounding_box.0, bounding_box.1),
                 };
             } else {
                 let mid = start + 1;
@@ -100,37 +100,33 @@ impl BVH {
                     bb_corner_1: bounding_box.0,
                     bb_corner_2: bounding_box.1,
                     is_leaf: false,
-                    bounding_box_surface_area: Self::get_bounding_box_volume(bounding_box.0, bounding_box.1),
+                    bounding_box_surface_area: Self::get_bounding_box_surface_area(bounding_box.0, bounding_box.1),
                 };
             }
         }
 
-        //let mid: usize = start + object_span / 2;
-        let step_value = object_span/2;//usize::max(object_span/25, 1);
-        let /*mut*/ best_mid: usize = start + step_value;
-        let /*mut*/ best_split_axis = rand::thread_rng().gen_range(0..=2);
-        //let mut smallest_surface_area = f64::INFINITY;
+        let mid: usize = start + object_span/2;
+        let mut best_split_axis = rand::thread_rng().gen_range(0..=2);
+        let mut smallest_surface_area = f64::INFINITY;
 
-        /*for i in 0..3 {
+        for i in 0..3 {
             tris[start..end].sort_by(|a, b| Self::box_compare(a, b, i));
-            for mid in (best_mid+1..end).step_by(step_value) {
-                let (tris1, tris2) = tris.split_at_mut(mid);
-                let area: f64 = Self::get_total_box_surface_area(&tris1) + 
-                    Self::get_total_box_surface_area(&tris2);
-                if area < smallest_surface_area {
-                    smallest_surface_area = area;
-                    best_split_axis = i;
-                    best_mid = mid;
-                }
+            let (tris1, tris2) = tris.split_at_mut(mid);
+            let area: f64 = Self::get_total_box_surface_area(&tris1) + 
+                Self::get_total_box_surface_area(&tris2);
+            if area < smallest_surface_area {
+                smallest_surface_area = area;
+                best_split_axis = i;
             }
-        }*/
+        }
+        
         
         tris[start..end].sort_by(|a, b| Self::box_compare(a, b, best_split_axis));
 
-        let (tris1, tris2) = tris.split_at_mut(best_mid);
+        let (tris1, tris2) = tris.split_at_mut(mid);
         let (bvh_obj_1, bvh_obj_2) = rayon::join(
-            || Self::construct_recursive(tris1, start, best_mid),
-            || Self::construct_recursive(tris2, 0, end - best_mid),
+            || Self::construct_recursive(tris1, start, mid),
+            || Self::construct_recursive(tris2, 0, end - mid),
         );
         let bounding_box = Self::merge_bounding_boxes(
             (bvh_obj_1.bb_corner_1, bvh_obj_1.bb_corner_2),
@@ -144,7 +140,7 @@ impl BVH {
             bb_corner_1: bounding_box.0,
             bb_corner_2: bounding_box.1,
             is_leaf: false,
-            bounding_box_surface_area: Self::get_bounding_box_volume(bounding_box.0, bounding_box.1),
+            bounding_box_surface_area: Self::get_bounding_box_surface_area(bounding_box.0, bounding_box.1),
         }
     }
 
@@ -164,23 +160,26 @@ impl BVH {
         )
     }
 
-    pub fn get_bounding_box_volume(bounding_box_corner_1: Vector3, bounding_box_corner_2: Vector3) -> f64 {
+    pub fn get_bounding_box_surface_area(bounding_box_corner_1: Vector3, bounding_box_corner_2: Vector3) -> f64 {
         let length = (bounding_box_corner_1.x - bounding_box_corner_2.x).abs();
         let width = (bounding_box_corner_1.y - bounding_box_corner_2.y).abs();
         let height = (bounding_box_corner_1.z - bounding_box_corner_2.z).abs();
     
-        length * width * height
+        2.0 * (length * width + length * height + width * height)
     }
 
     pub fn get_total_box_surface_area(tris: &[Tri]) -> f64 {
         if tris.len() == 0 { return f64::INFINITY }
-        let mut bb: (Vector3, Vector3) = (
-            Vector3::new(f64::INFINITY, f64::INFINITY, f64::INFINITY),
-            Vector3::new(f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY)
-        );
-        for t in tris {
-            bb = Self::merge_bounding_boxes(bb, t.bounding_box);
+        let mut area: f64 = 0.0;
+        for t in tris.chunks(2) {
+            if t.len() == 2 {
+                let bb: (Vector3, Vector3) = Self::merge_bounding_boxes(t[0].bounding_box, t[1].bounding_box);
+                area += Self::get_bounding_box_surface_area(bb.0, bb.1)
+            } else {
+                let bb: (Vector3, Vector3) = t[0].bounding_box;
+                area += Self::get_bounding_box_surface_area(bb.0, bb.1)
+            }
         }
-        Self::get_bounding_box_volume(bb.0, bb.1)
+        area
     }
 }

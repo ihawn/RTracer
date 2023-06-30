@@ -109,13 +109,13 @@ fn import_obj(file_path: &str, material: Material) -> Vec<Tri> {
         let vert2 = vertices[p2_index];
         let vert3 = vertices[p3_index];
 
-        let p1: Vector3 = Vector3::new(vert1.position[0] as f64, vert1.position[1] as f64, vert1.position[2] as f64);
-        let p2: Vector3 = Vector3::new(vert2.position[0] as f64, vert2.position[1] as f64, vert2.position[2] as f64);
-        let p3: Vector3 = Vector3::new(vert3.position[0] as f64, vert3.position[1] as f64, vert3.position[2] as f64);
+        let p1: Vector3 = Vector3::new(vert1.position[0] as f64, vert1.position[2] as f64, vert1.position[1] as f64);
+        let p2: Vector3 = Vector3::new(vert2.position[0] as f64, vert2.position[2] as f64, vert2.position[1] as f64);
+        let p3: Vector3 = Vector3::new(vert3.position[0] as f64, vert3.position[2] as f64, vert3.position[1] as f64);
 
-        let p1_normal: Vector3 = Vector3::new(vert1.normal[0] as f64, vert1.normal[1] as f64, vert1.normal[2] as f64);
-        let p2_normal: Vector3 = Vector3::new(vert2.normal[0] as f64, vert2.normal[1] as f64, vert2.normal[2] as f64);
-        let p3_normal: Vector3 = Vector3::new(vert3.normal[0] as f64, vert3.normal[1] as f64, vert3.normal[2] as f64);
+        let p1_normal: Vector3 = Vector3::new(vert1.normal[0] as f64, vert1.normal[2] as f64, vert1.normal[1] as f64);
+        let p2_normal: Vector3 = Vector3::new(vert2.normal[0] as f64, vert2.normal[2] as f64, vert2.normal[1] as f64);
+        let p3_normal: Vector3 = Vector3::new(vert3.normal[0] as f64, vert3.normal[2] as f64, vert3.normal[1] as f64);
 
 
         let triangle = Tri::new(p1, p2, p3, p1_normal, p2_normal, p3_normal,
