@@ -16,33 +16,33 @@ use std::time::Instant;
 fn main() {
 
     let red = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.15, 0.0, 
-        0.0, true, None
+        Color::white(), Color::black(), 0.0, 0.9, 0.15, 0.0, 
+        0.0, true, None, None, None, None
     );
     let green = Material::new(Color::new(0.3, 1.0, 0.3), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.15, 0.0, 
-        0.0,true, None
+        Color::white(), Color::black(), 0.0, 0.9, 0.15, 0.0, 
+        0.0,true, None, None, None, None
     );
     let blue = Material::new(Color::new(0.3, 0.3, 1.0), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.15, 0.0, 
-        0.0, true, None
+        Color::white(), Color::black(), 0.0, 0.9, 0.15, 0.0, 
+        0.0, true, None, None, None, None
     );
     let yellow = Material::new(Color::new(1.0, 1.0, 0.3), Color::black(), 
-        Color::white(), 0.0, 0.9, 0.0, 0.0, 
-        0.0, true, Some(0)
+        Color::white(), Color::black(), 5.0, 0.9, 1.0, 0.0, 
+        1.5, true, None, None, Some(0), None
     );
     let white = Material::new(Color::white(), Color::black(), 
-        Color::white(), 0.0, 1.0, 0.0, 0.0, 
-        0.0, true, Some(0)
+        Color::white(),  Color::black(),0.0, 1.0, 0.0, 0.0, 
+        0.0, true, Some(0), None, None, None
     );
 
     let mirror = Material::new(Color::white(), Color::black(), 
-        Color::white(), 0.0, 1.0, 1.0, 0.0, 
-        0.0, true, None
+        Color::white(),  Color::black(),0.0, 1.0, 1.0, 0.0, 
+        0.0, true, None, None, None, None
     );
     let mirror_rough = Material::new(Color::white(), Color::black(), 
-        Color::white() * 0.9, 0.0, 0.8, 1.0, 
-        0.0, 0.0, true, None
+        Color::white() * 0.9,  Color::black(),0.0, 0.8, 1.0, 
+        0.0, 0.0, true, None, None, None, None
     );
     /*let mirror_rough2 = Material::new(Color::white(), Color::black(), 
     Color::white() * 0.9, 0.0, 0.8, 1.0, 0.0, 0.0, true
@@ -104,23 +104,23 @@ fn main() {
     );*/
 
     let glossy_white = Material::new(Color::new(0.95, 0.05, 1.0), Color::black(),
-        Color::new(0.1, 1.0, 0.1), 0.0, 1.0, 0.5, 0.0, 
-        0.0, true, None
+        Color::new(0.1, 1.0, 0.1),  Color::black(),0.0, 1.0, 0.5, 0.0, 
+        0.0, true, None, None, None, None
     );
 
 
 
     let emiss_mat_1 = Material::new(Color::black(), Color::white(),
-        Color::white(), 1.0, 0.0, 0.0, 0.0, 
-        0.0, true, None
+        Color::white(), Color::black(), 1.0, 0.0, 0.0, 0.0, 
+        0.0, true, None, None, None, None
     );
     let plastic = Material::new(Color::white()*0.9, Color::black(),
-        Color::white(), 0.0, 0.95, 0.35, 0.65, 
-        1.5, true, None
+        Color::white(), Color::white()*0.9, 0.0, 0.95, 0.35, 0.65, 
+        1.5, true, None, None, None, None
     );
     let glass = Material::new(Color::white()*0.9, Color::black(),
-        Color::white(), 0.0, 0.9, 0.0, 1.0, 
-        1.5, true, None
+        Color::white(), Color::white()*0.9, 0.0, 0.9, 0.0, 1.0, 
+        1.5, true, None, None, None, None
     );
     /*let frosted_glass = Material::new_dieletric(Color::white(), 0.9, 1.5);
     let water = Material::new_dieletric(Color::white(), 1.0, 1.333);

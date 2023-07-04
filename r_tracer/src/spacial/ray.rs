@@ -2,14 +2,12 @@ use crate::datatypes::vector3::Vector3;
 use crate::datatypes::vector2::Vector2;
 use crate::spacial::camera::Camera;
 use crate::datatypes::color::Color;
-use crate::datatypes::hit_point::HitPoint;
+use crate::datatypes::hit_point::{HitPoint, self};
 use crate::spacial::tri::Tri;
 use crate::spacial::bvh::BVH;
 use crate::datatypes::material::Material;
 use crate::spacial::scene::Scene;
 use rand::Rng;
-
-use super::scene;
 
 
 #[derive(Copy, Clone)]
@@ -91,24 +89,28 @@ impl Ray {
 
             if !hit_point.is_empty {
 
+                let (
+                    diffuse_color, emission_color,
+                    specular_color, dielectric_color
+                ) = Self::get_colors(&hit_point, scene);
                 let material: Material = hit_point.object.material;
+
                 let random_val: f64 = rand::thread_rng().gen_range(0.0..1.0);
 
                 self.origin = hit_point.point;
                 self.direction = self.ray_redirect(hit_point, random_val);
 
-                let emitted_light: Color = material.emission_color;
                 if material.visible {
-                    incoming_light = emitted_light * ray_color + incoming_light;
+                    incoming_light = emission_color * ray_color + incoming_light;
                 }
                 
                 if material.dielectric > 0.0 {
-                    ray_color = ray_color * material.color;
+                    ray_color = dielectric_color * material.diffuse_color;
                 } else {
                     let light_strength: f64 = hit_point.normal * self.direction;
                     ray_color = ray_color * Color::lerp(
-                        Self::get_diffuse_color(&hit_point, scene) * light_strength * exposure, 
-                        material.specular_color * light_strength * exposure, 
+                        diffuse_color * light_strength * exposure, 
+                        specular_color * light_strength * exposure, 
                         ((material.specular >= random_val) as u8) as f64
                     );
                 }
@@ -159,20 +161,39 @@ impl Ray {
         r0 + (1.0 - r0) * (1.0 - cosine).powf(5.0)
     }
 
-    fn get_diffuse_color(hit: &HitPoint, scene: &Scene) -> Color {
-        if hit.object.material.albedo_index == None {
-            return hit.object.material.color;
-        } else {
-            let i: usize = hit.object.material.albedo_index.unwrap();
-            let uv: Vector2 = hit.barycentric_coords.x*hit.object.p1_texture
-                + hit.barycentric_coords.y*hit.object.p2_texture
-                + hit.barycentric_coords.z*hit.object.p3_texture;
-            let width: usize = scene.albedo_maps[i].width;
-            let height: usize = scene.albedo_maps[i].height;
-            return *scene.albedo_maps[i].get(
-                (f64::round((width as f64 - 1.0) * uv.x) as usize) % width,
-                (f64::round((height as f64 - 1.0) * uv.y) as usize) % height
-            ).unwrap();
+    fn get_colors(hit: &HitPoint, scene: &Scene) -> (Color, Color, Color, Color) {
+        let mut diffuse_col: Color = hit.object.material.diffuse_color;
+        let mut emission_col: Color = hit.object.material.emission_color;
+        let mut specular_col: Color = hit.object.material.specular_color;
+        let mut dielectric_col: Color = hit.object.material.dielectric_color;
+
+        let uv: Vector2 = hit.barycentric_coords.x*hit.object.p1_texture
+            + hit.barycentric_coords.y*hit.object.p2_texture
+            + hit.barycentric_coords.z*hit.object.p3_texture;
+
+        if hit.object.material.diffuse_color_map_index != None {
+            diffuse_col = Self::get_map_color(scene, uv, hit.object.material.diffuse_color_map_index.unwrap());
         }
+        if hit.object.material.emission_color_map_index != None {
+            emission_col = Self::get_map_color(scene, uv, hit.object.material.emission_color_map_index.unwrap());
+        }
+        if hit.object.material.specular_color_map_index != None {
+            specular_col = Self::get_map_color(scene, uv, hit.object.material.specular_color_map_index.unwrap());
+        }
+        if hit.object.material.dielectric_color_map_index != None {
+            dielectric_col = Self::get_map_color(scene, uv, hit.object.material.dielectric_color_map_index.unwrap());
+        }
+
+
+        (diffuse_col, emission_col, specular_col, dielectric_col)
+    }
+
+    fn get_map_color(scene: &Scene, uv: Vector2, index: usize) -> Color {
+        let width: usize = scene.texture_maps[index].width;
+        let height: usize = scene.texture_maps[index].height;
+        *scene.texture_maps[index].get(
+            (f64::round((width as f64 - 1.0) * uv.x) as usize) % width, 
+            (f64::round((height as f64 - 1.0) * uv.y) as usize) % height
+        ).unwrap()
     }
 }
