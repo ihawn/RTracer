@@ -184,7 +184,7 @@ impl Tri {
     }
 
     pub fn compute_hitpoint_normal(&self, hit_location: Vector3) -> Vector3 {
-        let barycentric_coords = self.compute_barycentric_coords(hit_location);
+        let barycentric_coords = self.compute_barycentric_coords(hit_location); //todo: remove redundant calculation
 
         let p1_normal_weight = barycentric_coords.x;
         let p2_normal_weight = barycentric_coords.y;

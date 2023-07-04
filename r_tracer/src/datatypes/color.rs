@@ -41,6 +41,10 @@ impl Color {
     pub fn lerp(v1: Color, v2: Color, t: f64) -> Color {
         v1*(1.0 - t) + v2*t
     }
+
+    pub fn to_greyscale(self: &Color) -> f64 {
+        (0.2989 * self.red) + (0.5870 * self.green) + (0.1140 * self.blue)
+    }
 }
 
 impl std::ops::Mul<Color> for Color {
