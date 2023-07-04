@@ -91,21 +91,22 @@ impl Ray {
 
                 let (
                     diffuse_color, emission_color,
-                    specular_color, dielectric_color
-                ) = Self::get_colors(&hit_point, scene);
-                let material: Material = hit_point.object.material;
+                    specular_color, dielectric_color,
+                    normal_map_vector
+                ) = Self::get_maps(&hit_point, scene);
 
+                let material: Material = hit_point.object.material;
                 let random_val: f64 = rand::thread_rng().gen_range(0.0..1.0);
 
                 self.origin = hit_point.point;
-                self.direction = self.ray_redirect(hit_point, random_val);
+                self.direction = self.ray_redirect(hit_point, random_val, normal_map_vector);
 
                 if material.visible {
                     incoming_light = emission_color * ray_color + incoming_light;
                 }
                 
                 if material.dielectric > 0.0 {
-                    ray_color = dielectric_color * material.diffuse_color;
+                    ray_color = ray_color * dielectric_color;
                 } else {
                     let light_strength: f64 = hit_point.normal * self.direction;
                     ray_color = ray_color * Color::lerp(
@@ -124,12 +125,16 @@ impl Ray {
         incoming_light
     }
 
-    fn ray_redirect(self: Ray, hit: HitPoint, random_val: f64) -> Vector3 {        
+    fn ray_redirect(self: Ray, hit: HitPoint, random_val: f64, normal_map_vector: Vector3) -> Vector3 {        
         let mat: Material = hit.object.material;
         let is_specular_bounce = (mat.specular >= random_val) as u8 as f64;
+        let mut normal: Vector3 = hit.normal;
+        if normal_map_vector != Vector3::zero() {
+            normal = (normal + normal_map_vector*hit.object.material.normal_strength).normalize();
+        }
 
-        let diffuse_direction: Vector3 = Vector3::random_hemisphere_normal(hit.normal);
-        let specular_direction: Vector3 = self.reflect(hit.normal);
+        let diffuse_direction: Vector3 = Vector3::random_hemisphere_normal(normal);
+        let specular_direction: Vector3 = self.reflect(normal);
         let glossy_direction: Vector3 = Vector3::lerp(diffuse_direction, specular_direction, mat.smoothness * is_specular_bounce);
 
         if mat.dielectric > 0.0 {
@@ -137,7 +142,7 @@ impl Ray {
             if hit.is_front_face { ior = 1.0 / ior }
             let random_val_2: f64 = rand::thread_rng().gen_range(0.0..1.0);
     
-            let cos_theta: f64 = f64::min(-1.0 * self.direction * hit.normal, 1.0);
+            let cos_theta: f64 = f64::min(-1.0 * self.direction * normal, 1.0);
             let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
     
             if ior * sin_theta > 1.0 || Self::get_reflectance(cos_theta, ior) > random_val_2 {
@@ -146,7 +151,7 @@ impl Ray {
                 let random_val_3 = rand::thread_rng().gen_range(0.0..1.0);
                 let is_dielectric_bounce = (mat.dielectric >= random_val_3) as u8 as f64;
                 let refracted_direction = Vector3::lerp(
-                    -1.0*diffuse_direction, self.refract_precomputed_cos_theta(hit.normal, ior, cos_theta), mat.smoothness
+                    -1.0*diffuse_direction, self.refract_precomputed_cos_theta(normal, ior, cos_theta), mat.smoothness
                 );  
                 return Vector3::lerp(glossy_direction, refracted_direction, is_dielectric_bounce);
             }
@@ -161,11 +166,12 @@ impl Ray {
         r0 + (1.0 - r0) * (1.0 - cosine).powf(5.0)
     }
 
-    fn get_colors(hit: &HitPoint, scene: &Scene) -> (Color, Color, Color, Color) {
+    fn get_maps(hit: &HitPoint, scene: &Scene) -> (Color, Color, Color, Color, Vector3) {
         let mut diffuse_col: Color = hit.object.material.diffuse_color;
         let mut emission_col: Color = hit.object.material.emission_color;
         let mut specular_col: Color = hit.object.material.specular_color;
         let mut dielectric_col: Color = hit.object.material.dielectric_color;
+        let mut normal_map_vec: Vector3 = Vector3::zero();
 
         let uv: Vector2 = hit.barycentric_coords.x*hit.object.p1_texture
             + hit.barycentric_coords.y*hit.object.p2_texture
@@ -183,15 +189,19 @@ impl Ray {
         if hit.object.material.dielectric_color_map_index != None {
             dielectric_col = Self::get_map_color(scene, uv, hit.object.material.dielectric_color_map_index.unwrap());
         }
+        if hit.object.material.normal_map_index != None {
+            normal_map_vec = (Self::get_map_color(
+                scene, uv, hit.object.material.normal_map_index.unwrap()
+            ).to_vector3() * 2.0 - Vector3::one()).normalize();
+        }
 
-
-        (diffuse_col, emission_col, specular_col, dielectric_col)
+        (diffuse_col, emission_col, specular_col, dielectric_col, normal_map_vec)
     }
 
-    fn get_map_color(scene: &Scene, uv: Vector2, index: usize) -> Color {
-        let width: usize = scene.texture_maps[index].width;
-        let height: usize = scene.texture_maps[index].height;
-        *scene.texture_maps[index].get(
+    fn get_map_color(scene: &Scene, uv: Vector2, map_index: usize) -> Color {
+        let width: usize = scene.texture_maps[map_index].width;
+        let height: usize = scene.texture_maps[map_index].height;
+        *scene.texture_maps[map_index].get(
             (f64::round((width as f64 - 1.0) * uv.x) as usize) % width, 
             (f64::round((height as f64 - 1.0) * uv.y) as usize) % height
         ).unwrap()

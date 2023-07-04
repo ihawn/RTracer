@@ -13,19 +13,21 @@ pub struct Material {
     pub specular: f64,
     pub dielectric: f64,
     pub index_of_refraction: f64,
+    pub normal_strength: f64,
     pub visible: bool,
     pub diffuse_color_map_index: Option<usize>,
     pub emission_color_map_index: Option<usize>,
     pub specular_color_map_index: Option<usize>,
-    pub dielectric_color_map_index: Option<usize>
+    pub dielectric_color_map_index: Option<usize>,
+    pub normal_map_index: Option<usize>
 }
 
 impl Material {
     pub fn new(color: Color, emiss_color: Color, spec_color: Color, dielectric_color: Color,
         emiss_strength: f64, smoothness: f64, specular: f64,
-        dielectric: f64, ior: f64, visible: bool, color_map_id: Option<usize>,
+        dielectric: f64, ior: f64, normal_strength: f64, visible: bool, color_map_id: Option<usize>,
         emission_map_id: Option<usize>, specular_map_id: Option<usize>,
-        dielectric_color_map_id: Option<usize>) -> Material {
+        dielectric_color_map_id: Option<usize>, normal_map_id: Option<usize>) -> Material {
         Material {
             diffuse_color: color,
             emission_color: emiss_color,
@@ -36,11 +38,13 @@ impl Material {
             specular: specular,
             dielectric: dielectric,
             index_of_refraction: ior,
+            normal_strength: normal_strength,
             visible: visible,
             diffuse_color_map_index: color_map_id,
             emission_color_map_index: emission_map_id,
             specular_color_map_index: specular_map_id,
-            dielectric_color_map_index: dielectric_color_map_id
+            dielectric_color_map_index: dielectric_color_map_id,
+            normal_map_index: normal_map_id
         }
     }
 
@@ -55,11 +59,13 @@ impl Material {
             specular: 0.0,
             dielectric: 0.0,
             index_of_refraction: 0.0,
+            normal_strength: 0.0,
             visible: false,
             diffuse_color_map_index: None,
             emission_color_map_index: None,
             specular_color_map_index: None,
-            dielectric_color_map_index: None
+            dielectric_color_map_index: None,
+            normal_map_index: None
         }
     }
 }

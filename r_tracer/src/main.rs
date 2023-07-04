@@ -17,32 +17,39 @@ fn main() {
 
     let red = Material::new(Color::new(1.0, 0.3, 0.3), Color::black(), 
         Color::white(), Color::black(), 0.0, 0.9, 0.15, 0.0, 
-        0.0, true, None, None, None, None
+        0.0, 0.0, true, None, None, None, 
+        None, None
     );
     let green = Material::new(Color::new(0.3, 1.0, 0.3), Color::black(), 
         Color::white(), Color::black(), 0.0, 0.9, 0.15, 0.0, 
-        0.0,true, None, None, None, None
+        0.0,0.0, true, None, None, None, 
+        None, None
     );
     let blue = Material::new(Color::new(0.3, 0.3, 1.0), Color::black(), 
         Color::white(), Color::black(), 0.0, 0.9, 0.15, 0.0, 
-        0.0, true, None, None, None, None
+        0.0, 0.0, true, None, None, None, 
+        None, None
     );
     let yellow = Material::new(Color::new(1.0, 1.0, 0.3), Color::black(), 
-        Color::white(), Color::black(), 5.0, 0.9, 1.0, 0.0, 
-        1.5, true, None, None, Some(0), None
+        Color::white(), Color::black(), 0.0, 0.9, 0.0, 0.0, 
+        0.0, 0.0, true, Some(0), None, None, 
+        None, None
     );
     let white = Material::new(Color::white(), Color::black(), 
         Color::white(),  Color::black(),0.0, 1.0, 0.0, 0.0, 
-        0.0, true, Some(0), None, None, None
+        0.0, 0.0, true, Some(0), None, None, 
+        None, None
     );
 
     let mirror = Material::new(Color::white(), Color::black(), 
         Color::white(),  Color::black(),0.0, 1.0, 1.0, 0.0, 
-        0.0, true, None, None, None, None
+        0.0, 0.0, true, None, None, None, 
+        None, None
     );
     let mirror_rough = Material::new(Color::white(), Color::black(), 
         Color::white() * 0.9,  Color::black(),0.0, 0.8, 1.0, 
-        0.0, 0.0, true, None, None, None, None
+        0.0, 0.0, 0.0, true, None, None, None, 
+        None, None
     );
     /*let mirror_rough2 = Material::new(Color::white(), Color::black(), 
     Color::white() * 0.9, 0.0, 0.8, 1.0, 0.0, 0.0, true
@@ -105,23 +112,34 @@ fn main() {
 
     let glossy_white = Material::new(Color::new(0.95, 0.05, 1.0), Color::black(),
         Color::new(0.1, 1.0, 0.1),  Color::black(),0.0, 1.0, 0.5, 0.0, 
-        0.0, true, None, None, None, None
+        0.0, 0.0, true, None, None, None, 
+        None, None
     );
 
 
 
     let emiss_mat_1 = Material::new(Color::black(), Color::white(),
         Color::white(), Color::black(), 1.0, 0.0, 0.0, 0.0, 
-        0.0, true, None, None, None, None
+        0.0, 0.0, true, None, None, None, 
+        None, None
     );
     let plastic = Material::new(Color::white()*0.9, Color::black(),
         Color::white(), Color::white()*0.9, 0.0, 0.95, 0.35, 0.65, 
-        1.5, true, None, None, None, None
+        1.5, 0.0, true, None, None, None, 
+        None, None
     );
     let glass = Material::new(Color::white()*0.9, Color::black(),
         Color::white(), Color::white()*0.9, 0.0, 0.9, 0.0, 1.0, 
-        1.5, true, None, None, None, None
+        1.5, 0.0, true, None, None, None, 
+        None, None
     );
+
+    let brick = Material::new(Color::black(), Color::black(),
+    Color::black(),  Color::black(),
+    0.0, 0.0, 0.0, 0.0, 
+    0.0, 5.0, true, Some(1), None, None, 
+    None, Some(2)
+);
     /*let frosted_glass = Material::new_dieletric(Color::white(), 0.9, 1.5);
     let water = Material::new_dieletric(Color::white(), 1.0, 1.333);
     let blue_glass = Material::new_dieletric(Color::new(0.8, 0.8, 1.0), 1.0, 1.5);*/
@@ -145,6 +163,7 @@ fn main() {
     let side4 = load_model("../Models/side4.stl", blue);
     let top_light = load_model("../Models/top_light.stl", emiss_mat_1);
     let top_light_big = load_model("../Models/top_light_big.stl", emiss_mat_1);
+    let test_sphere = load_model("../Models/test_sphere.obj", brick);
     /*let bot_light = load_model("../Models/bot_light.stl", emiss_mat_1);
     let ico_sphere = load_model("../Models/ico.stl", mirror);*/
 
@@ -162,7 +181,8 @@ fn main() {
     /*meshes.push(MeshObject::new(top_light1, false));
     meshes.push(MeshObject::new(top_light2, false));
     meshes.push(MeshObject::new(top_light3, false));*/
-    meshes.push(MeshObject::new(suzanne, true));
+    //meshes.push(MeshObject::new(suzanne, true));
+    meshes.push(MeshObject::new(test_sphere, true));
     /*meshes.push(MeshObject::new(suzanne2, true));
     meshes.push(MeshObject::new(suzanne3, true));
     meshes.push(MeshObject::new(suzanne4, true));
@@ -183,7 +203,11 @@ fn main() {
     let mut albedo_maps: Vec<Vector2D<Color>> = vec![];
 
     let test_uv: Vector2D<Color> = import_texture("../Textures/uv_test.jpg");
+    let stone_brick_col: Vector2D<Color> = import_texture("C:/Users/Isaac/Desktop/StoneBricksBeige015/StoneBricksBeige015_COL_2K.jpg");
+    let stone_brick_normal: Vector2D<Color> = import_texture("C:/Users/Isaac/Desktop/StoneBricksBeige015/StoneBricksBeige015_NRM_2K.jpg");
     albedo_maps.push(test_uv);
+    albedo_maps.push(stone_brick_col);
+    albedo_maps.push(stone_brick_normal);
 
     let scene: Scene = Scene::new(meshes, albedo_maps, Color::white() * 0.0);
     let camera: Camera = Camera::new(

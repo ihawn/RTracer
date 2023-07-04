@@ -4,7 +4,7 @@ use std::f64::consts::PI;
 use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Vector3 {
     pub x: f64,
     pub y: f64,
