@@ -120,19 +120,19 @@ fn main() {
     //let suzanne_noeyes = load_model("../Models/suzanne_noeyes.stl", yellow1);
     //let suzanne_eyes = load_model("../Models/suzanne_eyes.stl", emiss_mat_1);
     let suzanne = load_model("../Models/suzanne.stl", yellow);
-    /*let suzanne2 = load_model("../Models/suzanne2.stl", glossy_white);
+    let suzanne2 = load_model("../Models/suzanne2.stl", glossy_white);
     let suzanne3 = load_model("../Models/suzanne3.stl", plastic);
     let suzanne4 = load_model("../Models/suzanne4.stl", mirror);
-    let suzanne5 = load_model("../Models/suzanne5.stl", mirror_rough);*/
+    let suzanne5 = load_model("../Models/suzanne5.stl", mirror_rough);
     //let test_plane = load_model("../Models/test_plane.stl", emiss_mat_1);
     //let fluid_splash = load_model("../Models/fluid_splash.stl", glass);
     //let ceiling = load_model("../Models/ceil.stl", white);
     let floor = load_model("../Models/floor.stl", white);
-    /*let side1 = load_model("../Models/side1.stl", red);
+    let side1 = load_model("../Models/side1.stl", red);
     let side2 = load_model("../Models/side2.stl", green);
     let side3 = load_model("../Models/side3.stl", white);
-    let side4 = load_model("../Models/side4.stl", blue);*/
-    //let top_light = load_model("../Models/top_light.stl", emiss_mat_1);
+    let side4 = load_model("../Models/side4.stl", blue);
+    let top_light = load_model("../Models/top_light.stl", emiss_mat_1);
     let top_light_big = load_model("../Models/top_light_big.stl", emiss_mat_1);
     /*let bot_light = load_model("../Models/bot_light.stl", emiss_mat_1);
     let ico_sphere = load_model("../Models/ico.stl", mirror);*/
@@ -141,21 +141,21 @@ fn main() {
     let mut meshes: Vec<MeshObject> = vec![];
     //meshes.push(MeshObject::new(ceiling, false));
     meshes.push(MeshObject::new(floor, false));
-    /*meshes.push(MeshObject::new(side1, false));
+    meshes.push(MeshObject::new(side1, false));
     meshes.push(MeshObject::new(side2, false));
     meshes.push(MeshObject::new(side3, false));
-    meshes.push(MeshObject::new(side4, false));*/
-    //meshes.push(MeshObject::new(top_light, false));
-    meshes.push(MeshObject::new(top_light_big, false));
+    meshes.push(MeshObject::new(side4, false));
+    meshes.push(MeshObject::new(top_light, false));
+    //meshes.push(MeshObject::new(top_light_big, false));
     //meshes.push(MeshObject::new(bot_light, false));
     /*meshes.push(MeshObject::new(top_light1, false));
     meshes.push(MeshObject::new(top_light2, false));
     meshes.push(MeshObject::new(top_light3, false));*/
     meshes.push(MeshObject::new(suzanne, true));
-    /*meshes.push(MeshObject::new(suzanne2, true));
+    meshes.push(MeshObject::new(suzanne2, true));
     meshes.push(MeshObject::new(suzanne3, true));
     meshes.push(MeshObject::new(suzanne4, true));
-    meshes.push(MeshObject::new(suzanne5, true));*/
+    meshes.push(MeshObject::new(suzanne5, true));
     //meshes.push(MeshObject::new(fluid_splash, true));
     //meshes.push(MeshObject::new(test_plane, true));
     //meshes.push(MeshObject::new(fluid, true));
@@ -166,8 +166,8 @@ fn main() {
     //meshes.push(MeshObject::new(dave8));
 
 
-    let size_x: usize = 1200;
-    let size_y: usize = 800;
+    let size_x: usize = 1800;
+    let size_y: usize = 1200;
 
     let scene: Scene = Scene::new(meshes, Color::white() * 0.0);
     let camera: Camera = Camera::new(
@@ -183,7 +183,7 @@ fn main() {
     let mut frame_handler: FrameHandler = FrameHandler::new(size_x, size_y, "RTracer");
 
     let start_time = Instant::now();
-    let frame: Vector2D<Color> = camera.render_scene(frame_handler, 100);
+    let frame: Vector2D<Color> = camera.render_scene(frame_handler, 6000);
     let elapsed_time = start_time.elapsed();
 
     let hours = elapsed_time.as_secs() / 3600;
