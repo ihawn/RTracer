@@ -1,4 +1,5 @@
 use crate::datatypes::vector3::Vector3;
+use crate::datatypes::vector2::Vector2;
 use crate::datatypes::hit_point::HitPoint;
 use crate::spacial::ray::Ray;
 use crate::spacial::bvh::BVH;
@@ -14,6 +15,10 @@ pub struct Tri {
     pub p1_normal: Vector3,
     pub p2_normal: Vector3,
     pub p3_normal: Vector3,
+    pub p1_texture: Vector2,
+    pub p2_texture: Vector2,
+    pub p3_texture: Vector2,
+
     pub normal: Vector3,
     pub smooth_shading: bool,
 
@@ -27,7 +32,8 @@ pub struct Tri {
 impl Tri {
     pub fn new(p1: Vector3, p2: Vector3, p3: Vector3, 
         p1_normal: Vector3, p2_normal: Vector3, p3_normal: Vector3,
-        normal: Vector3, material: Material) -> Tri {
+        normal: Vector3, p1_texture: Vector2, p2_texture: Vector2,
+        p3_texture: Vector2, material: Material) -> Tri {
         let bb = Self::get_bounding_box(p1, p2, p3);
         Tri {
             p1: p1,
@@ -36,6 +42,9 @@ impl Tri {
             p1_normal: p1_normal,
             p2_normal: p2_normal,
             p3_normal: p3_normal,
+            p1_texture: p1_texture,
+            p2_texture: p2_texture,
+            p3_texture: p3_texture,
             normal: normal,
             material: material,
             is_empty: false,
@@ -54,6 +63,9 @@ impl Tri {
             p1_normal: Vector3::zero(),
             p2_normal: Vector3::zero(),
             p3_normal: Vector3::zero(),
+            p1_texture: Vector2::zero(),
+            p2_texture: Vector2::zero(),
+            p3_texture: Vector2::zero(),
             normal: Vector3::zero(),
             smooth_shading: false,
             is_empty: true,
@@ -184,7 +196,7 @@ impl Tri {
         interpolated_normal.normalize()
     }
     
-    fn compute_barycentric_coords(&self, point: Vector3) -> Vector3 {
+    pub fn compute_barycentric_coords(&self, point: Vector3) -> Vector3 {
         let v0 = self.p2 - self.p1;
         let v1 = self.p3 - self.p1;
         let v2 = point - self.p1;

@@ -7,12 +7,12 @@ use spacial::tri::{Tri, self};
 use spacial::mesh_object::MeshObject;
 use spacial::scene::Scene;
 use spacial::camera::Camera;
-use utilities::tracer_io::{load_model};
+use utilities::file_utilities::{load_model};
 use std::time::{Duration, Instant};
 
 pub mod utilities {
     pub mod frame_handler;
-    pub mod tracer_io;
+    pub mod file_utilities;
     pub mod postprocessing;
 }
 

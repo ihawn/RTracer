@@ -1,4 +1,6 @@
 use crate::datatypes::color::Color;
+use image::{Rgb, RgbImage};
+
 
 #[derive(Copy, Clone)]
 pub struct Material {
@@ -10,13 +12,14 @@ pub struct Material {
     pub specular: f64,
     pub dielectric: f64,
     pub index_of_refraction: f64,
-    pub visible: bool
+    pub visible: bool,
+    pub albedo_index: Option<usize>
 }
 
 impl Material {
     pub fn new(color: Color, emiss_color: Color, spec_color: Color, 
         emiss_strength: f64, smoothness: f64, specular: f64,
-        dielectric: f64, ior: f64, visible: bool) -> Material {
+        dielectric: f64, ior: f64, visible: bool, albedo_id: Option<usize>) -> Material {
         Material {
             color: color,
             emission_color: emiss_color,
@@ -26,7 +29,8 @@ impl Material {
             specular: specular,
             dielectric: dielectric,
             index_of_refraction: ior,
-            visible: visible
+            visible: visible,
+            albedo_index: albedo_id
         }
     }
 
@@ -40,7 +44,8 @@ impl Material {
             specular: 0.0,
             dielectric: 0.0,
             index_of_refraction: 0.0,
-            visible: false
+            visible: false,
+            albedo_index: None
         }
     }
 }

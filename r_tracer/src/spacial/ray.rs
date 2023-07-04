@@ -6,7 +6,10 @@ use crate::datatypes::hit_point::HitPoint;
 use crate::spacial::tri::Tri;
 use crate::spacial::bvh::BVH;
 use crate::datatypes::material::Material;
+use crate::spacial::scene::Scene;
 use rand::Rng;
+
+use super::scene;
 
 
 #[derive(Copy, Clone)]
@@ -74,10 +77,10 @@ impl Ray {
         let ray_direction = (focal_point - ray_origin).normalize();
 
         Ray::new(ray_origin, ray_direction)
-            .cast_ray(bvh, camera.max_bounces, camera.exposure, camera.scene.env_color)
+            .cast_ray(bvh, camera.max_bounces, camera.exposure, &camera.scene)
     }
 
-    pub fn cast_ray(mut self, bvh: &BVH, max_bounces: u32, exposure: f64, env_color: Color) -> Color {
+    pub fn cast_ray(mut self, bvh: &BVH, max_bounces: u32, exposure: f64, scene: &Scene) -> Color {
 
         let mut hit_point: HitPoint;
         let mut incoming_light: Color = Color::black();
@@ -104,14 +107,14 @@ impl Ray {
                 } else {
                     let light_strength: f64 = hit_point.normal * self.direction;
                     ray_color = ray_color * Color::lerp(
-                        material.color * light_strength * exposure, 
+                        Self::get_diffuse_color(&hit_point, scene) * light_strength * exposure, 
                         material.specular_color * light_strength * exposure, 
                         ((material.specular >= random_val) as u8) as f64
                     );
                 }
 
             } else {
-                incoming_light = env_color * ray_color + incoming_light;
+                incoming_light = scene.env_color * ray_color + incoming_light;
                 return incoming_light;
             }
         }
@@ -154,5 +157,22 @@ impl Ray {
         let mut r0: f64 = (1.0 - ior) / (1.0 + ior);
         r0 *= r0;
         r0 + (1.0 - r0) * (1.0 - cosine).powf(5.0)
+    }
+
+    fn get_diffuse_color(hit: &HitPoint, scene: &Scene) -> Color {
+        if hit.object.material.albedo_index == None {
+            return hit.object.material.color;
+        } else {
+            let i: usize = hit.object.material.albedo_index.unwrap();
+            let uv: Vector2 = hit.barycentric_coords.x*hit.object.p1_texture
+                + hit.barycentric_coords.y*hit.object.p2_texture
+                + hit.barycentric_coords.z*hit.object.p3_texture;
+            let width: usize = scene.albedo_maps[i].width;
+            let height: usize = scene.albedo_maps[i].height;
+            return *scene.albedo_maps[i].get(
+                (f64::round((width as f64 - 1.0) * uv.x) as usize) % width,
+                (f64::round((height as f64 - 1.0) * uv.y) as usize) % height
+            ).unwrap();
+        }
     }
 }

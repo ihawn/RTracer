@@ -1,10 +1,11 @@
 use pk_stl::parse_stl;
 use obj::{load_obj, Obj, TexturedVertex};
-use image::{Rgb, RgbImage};
+use image::{Rgb, RgbImage, DynamicImage};
 use rayon::prelude::*;
 use crate::spacial::tri::Tri;
 use crate::datatypes::material::Material;
 use crate::datatypes::vector3::Vector3;
+use crate::datatypes::vector2::Vector2;
 use crate::datatypes::color::Color;
 use crate::datatypes::vector2d::Vector2D;
 use crate::utilities::postprocessing::remove_fireflies;
@@ -13,6 +14,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::fs::File;
 use std::io::BufReader;
+use std::path::Path;
 
 pub fn load_model(file_path: &str, material: Material) -> Vec<Tri> {
     if file_path.ends_with(".obj") {
@@ -76,7 +78,9 @@ fn import_stl(file_path: &str, material: Material) -> Vec<Tri> {
     
         let tri: Tri = Tri::new(
             vertex1, vertex2, vertex3, vertex1_normal, 
-            vertex2_normal, vertex3_normal, face_normal, material
+            vertex2_normal, vertex3_normal, face_normal,
+            Vector2::zero(), Vector2::zero(), 
+            Vector2::zero(), material
         );
 
         let current: usize = counter.fetch_add(1, Ordering::Relaxed);
@@ -117,9 +121,14 @@ fn import_obj(file_path: &str, material: Material) -> Vec<Tri> {
         let p2_normal: Vector3 = Vector3::new(vert2.normal[0] as f64, vert2.normal[2] as f64, vert2.normal[1] as f64);
         let p3_normal: Vector3 = Vector3::new(vert3.normal[0] as f64, vert3.normal[2] as f64, vert3.normal[1] as f64);
 
+        let p1_texture: Vector2 = Vector2::new(vert1.texture[0] as f64, vert1.texture[1] as f64);
+        let p2_texture: Vector2 = Vector2::new(vert2.texture[0] as f64, vert2.texture[1] as f64);
+        let p3_texture: Vector2 = Vector2::new(vert3.texture[0] as f64, vert3.texture[1] as f64);
+
 
         let triangle = Tri::new(p1, p2, p3, p1_normal, p2_normal, p3_normal,
-            Tri::compute_face_normal(p1, p2, p3), material,
+            Tri::compute_face_normal(p1, p2, p3), 
+            p1_texture, p2_texture, p3_texture, material
         );
 
         triangles.push(triangle);
@@ -127,6 +136,28 @@ fn import_obj(file_path: &str, material: Material) -> Vec<Tri> {
 
 
     triangles
+}
+
+pub fn import_texture(path: &str) -> Vector2D<Color> {
+    let image_result = image::open(&Path::new(path));
+    if let Err(err) = image_result {
+        eprintln!("Failed to open image: {}", err);
+        return Vector2D::new(0, 0, Color::black());
+    }
+    
+    let image: DynamicImage = image_result.unwrap();
+    let rgb_image: RgbImage = image.into_rgb8();
+    
+    let width: usize = rgb_image.width() as usize;
+    let height: usize = rgb_image.height() as usize;
+    let mut pixel_vector = Vector2D::new(width, height, Color::black());
+    
+    for (x, y, pixel) in rgb_image.enumerate_pixels() {
+        let color = Color::new(pixel[0] as f64 / 255.0, pixel[1] as f64 / 255.0, pixel[2] as f64 / 255.0);
+        pixel_vector.set(x as usize, y as usize, color);
+    }
+    
+    pixel_vector
 }
 
 pub fn save_vector2d_as_png(vector: &Vector2D<Color>, filename: &str) -> Result<(), image::ImageError> {
