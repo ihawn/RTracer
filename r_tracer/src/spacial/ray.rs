@@ -198,11 +198,9 @@ impl Ray {
             dielectric_col = Self::get_map_color(scene, uv, hit.object.material.dielectric_color_map_index.unwrap());
         }
         if hit.object.material.normal_map_index != None {
-            let temp: Vector3 = (Self::get_map_color(
+            normal_map_vec = (Self::get_map_color(
                 scene, uv, hit.object.material.normal_map_index.unwrap()
             ).to_vector3() * 2.0 - Vector3::one()).normalize();
-
-            normal_map_vec = Vector3::new(temp.y, temp.x, temp.z);
         }
         if hit.object.material.smoothness_map_index != None {
             smoothness_map_val = Self::get_map_color(
@@ -219,11 +217,16 @@ impl Ray {
     }
 
     fn get_map_color(scene: &Scene, uv: Vector2, map_index: usize) -> Color {
-        let width: usize = scene.texture_maps[map_index].width;
-        let height: usize = scene.texture_maps[map_index].height;
-        *scene.texture_maps[map_index].get( 
-            (f64::round((height as f64 - 1.0) * uv.y) as usize) % height,
-            (f64::round((width as f64 - 1.0) * uv.x) as usize) % width
-        ).unwrap()
+        let width: i32 = scene.texture_maps[map_index].width as i32;
+        let height: i32 = scene.texture_maps[map_index].height as i32;
+        
+        let mut wrapped_x = (((width as f64 - 1.0) * uv.x) as i32) % width;
+        let mut wrapped_y = ((height as f64 - (height as f64 - 1.0) * uv.y) as i32) % height;
+        if wrapped_x < 0 { wrapped_x += width; }  
+        if wrapped_y < 0 { wrapped_y += height; }
+        
+        *scene.texture_maps[map_index]
+            .get(wrapped_x as usize, wrapped_y as usize)
+            .unwrap()
     }
 }
