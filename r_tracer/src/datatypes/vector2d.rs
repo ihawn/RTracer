@@ -2,6 +2,7 @@ use std::ops::Mul;
 use std::ops::AddAssign;
 use std::ops::Add;
 use std::ops::MulAssign;
+use std::cmp::PartialEq;
 use crate::datatypes::color::Color;
 
 #[derive(Clone)]
@@ -128,5 +129,14 @@ where
         for i in 0..self.data.len() {
             self.data[i] += other.data[i];
         }
+    }
+}
+
+impl<T: PartialEq> PartialEq for Vector2D<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.width == other.width
+            && self.height == other.height
+            && self.data == other.data
+            && self.default == other.default
     }
 }

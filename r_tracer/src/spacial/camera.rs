@@ -146,6 +146,7 @@ impl Camera {
         let mut pixel_accumulation: Vector2D<Color> = Vector2D::new(
             self.tile_size as usize, self.tile_size as usize, Color::black()
         );
+        let environment_map: &Vector2D<Color> = &self.scene.environment_map.clone().unwrap();
 
         for s in 0..sample_count {
             old_frame = pixel_accumulation;
@@ -154,8 +155,7 @@ impl Camera {
                     let mut pixel_color: Color = Color::black();
                     for _s in 0..self.rays_per_pixel {
                         pixel_color += Ray::cast_ray_from_camera(
-                            &self,
-                            &bvh, x, y
+                            &self, &bvh, environment_map, x, y
                         );
                     }
                     pixel_color /= self.rays_per_pixel;     
@@ -182,13 +182,14 @@ impl Camera {
         let horz: Vec<usize> = (0..frame.width).collect();
         let vert_slice: &[usize] = &vert;
         let horz_slice: &[usize] = &horz;
+        let environment_map: &Vector2D<Color> = &self.scene.environment_map.clone().unwrap();
 
         let frame: Mutex<Vector2D<Color>> = Mutex::new(frame);
         vert_slice.par_iter().for_each(|&x| {
             horz_slice.par_iter().for_each(|&y| {
                 let mut pixel_color: Color = Color::black();
                 for _s in 0..self.rays_per_pixel {
-                    pixel_color += Ray::cast_ray_from_camera(&self, &bvh, x, y);
+                    pixel_color += Ray::cast_ray_from_camera(&self, &bvh, environment_map, x, y);
                 }
                 pixel_color /= self.rays_per_pixel;             
                 let mut frame: MutexGuard<Vector2D<Color>> = frame.lock().unwrap();             

@@ -3,7 +3,7 @@ use std::ops::AddAssign;
 use std::ops::DivAssign;
 use std::ops::MulAssign;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Color {
     pub red: f64,
     pub green: f64,

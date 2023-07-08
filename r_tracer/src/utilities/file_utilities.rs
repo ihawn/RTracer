@@ -139,6 +139,7 @@ fn import_obj(file_path: &str, material: Material) -> Vec<Tri> {
 }
 
 pub fn import_texture(path: &str) -> Vector2D<Color> {
+    println!("Loading texture: {}", path);
     let image_result = image::open(&Path::new(path));
     if let Err(err) = image_result {
         eprintln!("Failed to open image: {}", err);

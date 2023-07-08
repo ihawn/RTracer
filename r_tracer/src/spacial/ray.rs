@@ -1,12 +1,14 @@
 use crate::datatypes::vector3::Vector3;
 use crate::datatypes::vector2::Vector2;
+use crate::datatypes::vector2d::Vector2D;
 use crate::spacial::camera::Camera;
 use crate::datatypes::color::Color;
-use crate::datatypes::hit_point::{HitPoint, self};
+use crate::datatypes::hit_point::HitPoint;
 use crate::spacial::tri::Tri;
 use crate::spacial::bvh::BVH;
 use crate::datatypes::material::Material;
 use crate::spacial::scene::Scene;
+use std::f64::consts::PI;
 use rand::Rng;
 
 
@@ -61,7 +63,7 @@ impl Ray {
         true
     }
 
-    pub fn cast_ray_from_camera(camera: &Camera, bvh: &BVH, x: usize, y: usize) -> Color {
+    pub fn cast_ray_from_camera(camera: &Camera, bvh: &BVH, environment_map: &Vector2D<Color>, x: usize, y: usize) -> Color {
         let projection_point = camera.blur_strength *
         Vector3::random_perturb(Vector2::new(camera.width as f64, camera.height as f64)) + 
         Vector3::new(
@@ -70,15 +72,15 @@ impl Ray {
             (camera.height as f64)/2.0 - x as f64
         ).normalize().rot(camera.rotation);
 
-        let focal_point = camera.position + camera.focal_distance * projection_point.normalize();
-        let ray_origin = camera.position + camera.dof_strength * Vector3::random_perturb(Vector2::new(1.0, 1.0));
-        let ray_direction = (focal_point - ray_origin).normalize();
+        let focal_point: Vector3 = camera.position + camera.focal_distance * projection_point.normalize();
+        let ray_origin: Vector3 = camera.position + camera.dof_strength * Vector3::random_perturb(Vector2::new(1.0, 1.0));
+        let ray_direction: Vector3 = (focal_point - ray_origin).normalize();
 
         Ray::new(ray_origin, ray_direction)
-            .cast_ray(bvh, camera.max_bounces, camera.exposure, &camera.scene)
+            .cast_ray(bvh, camera.max_bounces, camera.exposure, &camera.scene, environment_map)
     }
 
-    pub fn cast_ray(mut self, bvh: &BVH, max_bounces: u32, exposure: f64, scene: &Scene) -> Color {
+    pub fn cast_ray(mut self, bvh: &BVH, max_bounces: u32, exposure: f64, scene: &Scene, environment_map: &Vector2D<Color>) -> Color {
 
         let mut hit_point: HitPoint;
         let mut incoming_light: Color = Color::black();
@@ -120,7 +122,7 @@ impl Ray {
                 }
 
             } else {
-                incoming_light = scene.env_color * ray_color + incoming_light;
+                incoming_light = Self::get_environment_color(scene, environment_map, self.direction) * ray_color + incoming_light;
                 return incoming_light;
             }
         }
@@ -220,8 +222,8 @@ impl Ray {
         let width: i32 = scene.texture_maps[map_index].width as i32;
         let height: i32 = scene.texture_maps[map_index].height as i32;
         
-        let mut wrapped_x = (((width as f64 - 1.0) * uv.x) as i32) % width;
-        let mut wrapped_y = ((height as f64 - (height as f64 - 1.0) * uv.y) as i32) % height;
+        let mut wrapped_x: i32 = (((width as f64 - 1.0) * uv.x) as i32) % width;
+        let mut wrapped_y: i32 = ((height as f64 - (height as f64 - 1.0) * uv.y) as i32) % height;
         if wrapped_x < 0 { wrapped_x += width; }  
         if wrapped_y < 0 { wrapped_y += height; }
         
@@ -229,4 +231,20 @@ impl Ray {
             .get(wrapped_x as usize, wrapped_y as usize)
             .unwrap()
     }
+    
+    fn get_environment_color(scene: &Scene, map: &Vector2D<Color>, mut angle: Vector3) -> Color {
+        if scene.environment_map == None { return scene.env_color }
+        angle = angle.normalize();
+
+        let azimuth: f64 = f64::atan2(angle.x, angle.z);
+        let elevation: f64 = f64::asin(angle.y);
+
+        let width: f64 = map.width as f64;
+        let height: f64 = map.height as f64;
+        let pixel_x: f64 = (azimuth / (2.0 * PI)) * width as f64;
+        let pixel_y: f64 = (elevation / PI + 0.5) * height as f64;
+
+        *map.get(pixel_y as usize, pixel_x as usize).unwrap()
+    }
+    
 }
