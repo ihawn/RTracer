@@ -4,7 +4,7 @@ version = "1.0.0"
 edition = "2021"
 description = "A multithreaded, feature-rich ray tracer"
 license = "MIT"
-keywords = ["raytracer", "graphics", "rendering", "3D", "computer graphics"]
+keywords = ["raytracer", "graphics", "rendering", "3D"]
 categories = ["graphics", "rendering"]
 
 [dependencies]
