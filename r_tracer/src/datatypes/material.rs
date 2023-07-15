@@ -1,6 +1,4 @@
 use crate::datatypes::color::Color;
-use image::{Rgb, RgbImage};
-
 
 #[derive(Copy, Clone)]
 pub struct Material {

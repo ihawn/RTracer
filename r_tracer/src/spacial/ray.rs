@@ -231,7 +231,7 @@ impl Ray {
         *map.get(wrapped_y as usize, wrapped_x as usize)
     }
     
-    fn get_environment_color(scene: &Scene, map: &Vector2D<Color>, mut angle: Vector3) -> Color {
+    fn get_environment_color(scene: &Scene, map: &Vector2D<Color>, angle: Vector3) -> Color {
         if scene.environment_map == None { return scene.env_color }
 
         let azimuth: f32 = f32::atan2(angle.x, angle.y);
