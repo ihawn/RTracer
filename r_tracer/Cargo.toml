@@ -1,7 +1,11 @@
 [package]
 name = "r_tracer"
-version = "0.1.0"
-edition = "2021"
+version = "1.0.0"
+edition = "2023"
+description = "A multithreaded, feature-rich ray tracer"
+license = "MIT"
+keywords = ["raytracer", "graphics", "rendering", "3D", "computer graphics"]
+categories = ["graphics", "rendering"]
 
 [dependencies]
 minifb = "0.24"
