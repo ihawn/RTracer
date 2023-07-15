@@ -9,3 +9,4 @@
   
 ![Splash](https://github.com/ihawn/RTracer/blob/main/Renders/splash.png)
 
+![Brick](https://github.com/ihawn/RTracer/blob/main/Renders/brick.png)
