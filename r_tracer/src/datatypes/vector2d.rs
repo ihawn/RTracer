@@ -19,8 +19,8 @@ impl<T> Vector2D<T> {
         T: Clone,
         T: Copy
     {
-        let size = width * height;
-        let data = vec![default; size];
+        let size: usize = width * height;
+        let data: Vec<T> = vec![default; size];
         Self {
             width,
             height,
@@ -33,22 +33,22 @@ impl<T> Vector2D<T> {
         row * self.width + col
     }
 
-    pub fn get(&self, row: usize, col: usize) -> Option<&T> {
-        let index = self.get_index(row, col);
-        self.data.get(index)
+    pub fn get(&self, row: usize, col: usize) -> &T {
+        let index: usize = self.get_index(row, col);
+        &self.data[index]
     }
 
     pub fn set(&mut self, row: usize, col: usize, value: T) -> Option<()> {
-        let index = self.get_index(row, col);
-        self.data.get_mut(index).map(|element| *element = value)
+        let index: usize = self.get_index(row, col);
+        self.data.get_mut(index).map(|element: &mut T| *element = value)
     }
 }
 
 
-impl<Color> MulAssign<f64> for Vector2D<Color>
-where Color: MulAssign<f64>
+impl<Color> MulAssign<f32> for Vector2D<Color>
+where Color: MulAssign<f32>
 {
-    fn mul_assign(&mut self, other: f64) {
+    fn mul_assign(&mut self, other: f32) {
         for i in 0..self.data.len() {
             self.data[i] *= other;
         }

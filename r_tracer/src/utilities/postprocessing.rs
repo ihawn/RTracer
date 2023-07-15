@@ -9,14 +9,14 @@ pub fn remove_fireflies(color_matrix: &Vector2D<Color>) -> Vector2D<Color> {
 
     for i in 1..color_matrix.height - 1 {
         for j in 1..color_matrix.width - 1 {
-            let current_color: Color = *color_matrix.get(i, j).unwrap();
+            let current_color: Color = *color_matrix.get(i, j);
 
             let mut similar_found = false;
             let mut neighbor_count = 0;
             let mut color_sum = Color::black();
 
             for n in 0..8 {
-                let neighbor_color: Color = *color_matrix.get(i + idx_m[n] as usize, j + idx_n[n] as usize).unwrap();
+                let neighbor_color: Color = *color_matrix.get(i + idx_m[n] as usize, j + idx_n[n] as usize);
                 if (current_color.to_vector3() - neighbor_color.to_vector3()).magnitude() < 0.2 {
                     similar_found = true;
                     break;
@@ -27,7 +27,7 @@ pub fn remove_fireflies(color_matrix: &Vector2D<Color>) -> Vector2D<Color> {
             }
 
             if !similar_found && neighbor_count > 0 {
-                let average_color = color_sum * (1.0 / neighbor_count as f64);
+                let average_color = color_sum * (1.0 / neighbor_count as f32);
                 new_colors.set(i, j, average_color);
             } else {
                 new_colors.set(i, j, current_color);

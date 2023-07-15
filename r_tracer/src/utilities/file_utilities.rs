@@ -1,6 +1,6 @@
 use pk_stl::parse_stl;
 use obj::{load_obj, Obj, TexturedVertex};
-use image::{Rgb, RgbImage, DynamicImage};
+use image::{Rgb, RgbImage, DynamicImage, ImageError};
 use rayon::prelude::*;
 use crate::spacial::tri::Tri;
 use crate::datatypes::material::Material;
@@ -45,7 +45,7 @@ fn import_stl(file_path: &str, material: Material) -> Vec<Tri> {
         let mut vertex2_normal: Vector3 = Vector3::zero();
         let mut vertex3_normal: Vector3 = Vector3::zero();
     
-        let e: f64 = 0.0001;
+        let e: f32 = 0.0001;
         for other_tri in &model.triangles {
             let other_vertex1: Vector3 = Vector3::new(other_tri.vertices[0].x.into(), other_tri.vertices[0].y.into(), other_tri.vertices[0].z.into());
             let other_vertex2: Vector3 = Vector3::new(other_tri.vertices[1].x.into(), other_tri.vertices[1].y.into(), other_tri.vertices[1].z.into());
@@ -113,17 +113,17 @@ fn import_obj(file_path: &str, material: Material) -> Vec<Tri> {
         let vert2 = vertices[p2_index];
         let vert3 = vertices[p3_index];
 
-        let p1: Vector3 = Vector3::new(vert1.position[0] as f64, vert1.position[2] as f64, vert1.position[1] as f64);
-        let p2: Vector3 = Vector3::new(vert2.position[0] as f64, vert2.position[2] as f64, vert2.position[1] as f64);
-        let p3: Vector3 = Vector3::new(vert3.position[0] as f64, vert3.position[2] as f64, vert3.position[1] as f64);
+        let p1: Vector3 = Vector3::new(vert1.position[0] as f32, vert1.position[2] as f32, vert1.position[1] as f32);
+        let p2: Vector3 = Vector3::new(vert2.position[0] as f32, vert2.position[2] as f32, vert2.position[1] as f32);
+        let p3: Vector3 = Vector3::new(vert3.position[0] as f32, vert3.position[2] as f32, vert3.position[1] as f32);
 
-        let p1_normal: Vector3 = Vector3::new(vert1.normal[0] as f64, vert1.normal[2] as f64, vert1.normal[1] as f64);
-        let p2_normal: Vector3 = Vector3::new(vert2.normal[0] as f64, vert2.normal[2] as f64, vert2.normal[1] as f64);
-        let p3_normal: Vector3 = Vector3::new(vert3.normal[0] as f64, vert3.normal[2] as f64, vert3.normal[1] as f64);
+        let p1_normal: Vector3 = Vector3::new(vert1.normal[0] as f32, vert1.normal[2] as f32, vert1.normal[1] as f32);
+        let p2_normal: Vector3 = Vector3::new(vert2.normal[0] as f32, vert2.normal[2] as f32, vert2.normal[1] as f32);
+        let p3_normal: Vector3 = Vector3::new(vert3.normal[0] as f32, vert3.normal[2] as f32, vert3.normal[1] as f32);
 
-        let p1_texture: Vector2 = Vector2::new(vert1.texture[0] as f64, vert1.texture[1] as f64);
-        let p2_texture: Vector2 = Vector2::new(vert2.texture[0] as f64, vert2.texture[1] as f64);
-        let p3_texture: Vector2 = Vector2::new(vert3.texture[0] as f64, vert3.texture[1] as f64);
+        let p1_texture: Vector2 = Vector2::new(vert1.texture[0] as f32, vert1.texture[1] as f32);
+        let p2_texture: Vector2 = Vector2::new(vert2.texture[0] as f32, vert2.texture[1] as f32);
+        let p3_texture: Vector2 = Vector2::new(vert3.texture[0] as f32, vert3.texture[1] as f32);
 
 
         let triangle = Tri::new(p1, p2, p3, p1_normal, p2_normal, p3_normal,
@@ -140,7 +140,7 @@ fn import_obj(file_path: &str, material: Material) -> Vec<Tri> {
 
 pub fn import_texture(path: &str) -> Vector2D<Color> {
     println!("Loading texture: {}", path);
-    let image_result = image::open(&Path::new(path));
+    let image_result: Result<DynamicImage, ImageError> = image::open(&Path::new(path));
     if let Err(err) = image_result {
         eprintln!("Failed to open image: {}", err);
         return Vector2D::new(0, 0, Color::black());
@@ -151,11 +151,11 @@ pub fn import_texture(path: &str) -> Vector2D<Color> {
     
     let width: usize = rgb_image.width() as usize;
     let height: usize = rgb_image.height() as usize;
-    let mut pixel_vector = Vector2D::new(width, height, Color::black());
+    let mut pixel_vector: Vector2D<Color> = Vector2D::new(width, height, Color::black());
     
     for (x, y, pixel) in rgb_image.enumerate_pixels() {
-        let color = Color::new(pixel[0] as f64 / 255.0, pixel[1] as f64 / 255.0, pixel[2] as f64 / 255.0);
-        pixel_vector.set(x as usize, y as usize, color);
+        let color: Color = Color::new(pixel[0] as f32 / 255.0, pixel[1] as f32 / 255.0, pixel[2] as f32 / 255.0);
+        pixel_vector.set(y as usize, x as usize, color);
     }
     
     pixel_vector

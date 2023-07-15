@@ -17,24 +17,24 @@ pub struct Camera {
     pub position: Vector3,
     pub rotation: Vector3,
     pub scene: Scene,
-    pub exposure: f64,
+    pub exposure: f32,
     pub width: usize,
     pub height: usize,
     pub max_bounces: u32,
     pub rays_per_pixel: u32,
-    pub blur_strength: f64,
-    pub dof_strength: f64,
-    pub focal_distance: f64,
-    pub fov: f64,
+    pub blur_strength: f32,
+    pub dof_strength: f32,
+    pub focal_distance: f32,
+    pub fov: f32,
     pub tile_size: usize
 }
 
 impl Camera {
     pub fn new(
         position: Vector3, rotation: Vector3, scene: Scene,
-        exposure: f64, width: usize, height: usize, max_bounces: 
-        u32, rays_per_pixel: u32, blur_str: f64, dof_strength: 
-        f64, focal_distance: f64, fov: f64, tile_size: usize
+        exposure: f32, width: usize, height: usize, max_bounces: 
+        u32, rays_per_pixel: u32, blur_str: f32, dof_strength: 
+        f32, focal_distance: f32, fov: f32, tile_size: usize
     ) -> Camera {
         Camera {
              position: position,
@@ -78,7 +78,7 @@ impl Camera {
                     usize::min(height, t.1 + tile_size),
                     sample_count as usize,
                     &bvh,
-                    (0..sample_count).map(|s| 1.0 / (s as f64 + 1.0)).collect()
+                    (0..sample_count).map(|s| 1.0 / (s as f32 + 1.0)).collect()
                 );
             
                 let mut frame: MutexGuard<Vector2D<Color>> = frame.lock().unwrap();
@@ -87,13 +87,13 @@ impl Camera {
                         frame.set(
                             usize::min(height, t.1 + x),
                             usize::min(width, t.0 + y),
-                            *tile_render.get(x, y).unwrap(),
+                            *tile_render.get(x, y),
                         );
                     }
                 }
             
                 let current_tile: usize = counter.fetch_add(1, Ordering::Relaxed);
-                println!("Render progress: {}%", (100.0 * ((current_tile + 1) as f64) / (total_tiles as f64)) as usize);
+                println!("Render progress: {}%", (100.0 * ((current_tile + 1) as f32) / (total_tiles as f32)) as usize);
             });
             
             let frame: MutexGuard<Vector2D<Color>> = frame.lock().unwrap();
@@ -108,7 +108,7 @@ impl Camera {
             let mut new_render: Vector2D<Color> = Vector2D::new(self.width, self.height, Color::black());
             let mut old_render: Vector2D<Color> = new_render;
             let mut pixel_accumulation: Vector2D<Color> = old_render;
-            let weight_slice: Vec<f64> = (0..sample_count).map(|s| 1.0 / (s as f64 + 1.0)).collect();
+            let weight_slice: Vec<f32> = (0..sample_count).map(|s| 1.0 / (s as f32 + 1.0)).collect();
 
             let sample_count_usize: usize = sample_count as usize;
             for i in 0..sample_count_usize {
@@ -136,7 +136,7 @@ impl Camera {
 
     pub fn render_tile(self: &Camera, start_x: usize, end_x: usize, 
         start_y: usize, end_y: usize, sample_count: usize,
-         bvh: &BVH, weight_slice: Vec<f64>) 
+         bvh: &BVH, weight_slice: Vec<f32>) 
     -> Vector2D<Color> {
 
         let mut frame: Vector2D<Color> = Vector2D::new(
