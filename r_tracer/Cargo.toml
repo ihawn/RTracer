@@ -7,7 +7,7 @@ license = "MIT"
 keywords = ["raytracer", "graphics", "rendering", "3D"]
 categories = ["graphics", "rendering"]
 repository = "https://github.com/ihawn/RTracer"
-readme = "https://github.com/ihawn/RTracer/blob/main/README.md"
+readme = "../README.md"
 
 [dependencies]
 minifb = "0.24"
