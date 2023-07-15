@@ -79,7 +79,8 @@ println!(
 save_vector2d_as_png(&frame, "../Renders/render.png");
 ```
 
-- Makes some pretty pictures:
+
+### Makes some pretty pictures:
 
 
 ![Suzanne](https://github.com/ihawn/RTracer/blob/main/Renders/30.PNG)
