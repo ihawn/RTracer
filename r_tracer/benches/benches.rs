@@ -18,7 +18,7 @@ fn criterion_benchmark(c: &mut Criterion) {
 }
 
 fn bench_scene() {
-        let rock = Material::new(Color::black(), Color::black(),
+    let rock = Material::new(Color::black(), Color::black(),
         Color::black(),  Color::black(),
         0.0, 0.0, 0.0, 0.0, 
         0.0, 1.0, true, Some(0), None, Some(0), 
