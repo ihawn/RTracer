@@ -19,7 +19,7 @@ use r_tracer::utilities::file_utilities::{load_model, save_vector2d_as_png, impo
 use std::time::Instant;
 
 
-let rock = Material::new(Color::black(), Color::black(),
+    let rock = Material::new(Color::black(), Color::black(),
         Color::black(),  Color::black(),
         0.0, 0.0, 0.0, 0.0, 
         0.0, 1.0, true, Some(0), None, Some(0), 
