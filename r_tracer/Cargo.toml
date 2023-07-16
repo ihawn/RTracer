@@ -1,6 +1,6 @@
 [package]
 name = "r_tracer"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021"
 description = "A multithreaded, feature-rich ray tracer"
 license = "MIT"

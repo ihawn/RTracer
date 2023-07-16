@@ -243,7 +243,9 @@ impl Ray {
         let mut pixel_y: f32 = height - (elevation / PI + 0.5) * height as f32;
 
         if pixel_x < 0.0 { pixel_x += width; }
+        else if pixel_x >= width { pixel_x -= width; }
         if pixel_y < 0.0 { pixel_y += height; }
+        else if pixel_y >= height { pixel_y -= height; }
 
         *map.get(pixel_y as usize, pixel_x as usize)
     }
