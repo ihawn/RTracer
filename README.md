@@ -3,6 +3,9 @@
 - This is a ray tracer written in rust from scratch
 - Still under active development
 
+  
+![Mud](https://github.com/ihawn/RTracer/blob/main/Renders/mud.PNG)
+
 # Getting Started
 Example usage:
 
