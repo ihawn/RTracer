@@ -27,7 +27,7 @@ pub fn remove_fireflies(color_matrix: &Vector2D<Color>) -> Vector2D<Color> {
             }
 
             if !similar_found && neighbor_count > 0 {
-                let average_color = color_sum * (1.0 / neighbor_count as f32);
+                let average_color = color_sum * (1.0 / neighbor_count as f64);
                 new_colors.set(i, j, average_color);
             } else {
                 new_colors.set(i, j, current_color);

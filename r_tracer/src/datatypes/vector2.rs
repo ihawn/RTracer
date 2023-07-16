@@ -2,12 +2,12 @@ use std::ops::{Add, Sub, Mul, Div};
 
 #[derive(Copy, Clone)]
 pub struct Vector2 {
-    pub x: f32,
-    pub y: f32,
+    pub x: f64,
+    pub y: f64,
 }
 
 impl Vector2 {
-    pub fn new(x: f32, y: f32) -> Vector2 {
+    pub fn new(x: f64, y: f64) -> Vector2 {
         Vector2 { x, y }
     }
 
@@ -32,23 +32,23 @@ impl Sub<Vector2> for Vector2 {
     }
 }
 
-impl Mul<f32> for Vector2 {
+impl Mul<f64> for Vector2 {
     type Output = Vector2;
 
-    fn mul(self, scalar: f32) -> Vector2 {
+    fn mul(self, scalar: f64) -> Vector2 {
         Vector2::new(self.x * scalar, self.y * scalar)
     }
 }
 
-impl Div<f32> for Vector2 {
+impl Div<f64> for Vector2 {
     type Output = Vector2;
 
-    fn div(self, scalar: f32) -> Vector2 {
+    fn div(self, scalar: f64) -> Vector2 {
         Vector2::new(self.x / scalar, self.y / scalar)
     }
 }
 
-impl Mul<Vector2> for f32 {
+impl Mul<Vector2> for f64 {
     type Output = Vector2;
 
     fn mul(self, vector: Vector2) -> Vector2 {
@@ -56,7 +56,7 @@ impl Mul<Vector2> for f32 {
     }
 }
 
-impl Div<Vector2> for f32 {
+impl Div<Vector2> for f64 {
     type Output = Vector2;
 
     fn div(self, vector: Vector2) -> Vector2 {

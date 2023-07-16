@@ -86,7 +86,7 @@ impl Tri {
                 rand::thread_rng().gen_range(0.0..1.0)
         );
         let (bb1, bb2) = (p1.min(p2.min(p3)), p1.max(p2.max(p3)));
-        let size: f32 = 0.1*(bb1 - bb2).magnitude();
+        let size: f64 = 0.1*(bb1 - bb2).magnitude();
         (bb1 - rand_vec_1*size, bb2 + rand_vec_2*size)
     }
 
@@ -97,12 +97,12 @@ impl Tri {
     pub fn ray_collision(ray: Ray, bvh: &BVH) -> HitPoint {
         let meshes_to_check = Self::traverse_bvh_for_meshes(ray, bvh, Vec::new());
         let mut closest_hit_point: HitPoint = HitPoint::empty();
-        let mut closest_hit_distance: f32 = f32::MAX;
+        let mut closest_hit_distance: f64 = f64::MAX;
 
         for mesh in meshes_to_check {
             let hit_point: HitPoint = Self::intersect_tri(&ray, &mesh);
             if !hit_point.is_empty {
-                let dist: f32 = hit_point.point.distance(hit_point.hitting_ray.origin);
+                let dist: f64 = hit_point.point.distance(hit_point.hitting_ray.origin);
                 if closest_hit_point.is_empty || dist < closest_hit_distance {
                     closest_hit_distance = dist;
                     closest_hit_point = hit_point;
@@ -207,9 +207,9 @@ impl Tri {
         let dot20 = v2*v0;
         let dot21 = v2*v1;
 
-        let denom: f32 = dot00 * dot11 - dot01 * dot01;
-        let v: f32 = (dot11 * dot20 - dot01 * dot21) / denom;
-        let w: f32 = (dot00 * dot21 - dot01 * dot20) / denom;
+        let denom: f64 = dot00 * dot11 - dot01 * dot01;
+        let v: f64 = (dot11 * dot20 - dot01 * dot21) / denom;
+        let w: f64 = (dot00 * dot21 - dot01 * dot20) / denom;
         let u = 1.0 - v - w;
 
         Vector3::new(u, v, w)

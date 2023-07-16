@@ -5,13 +5,13 @@ use std::ops::MulAssign;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct Color {
-    pub red: f32,
-    pub green: f32,
-    pub blue: f32,
+    pub red: f64,
+    pub green: f64,
+    pub blue: f64,
 }
 
 impl Color {
-    pub fn new(r: f32, g: f32, b: f32) -> Color {
+    pub fn new(r: f64, g: f64, b: f64) -> Color {
         Color {
             red: r,
             green: g,
@@ -38,11 +38,11 @@ impl Color {
         (r << 16) | (g << 8) | b
     }
 
-    pub fn lerp(v1: Color, v2: Color, t: f32) -> Color {
+    pub fn lerp(v1: Color, v2: Color, t: f64) -> Color {
         v1*(1.0 - t) + v2*t
     }
 
-    pub fn to_greyscale(self: &Color) -> f32 {
+    pub fn to_greyscale(self: &Color) -> f64 {
         (0.2989 * self.red) + (0.5870 * self.green) + (0.1140 * self.blue)
     }
 }
@@ -58,10 +58,10 @@ impl std::ops::Mul<Color> for Color {
     }
 }
 
-impl std::ops::Mul<f32> for Color {
+impl std::ops::Mul<f64> for Color {
     type Output = Color;
 
-    fn mul(self, other: f32) -> Color {
+    fn mul(self, other: f64) -> Color {
         let r = self.red * other;
         let g = self.green * other;
         let b = self.blue * other;
@@ -88,8 +88,8 @@ impl AddAssign<Color> for Color {
     }
 }
 
-impl MulAssign<f32> for Color {
-    fn mul_assign(&mut self, other: f32) {
+impl MulAssign<f64> for Color {
+    fn mul_assign(&mut self, other: f64) {
         self.red *= other;
         self.green *= other;
         self.blue *= other;
@@ -98,9 +98,9 @@ impl MulAssign<f32> for Color {
 
 impl DivAssign<u32> for Color {
     fn div_assign(&mut self, scalar: u32) {
-        self.red /= scalar as f32;
-        self.green /= scalar as f32;
-        self.blue /= scalar as f32;
+        self.red /= scalar as f64;
+        self.green /= scalar as f64;
+        self.blue /= scalar as f64;
     }
 }
 

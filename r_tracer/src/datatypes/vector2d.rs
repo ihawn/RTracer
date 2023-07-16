@@ -45,10 +45,10 @@ impl<T> Vector2D<T> {
 }
 
 
-impl<Color> MulAssign<f32> for Vector2D<Color>
-where Color: MulAssign<f32>
+impl<Color> MulAssign<f64> for Vector2D<Color>
+where Color: MulAssign<f64>
 {
-    fn mul_assign(&mut self, other: f32) {
+    fn mul_assign(&mut self, other: f64) {
         for i in 0..self.data.len() {
             self.data[i] *= other;
         }

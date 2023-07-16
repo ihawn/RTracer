@@ -13,7 +13,7 @@ pub struct BVH {
     pub bb_corner_1: Vector3,
     pub bb_corner_2: Vector3,
     pub is_leaf: bool,
-    pub bounding_box_surface_area: f32,
+    pub bounding_box_surface_area: f64,
 }
 
 impl BVH {
@@ -30,7 +30,7 @@ impl BVH {
         let bvh: BVH = Self::construct_recursive(&mut tris, 0, len);
         let elapsed_time = start_time.elapsed().as_millis();
         println!("Done");
-        println!("Built BVH in {} seconds", elapsed_time as f32 / 1000.0);
+        println!("Built BVH in {} seconds", elapsed_time as f64 / 1000.0);
 
         bvh
     }
@@ -107,12 +107,12 @@ impl BVH {
 
         let mid: usize = start + object_span/2;
         let mut best_split_axis = rand::thread_rng().gen_range(0..=2);
-        let mut smallest_surface_area = f32::INFINITY;
+        let mut smallest_surface_area = f64::INFINITY;
 
         for i in 0..3 {
             tris[start..end].sort_by(|a, b| Self::box_compare(a, b, i));
             let (tris1, tris2) = tris.split_at_mut(mid);
-            let area: f32 = Self::get_total_box_surface_area(&tris1) + 
+            let area: f64 = Self::get_total_box_surface_area(&tris1) + 
                 Self::get_total_box_surface_area(&tris2);
             if area < smallest_surface_area {
                 smallest_surface_area = area;
@@ -160,7 +160,7 @@ impl BVH {
         )
     }
 
-    pub fn get_bounding_box_surface_area(bounding_box_corner_1: Vector3, bounding_box_corner_2: Vector3) -> f32 {
+    pub fn get_bounding_box_surface_area(bounding_box_corner_1: Vector3, bounding_box_corner_2: Vector3) -> f64 {
         let length = (bounding_box_corner_1.x - bounding_box_corner_2.x).abs();
         let width = (bounding_box_corner_1.y - bounding_box_corner_2.y).abs();
         let height = (bounding_box_corner_1.z - bounding_box_corner_2.z).abs();
@@ -168,9 +168,9 @@ impl BVH {
         2.0 * (length * width + length * height + width * height)
     }
 
-    pub fn get_total_box_surface_area(tris: &[Tri]) -> f32 {
-        if tris.len() == 0 { return f32::INFINITY }
-        let mut area: f32 = 0.0;
+    pub fn get_total_box_surface_area(tris: &[Tri]) -> f64 {
+        if tris.len() == 0 { return f64::INFINITY }
+        let mut area: f64 = 0.0;
         for t in tris.chunks(2) {
             if t.len() == 2 {
                 let bb: (Vector3, Vector3) = Self::merge_bounding_boxes(t[0].bounding_box, t[1].bounding_box);
