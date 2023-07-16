@@ -4,7 +4,7 @@
 - Still under active development
 
   
-![Mud](https://github.com/ihawn/RTracer/blob/main/Renders/mud3.png)
+![Mud](https://github.com/ihawn/RTracer/blob/main/Renders/mud.png)
 
 # Getting Started
 Example usage:
